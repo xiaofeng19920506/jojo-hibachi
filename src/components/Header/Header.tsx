@@ -4,24 +4,24 @@ import {
   Logo,
   BrandName,
   Nav,
-  NavLink,
+  StyledNavLink,
   BookNow,
 } from "./elements";
+import LogoImage from "../../asset/logo.png";
 
-const Header = () => {
+const Header: React.FC = () => {
   return (
     <HeaderWrapper>
       <LogoGroup>
-        <Logo src="/logo.png" alt="Logo" />
-        <BrandName>JoJo hibachi</BrandName>
+        <Logo src={LogoImage} alt="Logo" />
+        <BrandName>Fancy Hibachi</BrandName>
       </LogoGroup>
       <Nav>
-        <NavLink>Home</NavLink>
-        <NavLink>Menu</NavLink>
-        <NavLink>Gallery</NavLink>
-        <NavLink>FAQ</NavLink>
-        <NavLink>Contact</NavLink>
-        <BookNow>Book Now</BookNow>
+        <StyledNavLink to="/menu">Menu</StyledNavLink>
+        <StyledNavLink to="/gallery">Gallery</StyledNavLink>
+        <StyledNavLink to="/faq">FAQ</StyledNavLink>
+        <StyledNavLink to="/contact">Contact</StyledNavLink>
+        <BookNow to="/booknow">Book Now</BookNow>
       </Nav>
     </HeaderWrapper>
   );

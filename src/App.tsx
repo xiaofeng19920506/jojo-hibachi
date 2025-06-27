@@ -1,7 +1,45 @@
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import Layout from "./Layout";
+import SignIn from "./pages/SignIn/SignIn";
+import SignUp from "./pages/SignUp/SignUp";
+import Menu from "./pages/Menu/Menu";
+import Gallery from "./pages/Gallery/Gallery";
+import FAQ from "./pages/FAQ/FAQ";
+import Contact from "./pages/Contact/Contact";
+import BookNow from "./pages/BookNow/BookNow";
+import Dashboard from "./pages/Dashboard/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 
-const App = () => {
-  return <Layout></Layout>;
+const App: React.FC = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Navigate to="/menu" />} />
+          <Route path="menu" element={<Menu />} />
+          <Route path="gallery" element={<Gallery />} />
+          <Route path="faq" element={<FAQ />} />
+          <Route path="contact" element={<Contact />} />
+          <Route path="booknow" element={<BookNow />} />
+          <Route
+            path="dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
+      </Routes>
+    </Router>
+  );
 };
 
 export default App;

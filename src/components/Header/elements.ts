@@ -1,64 +1,62 @@
 import styled from "styled-components";
+import { NavLink } from "react-router-dom";
 
 export const HeaderWrapper = styled.header`
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
   padding: 1rem 2rem;
-  background: white;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  background-color: #ffffff; /* White background */
+  color: #000000; /* Black text */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
 export const LogoGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
 `;
 
 export const Logo = styled.img`
-  width: 50px;
-  height: auto;
+  width: 40px;
+  height: 40px;
+  margin-right: 0.5rem;
 `;
 
 export const BrandName = styled.h1`
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #d23f3f;
+  font-size: 1.5rem;
+  color: #000000;
 `;
 
 export const Nav = styled.nav`
   display: flex;
-  gap: 1.5rem;
-
-  @media (max-width: 768px) {
-    display: none; /* Add burger menu later if needed */
-  }
+  align-items: center;
+  gap: 1rem;
 `;
 
-export const NavLink = styled.a`
+export const StyledNavLink = styled(NavLink)`
+  color: #000000; /* Black text */
   text-decoration: none;
-  color: #333;
   font-weight: 500;
-  cursor: pointer;
+
+  &.active {
+    font-weight: bold;
+    border-bottom: 2px solid #000000;
+  }
 
   &:hover {
-    color: #d23f3f;
+    opacity: 0.7;
   }
 `;
 
-export const BookNow = styled.button`
-  background-color: #ff4b4b;
-  color: white;
-  border: none;
-  border-radius: 20px;
+export const BookNow = styled(NavLink)`
   padding: 0.5rem 1rem;
-  font-weight: bold;
-  cursor: pointer;
+  background-color: #000000; /* Black background */
+  color: #ffffff; /* White text */
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: 600;
 
   &:hover {
-    background-color: #e63939;
+    background-color: #333333;
   }
 `;
