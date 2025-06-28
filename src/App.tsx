@@ -5,8 +5,8 @@ import {
   Navigate,
 } from "react-router-dom";
 import Layout from "./pages/Layout/Layout";
-import SignIn from "./pages/SignIn/SignIn";
-import SignUp from "./pages/SignUp/SignUp";
+import SignIn from "./pages/Auth/SignIn";
+import SignUp from "./pages/Auth/SignUp";
 import Menu from "./pages/Menu/Menu";
 import Gallery from "./pages/Gallery/Gallery";
 import FAQ from "./pages/FAQ/FAQ";

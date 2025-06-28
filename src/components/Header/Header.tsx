@@ -6,10 +6,21 @@ import {
   Nav,
   StyledNavLink,
   BookNow,
+  LoginButton,
+  LogoutButton,
 } from "./elements";
 import LogoImage from "../../asset/logo.png";
+import { logout } from "../../features/userSlice";
+import { useAppDispatch, useAppSelector } from "../../hooks";
 
 const Header: React.FC = () => {
+  const { isAuthenticated } = useAppSelector((state) => state.user);
+  const dispatch = useAppDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+  };
+  
   return (
     <HeaderWrapper>
       <LogoGroup>
@@ -23,6 +34,13 @@ const Header: React.FC = () => {
         <StyledNavLink to="/faq">FAQ</StyledNavLink>
         <StyledNavLink to="/contact">Contact</StyledNavLink>
         <BookNow to="/booknow">Book Now</BookNow>
+        {isAuthenticated ? (
+          <LogoutButton as="button" onClick={handleLogout}>
+            Logout
+          </LogoutButton>
+        ) : (
+          <LoginButton to="/signin">Login</LoginButton>
+        )}
       </Nav>
     </HeaderWrapper>
   );

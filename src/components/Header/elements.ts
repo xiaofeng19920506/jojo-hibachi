@@ -48,15 +48,53 @@ export const StyledNavLink = styled(NavLink)`
   }
 `;
 
-export const BookNow = styled(NavLink)`
+const sharedButtonStyles = `
   padding: 0.5rem 1rem;
-  background-color: #000000; /* Black background */
-  color: #ffffff; /* White text */
-  text-decoration: none;
-  border-radius: 5px;
+  font-size: 1rem;
   font-weight: 600;
+  border-radius: 5px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+`;
+
+export const BookNow = styled(NavLink)`
+  ${sharedButtonStyles}
+  background-color: #000000;
+  color: #ffffff;
+  border: 2px solid #000000;
 
   &:hover {
     background-color: #333333;
+  }
+`;
+
+export const LoginButton = styled(NavLink)`
+  ${sharedButtonStyles}
+  background-color: transparent;
+  color: #000000;
+  border: 2px solid #000000;
+
+  &:hover {
+    background-color: #000000;
+    color: #ffffff;
+  }
+`;
+export const LogoutButton = styled.button`
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 5px;
+  border: 2px solid #000000;
+  background-color: transparent;
+  color: #000000;
+  cursor: pointer;
+  min-width: 100px;
+
+  &:hover {
+    background-color: #000000;
+    color: #ffffff;
   }
 `;
