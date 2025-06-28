@@ -2,7 +2,6 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
 } from "react-router-dom";
 import Layout from "./pages/Layout/Layout";
 import SignIn from "./pages/Auth/SignIn";
@@ -13,6 +12,7 @@ import FAQ from "./pages/FAQ/FAQ";
 import Contact from "./pages/Contact/Contact";
 import BookNow from "./pages/BookNow/BookNow";
 import Dashboard from "./pages/Dashboard/Dashboard";
+import Home from "./pages/Home/Home";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 
 const App: React.FC = () => {
@@ -22,7 +22,7 @@ const App: React.FC = () => {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/" element={<Layout />}>
-          <Route index element={<Navigate to="/" />} />
+          <Route index element={<Home />} />
           <Route path="menu" element={<Menu />} />
           <Route path="gallery" element={<Gallery />} />
           <Route path="faq" element={<FAQ />} />

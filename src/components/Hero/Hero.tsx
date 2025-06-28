@@ -15,7 +15,7 @@ const Hero = () => {
         <Title>
           Experience the Flavor and Fire of Hibachi at Your Doorstep!
         </Title>
-        <Location>New York • New Jersey • Long Island</Location>
+        <Location>Pennsylvania • New Jersey </Location>
         <CTA>Book Now</CTA>
       </Content>
     </HeroSection>
