@@ -61,6 +61,7 @@ export const MobileMenu = styled.div`
   flex-direction: column;
   gap: 1rem;
   padding: 1rem 2rem;
+  z-index: 1000;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 
   a {
