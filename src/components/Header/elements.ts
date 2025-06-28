@@ -17,8 +17,8 @@ export const LogoGroup = styled.div`
 `;
 
 export const Logo = styled.img`
-  width: 40px;
-  height: 40px;
+  width: 5rem;
+  height: 5rem;
   margin-right: 0.5rem;
 `;
 
@@ -58,17 +58,6 @@ const sharedButtonStyles = `
   align-items: center;
   justify-content: center;
   min-width: 100px;
-`;
-
-export const BookNow = styled(NavLink)`
-  ${sharedButtonStyles}
-  background-color: #000000;
-  color: #ffffff;
-  border: 2px solid #000000;
-
-  &:hover {
-    background-color: #333333;
-  }
 `;
 
 export const LoginButton = styled(NavLink)`

@@ -5,7 +5,6 @@ import {
   BrandName,
   Nav,
   StyledNavLink,
-  BookNow,
   LoginButton,
   LogoutButton,
 } from "./elements";
@@ -33,7 +32,6 @@ const Header: React.FC = () => {
         <StyledNavLink to="/gallery">Gallery</StyledNavLink>
         <StyledNavLink to="/faq">FAQ</StyledNavLink>
         <StyledNavLink to="/contact">Contact</StyledNavLink>
-        <BookNow to="/booknow">Book Now</BookNow>
         {isAuthenticated ? (
           <LogoutButton as="button" onClick={handleLogout}>
             Logout
