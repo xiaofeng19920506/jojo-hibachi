@@ -22,7 +22,7 @@ const App: React.FC = () => {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/" element={<Layout />}>
-          <Route index element={<Navigate to="/menu" />} />
+          <Route index element={<Navigate to="/" />} />
           <Route path="menu" element={<Menu />} />
           <Route path="gallery" element={<Gallery />} />
           <Route path="faq" element={<FAQ />} />

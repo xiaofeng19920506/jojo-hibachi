@@ -17,6 +17,7 @@ const Header: React.FC = () => {
         <BrandName>Fancy Hibachi</BrandName>
       </LogoGroup>
       <Nav>
+        <StyledNavLink to="/">Home</StyledNavLink>
         <StyledNavLink to="/menu">Menu</StyledNavLink>
         <StyledNavLink to="/gallery">Gallery</StyledNavLink>
         <StyledNavLink to="/faq">FAQ</StyledNavLink>
