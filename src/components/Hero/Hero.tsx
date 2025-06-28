@@ -1,6 +1,5 @@
 import {
   Content,
-  CTA,
   HeroSection,
   Overlay,
   Title,
@@ -15,8 +14,9 @@ const Hero = () => {
         <Title>
           Experience the Flavor and Fire of Hibachi at Your Doorstep!
         </Title>
-        <Location>Pennsylvania • New Jersey </Location>
-        <CTA>Book Now</CTA>
+        <Location>
+          Pennsylvania • New Jersey • New York • Delaware • Maryland
+        </Location>
       </Content>
     </HeroSection>
   );

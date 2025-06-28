@@ -39,18 +39,3 @@ export const Location = styled.p`
   margin-top: 1rem;
   font-weight: 500;
 `;
-
-export const CTA = styled.button`
-  margin-top: 2rem;
-  background: #ff4b4b;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  font-size: 1rem;
-  border-radius: 20px;
-  border: none;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #e63939;
-  }
-`;

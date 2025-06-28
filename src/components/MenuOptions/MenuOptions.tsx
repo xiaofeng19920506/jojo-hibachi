@@ -17,7 +17,7 @@ const MenuOptions: React.FC = () => {
           <Item>CHICKEN</Item>
           <Item>STEAK</Item>
           <Item>SHRIMP</Item>
-          <Item>SCALLOPS (+$5)</Item>
+          <Item>SCALLOPS</Item>
           <Item>SALMON</Item>
           <Item>VEGETABLE (+TOFU)</Item>
           <Item>FILET MIGNON (+$5)</Item>
@@ -28,6 +28,7 @@ const MenuOptions: React.FC = () => {
           <Title>Appetizers</Title>
           <Item>GYOZA (6PCS)</Item>
           <Item>EDAMAME $5</Item>
+          <Item>SEAWEED SALAD $10</Item>
         </MenuColumn>
 
         <MenuColumn>
