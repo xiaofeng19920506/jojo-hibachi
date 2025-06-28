@@ -6,9 +6,10 @@ export const HeaderWrapper = styled.header`
   justify-content: space-between;
   align-items: center;
   padding: 1rem 2rem;
-  background-color: #ffffff; /* White background */
-  color: #000000; /* Black text */
+  background-color: #ffffff;
+  color: #000000;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
 `;
 
 export const LogoGroup = styled.div`
@@ -31,10 +32,44 @@ export const Nav = styled.nav`
   display: flex;
   align-items: center;
   gap: 1rem;
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+export const Hamburger = styled.button`
+  font-size: 2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #000000;
+  display: none;
+
+  @media (max-width: 768px) {
+    display: block;
+  }
+`;
+
+export const MobileMenu = styled.div`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #ffffff;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem 2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+
+  a {
+    font-size: 1.2rem;
+  }
 `;
 
 export const StyledNavLink = styled(NavLink)`
-  color: #000000; /* Black text */
+  color: #000000;
   text-decoration: none;
   font-weight: 500;
 
@@ -71,16 +106,13 @@ export const LoginButton = styled(NavLink)`
     color: #ffffff;
   }
 `;
+
 export const LogoutButton = styled.button`
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  font-weight: 600;
-  border-radius: 5px;
-  border: 2px solid #000000;
+  ${sharedButtonStyles}
   background-color: transparent;
   color: #000000;
+  border: 2px solid #000000;
   cursor: pointer;
-  min-width: 100px;
 
   &:hover {
     background-color: #000000;
