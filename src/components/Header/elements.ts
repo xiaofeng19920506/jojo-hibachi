@@ -10,6 +10,7 @@ export const HeaderWrapper = styled.header`
   color: #000000;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
+  box-sizing: border-box;
 `;
 
 export const LogoGroup = styled.div`
@@ -56,7 +57,7 @@ export const MobileMenu = styled.div`
   top: 100%;
   right: 0;
   background-color: #ffffff;
-  width: 100%;
+  width: 80%;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -73,10 +74,14 @@ export const StyledNavLink = styled(NavLink)`
   color: #000000;
   text-decoration: none;
   font-weight: 500;
+  display: inline-block;
+  flex: 0 0 auto;
+  width: max-content;
 
   &.active {
     font-weight: bold;
     border-bottom: 2px solid #000000;
+    padding-bottom: 2px;
   }
 
   &:hover {
@@ -94,6 +99,7 @@ const sharedButtonStyles = `
   align-items: center;
   justify-content: center;
   min-width: 100px;
+  box-sizing: border-box;
 `;
 
 export const LoginButton = styled(NavLink)`
