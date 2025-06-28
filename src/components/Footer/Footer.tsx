@@ -23,13 +23,10 @@ const Footer: React.FC = () => {
           <LinkSection>
             <LinkTitle>Quick link</LinkTitle>
             <FooterLink href="#">HOME</FooterLink>
-            <FooterLink href="#">ABOUT US</FooterLink>
+            <FooterLink href="#">Menu</FooterLink>
             <FooterLink href="#">GALLERY</FooterLink>
             <FooterLink href="#">FAQ</FooterLink>
             <FooterLink href="#">CONTACT</FooterLink>
-            <FooterLink href="#">REWARDS</FooterLink>
-            <FooterLink href="#">PARTNERS</FooterLink>
-            <FooterLink href="#">LOCATION</FooterLink>
           </LinkSection>
           <LinkSection>
             <LinkTitle>Policy</LinkTitle>
