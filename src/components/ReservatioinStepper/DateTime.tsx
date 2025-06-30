@@ -19,9 +19,9 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
   const [date, setDate] = useState(() => {
     const parsedDate = dayjs(customerInfo.date);
     if (!parsedDate.isValid() || parsedDate.isBefore(minDate, "day")) {
-      return minDate; // Default to 3 days ahead
+      return minDate;
     }
-    return parsedDate; // Use the provided valid customerInfo.date
+    return parsedDate;
   });
 
   const [inputDate, setInputDate] = useState(date.format("YYYY-MM-DD"));
@@ -35,7 +35,6 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
     );
   }, [customerInfo]);
 
-  // Validate the input date
   const validateDate = (input: string) => {
     const parsedInput = dayjs(input);
     if (!parsedInput.isValid()) {
@@ -50,18 +49,16 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
     return true;
   };
 
-  // Handle the date input change
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputDate(e.target.value);
   };
 
-  // Handle date blur (validation and formatting on blur)
   const handleDateBlur = () => {
     const formattedInput = dayjs(inputDate).format("YYYY-MM-DD");
 
     if (validateDate(formattedInput)) {
       setDate(dayjs(formattedInput));
-      setInputDate(formattedInput); // Update input with formatted date
+      setInputDate(formattedInput);
       dispatch(
         setCustomerInfo({
           ...customerInfo,
@@ -69,11 +66,10 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
         })
       );
     } else {
-      setInputDate(date.format("YYYY-MM-DD")); // Revert to calendar selected date if invalid
+      setInputDate(date.format("YYYY-MM-DD"));
     }
   };
 
-  // Handle the date picker change
   const handleDateChange = (newDate: dayjs.Dayjs | string | null) => {
     if (newDate !== null) {
       const parsedDate = typeof newDate === "string" ? dayjs(newDate) : newDate;
@@ -87,7 +83,6 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
     }
   };
 
-  // Time validation (cannot be in the past)
   const validateTime = (selectedTime: string) => {
     if (!selectedTime) {
       setTimeError("Time is required.");
@@ -106,7 +101,6 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
     return true;
   };
 
-  // Handle time selection (using buttons)
   const handleTimeButtonClick = (selectedTime: string) => {
     setTime(selectedTime);
     if (validateTime(selectedTime)) {
