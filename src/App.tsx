@@ -6,7 +6,7 @@ import ReservationStepper from "./components/ReservatioinStepper/ReservationStep
 const App: React.FC = () => {
   return (
     <Router>
-      <Route
+      <Routes>
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/" element={<ReservationStepper />} />
