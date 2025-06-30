@@ -20,7 +20,9 @@ const ReservationStepper = () => {
   const handleReset = () => setActiveStep(0);
 
   return (
-    <Box sx={{ width: "100%", maxWidth: 600, mx: "auto", mt: 4 }}>
+    <Box
+      sx={{ width: "100%", minWidth: "100vw", px: "2rem", mx: "auto", mt: 4 }}
+    >
       <Stepper activeStep={activeStep} alternativeLabel>
         {steps.map((label) => (
           <Step key={label}>

@@ -1,7 +1,9 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import { type customerInfos, type User } from "./types";
 
 const initialState = {
-  user: null,
+  user: {} as User,
+  customerInfo: {} as customerInfos,
   isAuthenticated: false,
 };
 
@@ -14,11 +16,18 @@ const userSlice = createSlice({
       state.isAuthenticated = true;
     },
     logout: (state) => {
-      state.user = null;
+      state.user = {} as User;
       state.isAuthenticated = false;
+    },
+    setCustomerInfo(state, action: PayloadAction<customerInfos>) {
+      state.customerInfo = action.payload;
+    },
+    resetReservation(state) {
+      state.customerInfo = {} as customerInfos;
     },
   },
 });
 
-export const { login, logout } = userSlice.actions;
+export const { login, logout, setCustomerInfo, resetReservation } =
+  userSlice.actions;
 export default userSlice.reducer;
