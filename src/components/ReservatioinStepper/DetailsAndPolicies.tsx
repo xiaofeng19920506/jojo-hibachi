@@ -8,7 +8,7 @@ interface Props {
 const DetailsAndPolicies: React.FC<Props> = ({ onNext, onBack }) => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-      <Typography variant="h6">Pricing: $XX per guest</Typography>
+      <Typography variant="h6">Pricing: $50 per guest</Typography>
       <TextField label="Number of Guests" type="number" required />
       <TextField label="Food Allergies" multiline rows={2} />
       <TextField label="Event Type" />

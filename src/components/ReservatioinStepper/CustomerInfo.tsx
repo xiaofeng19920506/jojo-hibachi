@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { states } from "../../utils/constant";
-import { useAppDispatch, useAppSelector } from "../../hooks";
+import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import { type customerInfos } from "../../features/types";
 import { setCustomerInfo } from "../../features/userSlice";
 

@@ -5,6 +5,8 @@ export interface customerInfos {
   address: string;
   state: string;
   zipCode: string;
+  date: string;
+  time: string;
 }
 
 export interface User {
