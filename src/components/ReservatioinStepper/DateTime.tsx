@@ -18,10 +18,9 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
 
   const [date, setDate] = useState(() => {
     const parsedDate = dayjs(customerInfo.date);
-    if (!parsedDate.isValid() || parsedDate.isBefore(minDate, "day")) {
-      return minDate;
-    }
-    return parsedDate;
+    return parsedDate.isValid() && !parsedDate.isBefore(minDate, "day")
+      ? parsedDate
+      : minDate;
   });
 
   const [inputDate, setInputDate] = useState(date.format("YYYY-MM-DD"));
@@ -55,15 +54,12 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
 
   const handleDateBlur = () => {
     const formattedInput = dayjs(inputDate).format("YYYY-MM-DD");
-
     if (validateDate(formattedInput)) {
-      setDate(dayjs(formattedInput));
+      const parsed = dayjs(formattedInput);
+      setDate(parsed);
       setInputDate(formattedInput);
       dispatch(
-        setCustomerInfo({
-          ...customerInfo,
-          date: dayjs(formattedInput).toISOString(),
-        })
+        setCustomerInfo({ ...customerInfo, date: parsed.toISOString() })
       );
     } else {
       setInputDate(date.format("YYYY-MM-DD"));
@@ -91,7 +87,6 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
 
     const now = new Date();
     const selected = new Date(`${date.format("YYYY-MM-DD")}T${selectedTime}`);
-
     if (selected < now) {
       setTimeError("Time cannot be in the past.");
       return false;
@@ -110,13 +105,13 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
 
   const generateTimeOptions = () => {
     const options = [];
-    const startHour = 12;
-    const endHour = 21;
-    for (let hour = startHour; hour <= endHour; hour++) {
+    for (let hour = 12; hour <= 21; hour++) {
       for (let minutes = 0; minutes < 60; minutes += 30) {
-        const h = hour.toString().padStart(2, "0");
-        const m = minutes.toString().padStart(2, "0");
-        options.push(`${h}:${m}`);
+        options.push(
+          `${hour.toString().padStart(2, "0")}:${minutes
+            .toString()
+            .padStart(2, "0")}`
+        );
       }
     }
     return options;
@@ -126,70 +121,92 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Box sx={{ display: "flex", flexDirection: "row", gap: 3 }}>
-        <Box sx={{ flex: 1 }}>
-          <StaticDatePicker
-            displayStaticWrapperAs="desktop"
-            openTo="day"
-            value={date}
-            onChange={handleDateChange}
-            minDate={minDate}
-          />
-        </Box>
-
+      <Box
+        sx={{
+          p: { xs: 2, md: 4 },
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          overflowY: "auto",
+        }}
+      >
         <Box
           sx={{
-            flex: 1,
             display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
+            flexDirection: { xs: "column", md: "row" },
+            gap: 3,
           }}
         >
-          <TextField
-            label="Selected Date"
-            value={inputDate}
-            onChange={handleInputChange}
-            onBlur={handleDateBlur}
-            InputLabelProps={{ shrink: true }}
-            error={!!dateError}
-            helperText={dateError}
-            fullWidth
-            sx={{ marginBottom: 2, marginTop: 5 }}
-          />
+          <Box sx={{ flex: 1 }}>
+            <StaticDatePicker
+              displayStaticWrapperAs="desktop"
+              openTo="day"
+              value={date < minDate ? minDate : date}
+              onChange={handleDateChange}
+              minDate={minDate}
+            />
+          </Box>
 
-          <Box sx={{ mb: 2 }}>
-            <Box
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <TextField
+              label="Selected Date"
+              value={inputDate}
+              onChange={handleInputChange}
+              onBlur={handleDateBlur}
+              InputLabelProps={{ shrink: true }}
+              error={!!dateError}
+              helperText={dateError}
+              fullWidth
               sx={{
-                display: "grid",
-                gridTemplateColumns: "repeat(5, 1fr)",
-                gap: 2,
+                marginBottom: 2,
+                marginTop: { xs: 2, md: 5 },
               }}
-            >
-              {generateTimeOptions().map((option) => (
-                <Button
-                  key={option}
-                  variant={option === time ? "contained" : "outlined"}
-                  onClick={() => handleTimeButtonClick(option)}
-                  sx={{
-                    width: "100%",
-                    textAlign: "center",
-                    height: 40,
-                  }}
-                >
-                  {option}
-                </Button>
-              ))}
+            />
+
+            <Box sx={{ mb: 2 }}>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "repeat(2, 1fr)",
+                    sm: "repeat(3, 1fr)",
+                    md: "repeat(5, 1fr)",
+                  },
+                  gap: 2,
+                }}
+              >
+                {generateTimeOptions().map((option) => (
+                  <Button
+                    key={option}
+                    variant={option === time ? "contained" : "outlined"}
+                    onClick={() => handleTimeButtonClick(option)}
+                    sx={{ width: "100%", height: 40 }}
+                  >
+                    {option}
+                  </Button>
+                ))}
+              </Box>
+              {timeError && (
+                <Box color="error.main" mt={1}>
+                  {timeError}
+                </Box>
+              )}
             </Box>
-            {timeError && <Box color="error.main">{timeError}</Box>}
           </Box>
         </Box>
-      </Box>
 
-      <Box display="flex" justifyContent="space-between" mt={2}>
-        <Button onClick={onBack}>Back</Button>
-        <Button variant="contained" onClick={onNext} disabled={!isFormValid}>
-          Next
-        </Button>
+        <Box display="flex" justifyContent="space-between" mt={2}>
+          <Button onClick={onBack}>Back</Button>
+          <Button variant="contained" onClick={onNext} disabled={!isFormValid}>
+            Next
+          </Button>
+        </Box>
       </Box>
     </LocalizationProvider>
   );

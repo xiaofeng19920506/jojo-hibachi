@@ -7,6 +7,11 @@ export interface customerInfos {
   zipCode: string;
   date: string;
   time: string;
+  allergies: string;
+  adult: number;
+  kids: number;
+  eventType: string;
+  notes: string;
 }
 
 export interface User {
