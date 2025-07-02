@@ -1,20 +1,35 @@
 import { Box, Button, Typography, Divider } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useAppSelector } from "../../utils/hooks";
+import { useAppSelector, useAppDispatch } from "../../utils/hooks";
+import { resetReservation } from "../../features/userSlice";
 
 interface Props {
   onReset: () => void;
 }
 
 const Confirmation: React.FC<Props> = ({ onReset }) => {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { customerInfo } = useAppSelector((state) => state.user); // ✅ Fix casing
+  const { customerInfo } = useAppSelector((state) => state.user);
 
   const { adult, kids, allergies, eventType, notes } = customerInfo;
 
   const totalGuests = (adult || 0) + (kids || 0);
   const totalPrice = (adult || 0) * 50 + (kids || 0) * 25;
 
+  const clearState = () => {
+    dispatch(resetReservation());
+  };
+
+  const makeAnotherReservation = () => {
+    clearState();
+    onReset();
+  };
+
+  const goToHome = () => {
+    clearState();
+    navigate("/");
+  };
   return (
     <Box sx={{ maxWidth: 600, margin: "0 auto", textAlign: "center", mt: 4 }}>
       <Typography variant="h4" gutterBottom>
@@ -61,11 +76,11 @@ const Confirmation: React.FC<Props> = ({ onReset }) => {
       </Box>
 
       <Box sx={{ mt: 4, display: "flex", gap: 2, justifyContent: "center" }}>
-        <Button variant="outlined" onClick={onReset}>
+        <Button variant="outlined" onClick={makeAnotherReservation}>
           Make Another Reservation
         </Button>
-        <Button variant="contained" onClick={() => navigate("/")}>
-          Go to Home
+        <Button variant="contained" onClick={goToHome}>
+          Done
         </Button>
       </Box>
     </Box>
