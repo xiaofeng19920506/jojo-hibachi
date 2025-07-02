@@ -7,7 +7,7 @@ import {
 import SignIn from "./pages/Auth/SignIn";
 import SignUp from "./pages/Auth/SignUp";
 import ReservationStepper from "./components/ReservatioinStepper/ReservationStepper";
-import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+// import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import Dashboard from "./pages/Dashboard/Dashboard";
 
 const App: React.FC = () => {
