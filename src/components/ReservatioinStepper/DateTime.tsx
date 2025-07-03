@@ -58,9 +58,9 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
     const updatedInfo = {
       ...customerInfo,
       date: parsedDate.toISOString(),
-      day: String(parsedDate.date()),
-      month: String(parsedDate.month() + 1), // month is 0-based
-      year: String(parsedDate.year()),
+      reservationDay: String(parsedDate.date()),
+      reservationMonth: String(parsedDate.month() + 1), // 0-based month
+      reservationYear: String(parsedDate.year()),
     };
     dispatch(setCustomerInfo(updatedInfo));
   };

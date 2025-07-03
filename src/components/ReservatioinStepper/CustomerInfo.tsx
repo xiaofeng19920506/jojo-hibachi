@@ -29,19 +29,21 @@ const CustomerInfo: React.FC<Props> = ({ onNext }) => {
     e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>
   ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
+    const updatedForm = {
+      ...form,
       [name as string]: value,
-    }));
-    dispatch(setCustomerInfo({ ...form, [name as string]: value }));
+    };
+    setForm(updatedForm);
+    dispatch(setCustomerInfo(updatedForm));
   };
 
   const handleSelectChange = (e: SelectChangeEvent<string>) => {
-    setForm((prev) => ({
-      ...prev,
+    const updatedForm = {
+      ...form,
       state: e.target.value,
-    }));
-    dispatch(setCustomerInfo({ ...form, state: e.target.value }));
+    };
+    setForm(updatedForm);
+    dispatch(setCustomerInfo(updatedForm));
   };
 
   const validate = () => {
@@ -49,14 +51,16 @@ const CustomerInfo: React.FC<Props> = ({ onNext }) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const zipRegex = /^\d{5}$/;
 
-    if (!form.fullName.trim()) newErrors.fullName = "Full name is required";
-    if (!form.email.trim()) newErrors.email = "Email is required";
+    if (!form.firstName?.trim()) newErrors.firstName = "First name is required";
+    if (!form.lastName?.trim()) newErrors.lastName = "Last name is required";
+    if (!form.email?.trim()) newErrors.email = "Email is required";
     else if (!emailRegex.test(form.email)) newErrors.email = "Invalid email";
-    if (!form.phoneNumber.trim()) newErrors.phoneNumber = "phoneNumber number is required";
-    if (!form.address.trim()) newErrors.address = "Address is required";
-    if (!form.city.trim()) newErrors.city = "City is required";
+    if (!form.phoneNumber?.trim())
+      newErrors.phoneNumber = "Phone number is required";
+    if (!form.address?.trim()) newErrors.address = "Address is required";
+    if (!form.city?.trim()) newErrors.city = "City is required";
     if (!form.state) newErrors.state = "State is required";
-    if (!form.zipCode.trim()) newErrors.zipCode = "Zip code is required";
+    if (!form.zipCode?.trim()) newErrors.zipCode = "Zip code is required";
     else if (!zipRegex.test(form.zipCode))
       newErrors.zipCode = "Zip code must be 5 digits";
 
@@ -80,12 +84,22 @@ const CustomerInfo: React.FC<Props> = ({ onNext }) => {
       sx={{ display: "flex", flexDirection: "column", gap: 2 }}
     >
       <TextField
-        label="Full Name"
-        name="fullName"
-        value={form.fullName}
+        label="First Name"
+        name="firstName"
+        value={form.firstName}
         onChange={handleChange}
-        error={!!errors.fullName}
-        helperText={errors.fullName}
+        error={!!errors.firstName}
+        helperText={errors.firstName}
+        required
+      />
+
+      <TextField
+        label="Last Name"
+        name="lastName"
+        value={form.lastName}
+        onChange={handleChange}
+        error={!!errors.lastName}
+        helperText={errors.lastName}
         required
       />
 
@@ -100,7 +114,7 @@ const CustomerInfo: React.FC<Props> = ({ onNext }) => {
       />
 
       <TextField
-        label="phone Number"
+        label="Phone Number"
         name="phoneNumber"
         value={form.phoneNumber}
         onChange={handleChange}

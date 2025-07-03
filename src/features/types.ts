@@ -1,5 +1,6 @@
 export interface customerInfos {
-  fullName: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phoneNumber: string;
   address: string;
@@ -13,9 +14,9 @@ export interface customerInfos {
   kids: number;
   eventType: string;
   notes: string;
-  day: string;
-  month: string;
-  year: string;
+  reservationDay: string;
+  reservationMonth: string;
+  reservationYear: string;
 }
 
 export interface User {
