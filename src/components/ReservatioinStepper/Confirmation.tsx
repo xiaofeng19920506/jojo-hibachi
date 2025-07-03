@@ -81,8 +81,8 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
         </Typography>
 
         <Box sx={{ mt: 4, display: "flex", gap: 2, justifyContent: "center" }}>
-          <Button variant="contained" onClick={onBack}>
-            Back
+          <Button variant="contained" onClick={onReset}>
+            Start a new Reservation
           </Button>
         </Box>
       </Box>
