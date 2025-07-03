@@ -34,6 +34,11 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
     );
   }, [customerInfo]);
 
+  useEffect(() => {
+    if (customerInfo.date === "" || customerInfo.date === undefined) {
+      handleDateBlur();
+    }
+  }, []);
   const validateDate = (input: string) => {
     const parsedInput = dayjs(input);
     if (!parsedInput.isValid()) {
