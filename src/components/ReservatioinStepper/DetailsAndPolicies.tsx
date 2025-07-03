@@ -12,48 +12,66 @@ const DetailsAndPolicies: React.FC<Props> = ({ onNext, onBack }) => {
   const dispatch = useAppDispatch();
   const { customerInfo } = useAppSelector((state) => state.user);
   const { allergies, adult, kids, eventType, notes } = customerInfo;
+
   const [adultGuests, setAdultGuests] = useState<number | "">(adult || "");
   const [kidGuests, setKidGuests] = useState<number | "">(kids || "");
   const [inputAllergies, setInputAllergies] = useState(allergies || "");
   const [inputEventType, setInputEventType] = useState(eventType || "");
   const [inputNotes, setInputNotes] = useState(notes || "");
+
   const [errors, setErrors] = useState({
-    guests: "",
     adult: "",
     kids: "",
+    guests: "",
   });
 
+  const validateAdultGuests = () => {
+    let error = "";
+    if (
+      adultGuests === "" ||
+      isNaN(Number(adultGuests)) ||
+      !Number.isInteger(Number(adultGuests)) ||
+      Number(adultGuests) < 0
+    ) {
+      error = "Enter a valid non-negative integer.";
+    }
+    setErrors((prev) => ({ ...prev, adult: error }));
+    return error === "";
+  };
+
+  const validateKidGuests = () => {
+    let error = "";
+    if (
+      kidGuests === "" ||
+      isNaN(Number(kidGuests)) ||
+      !Number.isInteger(Number(kidGuests)) ||
+      Number(kidGuests) < 0
+    ) {
+      error = "Enter a valid non-negative integer.";
+    }
+    setErrors((prev) => ({ ...prev, kids: error }));
+    return error === "";
+  };
+
+  const validateTotalGuests = () => {
+    const total = (Number(adultGuests) || 0) + (Number(kidGuests) || 0);
+    const error = total === 0 ? "Please enter at least one guest." : "";
+    setErrors((prev) => ({ ...prev, guests: error }));
+    return error === "";
+  };
+
   const handleNext = () => {
-    let formValid = true;
-    const newErrors = { guests: "", adult: "", kids: "" };
+    const isAdultValid = validateAdultGuests();
+    const isKidValid = validateKidGuests();
+    const isGuestTotalValid = validateTotalGuests();
 
-    const adultCount = Number(adultGuests) || 0;
-    const kidCount = Number(kidGuests) || 0;
-
-    if (adultCount + kidCount === 0) {
-      newErrors.guests = "Please enter at least one guest.";
-      formValid = false;
-    }
-
-    if (adultCount < 0) {
-      newErrors.adult = "Cannot be negative.";
-      formValid = false;
-    }
-
-    if (kidCount < 0) {
-      newErrors.kids = "Cannot be negative.";
-      formValid = false;
-    }
-
-    setErrors(newErrors);
-
-    if (!formValid) return;
+    if (!isAdultValid || !isKidValid || !isGuestTotalValid) return;
 
     dispatch(
       setCustomerInfo({
         ...customerInfo,
-        adult: adultCount,
-        kids: kidCount,
+        adult: Number(adultGuests),
+        kids: Number(kidGuests),
         allergies: inputAllergies.trim(),
         eventType: inputEventType.trim(),
         notes: inputNotes.trim(),
@@ -71,9 +89,11 @@ const DetailsAndPolicies: React.FC<Props> = ({ onNext, onBack }) => {
         label="Number of Adult Guests"
         type="number"
         value={adultGuests}
-        onChange={(e) =>
-          setAdultGuests(e.target.value === "" ? "" : Number(e.target.value))
-        }
+        onChange={(e) => {
+          const value = e.target.value;
+          setAdultGuests(value === "" ? "" : Number(value));
+        }}
+        onBlur={validateAdultGuests}
         required
         error={Boolean(errors.adult)}
         helperText={errors.adult}
@@ -83,9 +103,11 @@ const DetailsAndPolicies: React.FC<Props> = ({ onNext, onBack }) => {
         label="Number of Kid Guests"
         type="number"
         value={kidGuests}
-        onChange={(e) =>
-          setKidGuests(e.target.value === "" ? "" : Number(e.target.value))
-        }
+        onChange={(e) => {
+          const value = e.target.value;
+          setKidGuests(value === "" ? "" : Number(value));
+        }}
+        onBlur={validateKidGuests}
         error={Boolean(errors.kids)}
         helperText={errors.kids}
       />
