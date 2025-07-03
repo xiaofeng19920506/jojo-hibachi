@@ -5,9 +5,10 @@ import { resetReservation } from "../../features/userSlice";
 
 interface Props {
   onReset: () => void;
+  onBack: () => void;
 }
 
-const Confirmation: React.FC<Props> = ({ onReset }) => {
+const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { customerInfo } = useAppSelector((state) => state.user);
@@ -19,11 +20,6 @@ const Confirmation: React.FC<Props> = ({ onReset }) => {
 
   const clearState = () => {
     dispatch(resetReservation());
-  };
-
-  const makeAnotherReservation = () => {
-    clearState();
-    onReset();
   };
 
   const goToHome = () => {
@@ -76,8 +72,8 @@ const Confirmation: React.FC<Props> = ({ onReset }) => {
       </Box>
 
       <Box sx={{ mt: 4, display: "flex", gap: 2, justifyContent: "center" }}>
-        <Button variant="outlined" onClick={makeAnotherReservation}>
-          Make Another Reservation
+        <Button variant="outlined" onClick={onBack}>
+          Back
         </Button>
         <Button variant="contained" onClick={goToHome}>
           Done

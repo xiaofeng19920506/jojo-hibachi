@@ -39,7 +39,9 @@ const ReservationStepper = () => {
         {activeStep === 2 && (
           <DetailsAndPolicies onNext={handleNext} onBack={handleBack} />
         )}
-        {activeStep === 3 && <Confirmation onReset={handleReset} />}
+        {activeStep === 3 && (
+          <Confirmation onReset={handleReset} onBack={handleBack} />
+        )}
       </Box>
     </Box>
   );
