@@ -89,7 +89,6 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
     );
   }
 
-  // Success UI
   return (
     <Box sx={{ maxWidth: 600, margin: "0 auto", textAlign: "center", mt: 4 }}>
       <Typography variant="h4" gutterBottom>
