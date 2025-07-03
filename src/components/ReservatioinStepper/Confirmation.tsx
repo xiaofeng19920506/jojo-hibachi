@@ -18,12 +18,9 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
   const totalGuests = (adult || 0) + (kids || 0);
   const totalPrice = (adult || 0) * 50 + (kids || 0) * 25;
 
-  const clearState = () => {
-    dispatch(resetReservation());
-  };
-
   const goToHome = () => {
-    clearState();
+    dispatch(resetReservation());
+    onReset();
     navigate("/");
   };
   return (
