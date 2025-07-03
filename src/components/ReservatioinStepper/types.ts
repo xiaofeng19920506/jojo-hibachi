@@ -1,7 +1,7 @@
 export interface ReservationFormValues {
   fullName: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
   address: string;
   date: string;
   time: string;

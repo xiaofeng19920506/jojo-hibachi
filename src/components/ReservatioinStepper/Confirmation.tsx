@@ -18,11 +18,31 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
   const totalGuests = (adult || 0) + (kids || 0);
   const totalPrice = (adult || 0) * 50 + (kids || 0) * 25;
 
-  const goToHome = () => {
-    dispatch(resetReservation());
-    onReset();
-    navigate("/");
+  const goToHome = async () => {
+    try {
+      // Send reservation data to the server
+      const response = await fetch("http://localhost:3000/api/v1/reservation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...customerInfo, timeStamp: new Date() }), // or whatever structure your API expects
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send reservation.");
+      }
+
+      // Clear local Redux store and navigate home
+      dispatch(resetReservation());
+      onReset();
+      navigate("/");
+    } catch (error) {
+      console.error("Error sending reservation:", error);
+      // Optional: Show error to user
+    }
   };
+
   return (
     <Box sx={{ maxWidth: 600, margin: "0 auto", textAlign: "center", mt: 4 }}>
       <Typography variant="h4" gutterBottom>

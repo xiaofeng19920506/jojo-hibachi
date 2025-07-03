@@ -13,7 +13,7 @@ import { Link } from "react-router-dom";
 const SignUp: React.FC = () => {
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
-  const [phone, setPhone] = useState<string>("");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [email, setEmail] = useState<string>("");
   const [address, setAddress] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +21,7 @@ const SignUp: React.FC = () => {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!firstName || !lastName || !phone || !email || !address) {
+    if (!firstName || !lastName || !phoneNumber || !email || !address) {
       setError("Please fill in all fields.");
       return;
     }
@@ -31,7 +31,7 @@ const SignUp: React.FC = () => {
     console.log("Signing up with:", {
       firstName,
       lastName,
-      phone,
+      phoneNumber,
       email,
       address,
     });
@@ -59,9 +59,9 @@ const SignUp: React.FC = () => {
         <Input
           type="tel"
           placeholder="Phone Number"
-          value={phone}
+          value={phoneNumber}
           required
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={(e) => setPhoneNumber(e.target.value)}
         />
         <Input
           type="email"

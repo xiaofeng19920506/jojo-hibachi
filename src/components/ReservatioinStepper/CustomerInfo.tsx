@@ -23,7 +23,6 @@ const CustomerInfo: React.FC<Props> = ({ onNext }) => {
   const dispatch = useAppDispatch();
   const { customerInfo } = useAppSelector((state) => state.user);
   const [form, setForm] = useState<customerInfos>(customerInfo);
-
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleChange = (
@@ -53,8 +52,9 @@ const CustomerInfo: React.FC<Props> = ({ onNext }) => {
     if (!form.fullName.trim()) newErrors.fullName = "Full name is required";
     if (!form.email.trim()) newErrors.email = "Email is required";
     else if (!emailRegex.test(form.email)) newErrors.email = "Invalid email";
-    if (!form.phone.trim()) newErrors.phone = "Phone number is required";
+    if (!form.phoneNumber.trim()) newErrors.phoneNumber = "phoneNumber number is required";
     if (!form.address.trim()) newErrors.address = "Address is required";
+    if (!form.city.trim()) newErrors.city = "City is required";
     if (!form.state) newErrors.state = "State is required";
     if (!form.zipCode.trim()) newErrors.zipCode = "Zip code is required";
     else if (!zipRegex.test(form.zipCode))
@@ -100,12 +100,12 @@ const CustomerInfo: React.FC<Props> = ({ onNext }) => {
       />
 
       <TextField
-        label="Phone Number"
-        name="phone"
-        value={form.phone}
+        label="phone Number"
+        name="phoneNumber"
+        value={form.phoneNumber}
         onChange={handleChange}
-        error={!!errors.phone}
-        helperText={errors.phone}
+        error={!!errors.phoneNumber}
+        helperText={errors.phoneNumber}
         required
       />
 
@@ -116,6 +116,16 @@ const CustomerInfo: React.FC<Props> = ({ onNext }) => {
         onChange={handleChange}
         error={!!errors.address}
         helperText={errors.address}
+        required
+      />
+
+      <TextField
+        label="City"
+        name="city"
+        value={form.city}
+        onChange={handleChange}
+        error={!!errors.city}
+        helperText={errors.city}
         required
       />
 

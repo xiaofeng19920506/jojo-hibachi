@@ -39,6 +39,7 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
       handleDateBlur();
     }
   }, []);
+
   const validateDate = (input: string) => {
     const parsedInput = dayjs(input);
     if (!parsedInput.isValid()) {
@@ -53,6 +54,17 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
     return true;
   };
 
+  const updateDateInRedux = (parsedDate: dayjs.Dayjs) => {
+    const updatedInfo = {
+      ...customerInfo,
+      date: parsedDate.toISOString(),
+      day: String(parsedDate.date()),
+      month: String(parsedDate.month() + 1), // month is 0-based
+      year: String(parsedDate.year()),
+    };
+    dispatch(setCustomerInfo(updatedInfo));
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputDate(e.target.value);
   };
@@ -63,9 +75,7 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
       const parsed = dayjs(formattedInput);
       setDate(parsed);
       setInputDate(formattedInput);
-      dispatch(
-        setCustomerInfo({ ...customerInfo, date: parsed.toISOString() })
-      );
+      updateDateInRedux(parsed);
     } else {
       setInputDate(date.format("YYYY-MM-DD"));
     }
@@ -77,9 +87,7 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
       if (parsedDate.isValid()) {
         setDate(parsedDate);
         setInputDate(parsedDate.format("YYYY-MM-DD"));
-        dispatch(
-          setCustomerInfo({ ...customerInfo, date: parsedDate.toISOString() })
-        );
+        updateDateInRedux(parsedDate);
       }
     }
   };

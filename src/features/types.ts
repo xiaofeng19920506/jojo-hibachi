@@ -1,9 +1,10 @@
 export interface customerInfos {
   fullName: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
   address: string;
   state: string;
+  city: string;
   zipCode: string;
   date: string;
   time: string;
@@ -12,6 +13,9 @@ export interface customerInfos {
   kids: number;
   eventType: string;
   notes: string;
+  day: string;
+  month: string;
+  year: string;
 }
 
 export interface User {

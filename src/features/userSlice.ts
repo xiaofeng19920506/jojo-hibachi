@@ -3,7 +3,20 @@ import { type customerInfos, type User } from "./types";
 
 const initialState = {
   user: {} as User,
-  customerInfo: {} as customerInfos,
+  customerInfo: {
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    address: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    day: "",
+    month: "",
+    year: "",
+    date: "",
+    time: "",
+  } as customerInfos,
   isAuthenticated: false,
 };
 
