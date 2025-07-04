@@ -14,7 +14,25 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
   const navigate = useNavigate();
   const { customerInfo } = useAppSelector((state) => state.user);
 
-  const { adult, kids, allergies, eventType, notes } = customerInfo;
+  const {
+    firstName,
+    lastName,
+    email,
+    phoneNumber,
+    address,
+    city,
+    state,
+    zipCode,
+    time,
+    allergies,
+    adult,
+    kids,
+    eventType,
+    notes,
+    reservationDay,
+    reservationMonth,
+    reservationYear,
+  } = customerInfo;
 
   const totalGuests = (adult || 0) + (kids || 0);
   const totalPrice = (adult || 0) * 50 + (kids || 0) * 25;
@@ -104,7 +122,41 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
         Reservation Summary
       </Typography>
 
-      <Box sx={{ textAlign: "left", mt: 2 }}>
+      <Box sx={{ textAlign: "left", mt: 2, m: "auto" }}>
+        <Typography>
+          <strong>First Name:</strong> {firstName}
+        </Typography>
+        <Typography>
+          <strong>Last Name:</strong> {lastName}
+        </Typography>
+        <Typography>
+          <strong>Email:</strong> {email}
+        </Typography>
+        <Typography>
+          <strong>Phone Number:</strong> {phoneNumber}
+        </Typography>
+        <Typography>
+          <strong>Address:</strong> {address}
+        </Typography>
+        <Typography>
+          <strong>City:</strong> {city}
+        </Typography>
+        <Typography>
+          <strong>State:</strong> {state}
+        </Typography>
+        <Typography>
+          <strong>Zip Code:</strong> {zipCode}
+        </Typography>
+        <Typography>
+          <strong>Date:</strong>{" "}
+          {`${reservationMonth}/${reservationDay}/${reservationYear}`}
+        </Typography>
+        <Typography>
+          <strong>Time:</strong> {time}
+        </Typography>
+        <Typography>
+          <strong>Event Type:</strong> {eventType}
+        </Typography>
         <Typography>
           <strong>Adults:</strong> {adult}
         </Typography>
@@ -117,11 +169,6 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
         <Typography>
           <strong>Total Price:</strong> ${totalPrice}
         </Typography>
-        {eventType && (
-          <Typography>
-            <strong>Event Type:</strong> {eventType}
-          </Typography>
-        )}
         {allergies && (
           <Typography>
             <strong>Allergies:</strong> {allergies}
