@@ -29,7 +29,7 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
       setError(null);
       try {
         const response = await fetch(
-          "http://localhost:3000/api/v1/reservation",
+          `${import.meta.env.VITE_BACKEND_URL}/reservation`,
           {
             method: "POST",
             headers: {
