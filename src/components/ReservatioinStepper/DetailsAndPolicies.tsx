@@ -14,7 +14,7 @@ const DetailsAndPolicies: React.FC<Props> = ({ onNext, onBack }) => {
   const { allergies, adult, kids, eventType, notes } = customerInfo;
 
   const [adultGuests, setAdultGuests] = useState<number | "">(adult || "");
-  const [kidGuests, setKidGuests] = useState<number | "">(kids || "");
+  const [kidGuests, setKidGuests] = useState<number | "">(kids ?? 0);
   const [inputAllergies, setInputAllergies] = useState(allergies || "");
   const [inputEventType, setInputEventType] = useState(eventType || "");
   const [inputNotes, setInputNotes] = useState(notes || "");
@@ -72,9 +72,9 @@ const DetailsAndPolicies: React.FC<Props> = ({ onNext, onBack }) => {
         ...customerInfo,
         adult: Number(adultGuests),
         kids: Number(kidGuests),
-        allergies: inputAllergies.trim(),
-        eventType: inputEventType.trim(),
-        notes: inputNotes.trim(),
+        allergies: inputAllergies.trim() || "",
+        eventType: inputEventType.trim() || "",
+        notes: inputNotes.trim() || "",
       })
     );
 
