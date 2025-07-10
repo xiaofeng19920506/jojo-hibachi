@@ -167,7 +167,7 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
           <strong>Total Guests:</strong> {totalGuests}
         </Typography>
         <Typography>
-          <strong>Total Price:</strong> ${totalPrice}
+          <strong>Total Price:</strong> ${totalPrice >= 500 ? totalPrice : 500}
         </Typography>
         {allergies && (
           <Typography>
