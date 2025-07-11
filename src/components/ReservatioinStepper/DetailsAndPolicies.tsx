@@ -102,7 +102,7 @@ const DetailsAndPolicies: React.FC<Props> = ({ onNext, onBack }) => {
       if (!response.ok) {
         throw new Error(result.message || "Failed to send reservation.");
       }
-      const reservationId = result.data?._id || "";
+      const reservationId = result.data.data?._id || "";
       dispatch(setCustomerInfo({ ...updatedInfo, id: reservationId }));
       onNext();
     } catch (err: any) {

@@ -4,6 +4,7 @@ import { type customerInfos, type User } from "./types";
 const initialState = {
   user: {} as User,
   customerInfo: {
+    id: "",
     firstName: "",
     lastName: "",
     email: "",
