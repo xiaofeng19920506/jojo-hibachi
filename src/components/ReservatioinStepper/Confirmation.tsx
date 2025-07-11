@@ -39,7 +39,7 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
 
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+  const [id, setId] = useState<string>("");
 
   useEffect(() => {
     const sendReservation = async () => {
@@ -60,8 +60,8 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
         if (!response.ok) {
           throw new Error("Failed to send reservation.");
         }
-
-        setSuccess(true);
+        const { data } = await response.json();
+        setId(data.data._id);
       } catch (err: any) {
         setError(err.message || "Error sending reservation.");
       } finally {
@@ -73,8 +73,6 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
   }, [customerInfo]);
 
   const goToHome = () => {
-    if (!success) return;
-
     dispatch(resetReservation());
     onReset();
     navigate("/");
@@ -123,6 +121,9 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
       </Typography>
 
       <Box sx={{ textAlign: "left", mt: 2, m: "auto" }}>
+        <Typography>
+          <strong>Reservation Id:</strong> {id}
+        </Typography>
         <Typography>
           <strong>First Name:</strong> {firstName}
         </Typography>
