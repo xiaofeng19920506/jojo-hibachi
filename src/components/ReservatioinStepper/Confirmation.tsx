@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Box, Button, Typography, Divider } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../utils/hooks";
@@ -15,6 +14,7 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
   const { customerInfo } = useAppSelector((state) => state.user);
 
   const {
+    id,
     firstName,
     lastName,
     email,
@@ -37,73 +37,11 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
   const totalGuests = (adult || 0) + (kids || 0);
   const totalPrice = (adult || 0) * 50 + (kids || 0) * 25;
 
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [id, setId] = useState<string>("");
-
-  useEffect(() => {
-    const sendReservation = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_BACKEND_URL}/reservation`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ ...customerInfo, timeStamp: new Date() }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error("Failed to send reservation.");
-        }
-        const { data } = await response.json();
-        setId(data.data._id);
-      } catch (err: any) {
-        setError(err.message || "Error sending reservation.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    sendReservation();
-  }, [customerInfo]);
-
   const goToHome = () => {
     dispatch(resetReservation());
     onReset();
     navigate("/");
   };
-
-  if (loading) {
-    return (
-      <Box sx={{ maxWidth: 600, margin: "0 auto", textAlign: "center", mt: 4 }}>
-        <Typography variant="h6">Sending your reservation...</Typography>
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ maxWidth: 600, margin: "0 auto", textAlign: "center", mt: 4 }}>
-        <Typography variant="h4" color="error" gutterBottom>
-          ❌ Reservation Failed
-        </Typography>
-        <Typography variant="body1" color="error" gutterBottom>
-          {error}
-        </Typography>
-
-        <Box sx={{ mt: 4, display: "flex", gap: 2, justifyContent: "center" }}>
-          <Button variant="contained" onClick={goToHome}>
-            Start a new Reservation
-          </Button>
-        </Box>
-      </Box>
-    );
-  }
 
   return (
     <Box sx={{ maxWidth: 600, margin: "0 auto", textAlign: "center", mt: 4 }}>
@@ -122,7 +60,7 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
 
       <Box sx={{ textAlign: "left", mt: 2, m: "auto" }}>
         <Typography>
-          <strong>Reservation Id:</strong> {id}
+          <strong>Reservation ID:</strong> {id || "N/A"}
         </Typography>
         <Typography>
           <strong>First Name:</strong> {firstName}

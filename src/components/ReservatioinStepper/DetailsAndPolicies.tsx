@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { Box, TextField, Button, Typography } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  CircularProgress,
+} from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import { setCustomerInfo } from "../../features/userSlice";
 
@@ -24,6 +30,9 @@ const DetailsAndPolicies: React.FC<Props> = ({ onNext, onBack }) => {
     kids: "",
     guests: "",
   });
+
+  const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const validateAdultGuests = () => {
     let error = "";
@@ -60,25 +69,47 @@ const DetailsAndPolicies: React.FC<Props> = ({ onNext, onBack }) => {
     return error === "";
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     const isAdultValid = validateAdultGuests();
     const isKidValid = validateKidGuests();
     const isGuestTotalValid = validateTotalGuests();
-
     if (!isAdultValid || !isKidValid || !isGuestTotalValid) return;
 
-    dispatch(
-      setCustomerInfo({
-        ...customerInfo,
-        adult: Number(adultGuests),
-        kids: Number(kidGuests),
-        allergies: inputAllergies.trim() || "",
-        eventType: inputEventType.trim() || "",
-        notes: inputNotes.trim() || "",
-      })
-    );
+    const updatedInfo = {
+      ...customerInfo,
+      adult: Number(adultGuests),
+      kids: Number(kidGuests),
+      allergies: inputAllergies.trim() || "",
+      eventType: inputEventType.trim() || "",
+      notes: inputNotes.trim() || "",
+    };
 
-    onNext();
+    try {
+      setLoading(true);
+      setSubmitError(null);
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/reservation`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ...updatedInfo, timeStamp: new Date() }),
+        }
+      );
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.message || "Failed to send reservation.");
+      }
+      const reservationId = result.data?._id || "";
+      dispatch(setCustomerInfo({ ...updatedInfo, id: reservationId }));
+      onNext();
+    } catch (err: any) {
+      setSubmitError(err.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -145,10 +176,16 @@ const DetailsAndPolicies: React.FC<Props> = ({ onNext, onBack }) => {
         Weather Policy.
       </Typography>
 
-      <Box display="flex" justifyContent="space-between">
+      {submitError && (
+        <Typography color="error" variant="body2">
+          {submitError}
+        </Typography>
+      )}
+
+      <Box display="flex" justifyContent="space-between" alignItems="center">
         <Button onClick={onBack}>Back</Button>
-        <Button variant="contained" onClick={handleNext}>
-          Next
+        <Button variant="contained" onClick={handleNext} disabled={loading}>
+          {loading ? <CircularProgress size={24} /> : "Next"}
         </Button>
       </Box>
     </Box>
