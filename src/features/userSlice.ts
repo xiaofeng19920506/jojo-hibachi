@@ -1,8 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { type customerInfos, type User } from "./types";
+import { type customerInfos } from "./types";
 
 const initialState = {
-  user: {} as User,
   customerInfo: {
     id: "",
     firstName: "",
@@ -26,12 +25,10 @@ const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    login: (state, action) => {
-      state.user = action.payload;
+    login: (state) => {
       state.isAuthenticated = true;
     },
     logout: (state) => {
-      state.user = {} as User;
       state.isAuthenticated = false;
     },
     setCustomerInfo(state, action: PayloadAction<customerInfos>) {

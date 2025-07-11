@@ -66,8 +66,9 @@ export const RegisterPrompt = styled.p`
   margin-top: 1rem;
   font-size: 0.9rem;
   text-align: center;
-  color: var(--background-color);
+  color: var(--text-color, #fff);
   background-color: inherit;
+
   a {
     color: #0077cc;
     text-decoration: none;

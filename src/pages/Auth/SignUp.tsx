@@ -8,33 +8,71 @@ import {
   ErrorMessage,
   RegisterPrompt,
 } from "./elements";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const SignUp: React.FC = () => {
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-  const [phoneNumber, setPhoneNumber] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!firstName || !lastName || !phoneNumber || !email || !address) {
+    if (
+      !firstName ||
+      !lastName ||
+      !phoneNumber ||
+      !email ||
+      !address ||
+      !password
+    ) {
       setError("Please fill in all fields.");
       return;
     }
 
-    setError(null);
-    // Replace this with your backend API call
-    console.log("Signing up with:", {
-      firstName,
-      lastName,
-      phoneNumber,
-      email,
-      address,
-    });
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/register`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            username: email,
+            password,
+            role: "user",
+            firstName,
+            lastName,
+            phoneNumber,
+            address,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Registration failed.");
+      }
+
+      localStorage.setItem("authToken", data.token);
+      navigate("/dashboard");
+    } catch (err: any) {
+      setError(err.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -77,7 +115,16 @@ const SignUp: React.FC = () => {
           required
           onChange={(e) => setAddress(e.target.value)}
         />
-        <Button type="submit">Sign Up</Button>
+        <Input
+          type="password"
+          placeholder="Password"
+          value={password}
+          required
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <Button type="submit" disabled={loading}>
+          {loading ? "Signing Up..." : "Sign Up"}
+        </Button>
 
         <RegisterPrompt>
           Already have an account? <Link to="/signin">Sign In</Link>

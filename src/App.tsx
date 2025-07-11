@@ -9,6 +9,7 @@ import SignUp from "./pages/Auth/SignUp";
 import ReservationStepper from "./components/ReservatioinStepper/ReservationStepper";
 // import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import Dashboard from "./pages/Dashboard/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 
 const App: React.FC = () => {
   return (
@@ -21,9 +22,9 @@ const App: React.FC = () => {
         <Route
           path="/dashboard"
           element={
-            // <ProtectedRoute>
-            <Dashboard />
-            // </ProtectedRoute>
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
           }
         />
       </Routes>
