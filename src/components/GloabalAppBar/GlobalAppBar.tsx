@@ -1,5 +1,6 @@
 import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
-import { useAppDispatch } from "../../utils/hooks";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import { logout } from "../../features/userSlice";
 
 // Types for button configuration
@@ -15,6 +16,7 @@ interface GlobalAppBarProps {
   title?: string;
   subtitle?: string;
   showLogout?: boolean;
+  showNavigation?: boolean;
   actionButtons?: ActionButton[];
   elevation?: number;
   color?: "default" | "primary" | "secondary" | "transparent" | "inherit";
@@ -24,15 +26,25 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   title = "Dashboard",
   subtitle,
   showLogout = true,
+  showNavigation = true,
   actionButtons = [],
   elevation = 1,
   color = "default",
 }) => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
 
   const handleLogout = () => {
     dispatch(logout());
     localStorage.removeItem("authToken");
+    navigate("/signin");
+  };
+
+  const handleNavigation = (path: string) => {
+    navigate(path);
   };
 
   const getGreeting = () => {
@@ -45,6 +57,57 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const defaultSubtitle =
     subtitle ||
     `${getGreeting()}! Welcome back to your ${title.toLowerCase()}.`;
+
+  // Generate navigation buttons based on authentication state and current route
+  const getNavigationButtons = () => {
+    const buttons: ActionButton[] = [];
+    const currentPath = location.pathname;
+
+    if (!isAuthenticated) {
+      // Unauthenticated users see Sign In and Sign Up
+      if (currentPath !== "/signin") {
+        buttons.push({
+          label: "Sign In",
+          variant: "outlined",
+          color: "secondary",
+          onClick: () => handleNavigation("/signin"),
+        });
+      }
+      if (currentPath !== "/signup") {
+        buttons.push({
+          label: "Sign Up",
+          variant: "contained",
+          color: "secondary",
+          onClick: () => handleNavigation("/signup"),
+        });
+      }
+    } else {
+      // Authenticated users see Dashboard and Book Now
+      if (currentPath !== "/dashboard") {
+        buttons.push({
+          label: "Dashboard",
+          variant: "outlined",
+          color: "secondary",
+          onClick: () => handleNavigation("/dashboard"),
+        });
+      }
+      if (currentPath !== "/booknow") {
+        buttons.push({
+          label: "Book Now",
+          variant: "contained",
+          color: "secondary",
+          onClick: () => handleNavigation("/booknow"),
+        });
+      }
+    }
+
+    return buttons;
+  };
+
+  // Combine navigation buttons with custom action buttons
+  const allActionButtons = showNavigation
+    ? [...getNavigationButtons(), ...actionButtons]
+    : actionButtons;
 
   return (
     <AppBar position="static" color={color} elevation={elevation}>
@@ -63,7 +126,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
         </Box>
 
         <Box display="flex" gap={2} alignItems="center">
-          {actionButtons.map((button, index) => (
+          {allActionButtons.map((button, index) => (
             <Button
               key={index}
               variant={button.variant || "outlined"}
@@ -76,7 +139,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
             </Button>
           ))}
 
-          {showLogout && (
+          {showLogout && isAuthenticated && (
             <Button
               variant="outlined"
               color="error"

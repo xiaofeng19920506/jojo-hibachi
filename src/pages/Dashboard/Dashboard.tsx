@@ -168,16 +168,6 @@ const Dashboard: React.FC = () => {
     return "Good evening";
   };
 
-  // Define action buttons for the AppBar
-  const actionButtons = [
-    {
-      label: "Book Now",
-      variant: "contained" as const,
-      color: "primary" as const,
-      onClick: handleBookNow,
-    },
-  ];
-
   return (
     <Box
       sx={{
@@ -192,7 +182,6 @@ const Dashboard: React.FC = () => {
       <GlobalAppBar
         title="Dashboard"
         subtitle={`${getGreeting()}! Welcome back to your dashboard.`}
-        actionButtons={actionButtons}
         showLogout={true}
       />
 
