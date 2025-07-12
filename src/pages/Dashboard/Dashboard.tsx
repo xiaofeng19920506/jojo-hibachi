@@ -1,66 +1,33 @@
 import {
   Box,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
   TextField,
   Pagination,
-  Typography,
   MenuItem,
   Select,
   FormControl,
   InputLabel,
-  TableContainer,
-  Paper,
-  Button,
-  AppBar,
-  Toolbar,
 } from "@mui/material";
 import { useState, useMemo, useEffect } from "react";
-import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { login, logout } from "../../features/userSlice";
 import { useAppDispatch } from "../../utils/hooks";
+import DataTable, {
+  type TableType,
+  type SortableEntry,
+  type CustomerEntry,
+  type OrderEntry,
+  type EmployeeEntry,
+  mockCustomers,
+  mockOrders,
+  mockEmployees,
+} from "../../components/DataTable/DataTable";
+import GlobalAppBar from "../../components/GloabalAppBar/GlobalAppBar";
 
-interface CustomerEntry {
-  id: string;
-  name: string;
-  date: string;
-  address: string;
-  price: number;
-}
-
-const mockData: CustomerEntry[] = [
-  {
-    id: "1",
-    name: "Alice Johnson",
-    date: "2025-07-10",
-    address: "123 Maple St",
-    price: 300,
-  },
-  {
-    id: "2",
-    name: "Bob Smith",
-    date: "2025-06-15",
-    address: "456 Oak St",
-    price: 200,
-  },
-  {
-    id: "3",
-    name: "Charlie Brown",
-    date: "2025-06-20",
-    address: "789 Pine St",
-    price: 400,
-  },
-];
-
+// Main Dashboard Component
 const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortConfig, setSortConfig] = useState<{
-    key: keyof CustomerEntry;
+    key: string;
     direction: "asc" | "desc";
   }>({
     key: "date",
@@ -70,59 +37,76 @@ const Dashboard: React.FC = () => {
   const [endDate, setEndDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [activeTable, setActiveTable] = useState<TableType>("customers");
 
-  const handleSort = (key: keyof CustomerEntry) => {
+  const handleSort = (key: string) => {
     setSortConfig((prev) => ({
       key,
       direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc",
     }));
   };
 
+  const handleActionClick = (action: string, item: SortableEntry) => {
+    console.log(`Action: ${action}`, item);
+    // Handle different actions based on table type and action
+  };
+
   const handleBookNow = () => {
-    // Navigate to book now page
     console.log("Navigate to book now");
   };
 
-  const handleProfile = () => {
-    // Navigate to profile page
-    console.log("Navigate to profile");
-  };
-
-  const handleLogout = () => {
-    dispatch(logout());
-    localStorage.removeItem("authToken");
+  const getCurrentData = () => {
+    switch (activeTable) {
+      case "customers":
+        return mockCustomers;
+      case "orders":
+        return mockOrders;
+      case "employees":
+        return mockEmployees;
+      default:
+        return [];
+    }
   };
 
   const filteredSortedData = useMemo(() => {
-    let result = [...mockData];
+    let result = [...getCurrentData()];
 
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      result = result.filter((entry) =>
-        [entry.name, entry.address, entry.id].some((val) =>
-          val.toLowerCase().includes(query)
-        )
-      );
+      result = result.filter((entry) => {
+        const searchableFields = Object.values(entry).map((val) =>
+          String(val).toLowerCase()
+        );
+        return searchableFields.some((field) => field.includes(query));
+      });
     }
 
-    if (startDate) {
-      result = result.filter(
-        (entry) => new Date(entry.date) >= new Date(startDate)
-      );
-    }
-    if (endDate) {
-      result = result.filter(
-        (entry) => new Date(entry.date) <= new Date(endDate)
-      );
+    if (startDate || endDate) {
+      result = result.filter((entry) => {
+        let dateField = "";
+        if (activeTable === "customers") {
+          dateField = (entry as CustomerEntry).date;
+        } else if (activeTable === "orders") {
+          dateField = (entry as OrderEntry).date;
+        } else if (activeTable === "employees") {
+          dateField = (entry as EmployeeEntry).joinDate;
+        }
+
+        const entryDate = new Date(dateField);
+        const start = startDate ? new Date(startDate) : null;
+        const end = endDate ? new Date(endDate) : null;
+
+        return (!start || entryDate >= start) && (!end || entryDate <= end);
+      });
     }
 
     result.sort((a, b) => {
-      const aVal = a[sortConfig.key];
-      const bVal = b[sortConfig.key];
+      const aVal = (a as any)[sortConfig.key];
+      const bVal = (b as any)[sortConfig.key];
 
-      if (sortConfig.key === "date") {
-        const dateA = new Date(aVal as string).getTime();
-        const dateB = new Date(bVal as string).getTime();
+      if (sortConfig.key === "date" || sortConfig.key === "joinDate") {
+        const dateA = new Date(aVal).getTime();
+        const dateB = new Date(bVal).getTime();
         return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
       }
 
@@ -136,7 +120,7 @@ const Dashboard: React.FC = () => {
     });
 
     return result;
-  }, [searchQuery, startDate, endDate, sortConfig]);
+  }, [searchQuery, startDate, endDate, sortConfig, activeTable]);
 
   useEffect(() => {
     const verifyToken = async () => {
@@ -177,13 +161,22 @@ const Dashboard: React.FC = () => {
     currentPage * itemsPerPage
   );
 
-  // Get current time for greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
     if (hour < 17) return "Good afternoon";
     return "Good evening";
   };
+
+  // Define action buttons for the AppBar
+  const actionButtons = [
+    {
+      label: "Book Now",
+      variant: "contained" as const,
+      color: "primary" as const,
+      onClick: handleBookNow,
+    },
+  ];
 
   return (
     <Box
@@ -196,53 +189,13 @@ const Dashboard: React.FC = () => {
         bgcolor: "background.default",
       }}
     >
-      {/* Header */}
-      <AppBar position="static" color="default" elevation={1}>
-        <Toolbar sx={{ justifyContent: "space-between", py: 1 }}>
-          {/* Left side - Title and Greeting */}
-          <Box>
-            <Typography
-              variant="h4"
-              component="h1"
-              sx={{ fontWeight: "bold", mb: 0.5 }}
-            >
-              Dashboard
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              {getGreeting()}! Welcome back to your dashboard.
-            </Typography>
-          </Box>
+      <GlobalAppBar
+        title="Dashboard"
+        subtitle={`${getGreeting()}! Welcome back to your dashboard.`}
+        actionButtons={actionButtons}
+        showLogout={true}
+      />
 
-          {/* Right side - Navigation */}
-          <Box display="flex" gap={2} alignItems="center">
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleBookNow}
-              sx={{ textTransform: "none" }}
-            >
-              Book Now
-            </Button>
-            <Button
-              variant="outlined"
-              onClick={handleProfile}
-              sx={{ textTransform: "none" }}
-            >
-              Profile
-            </Button>
-            <Button
-              variant="outlined"
-              color="error"
-              onClick={handleLogout}
-              sx={{ textTransform: "none" }}
-            >
-              Logout
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
-
-      {/* Main Content */}
       <Box
         sx={{
           flex: 1,
@@ -252,8 +205,23 @@ const Dashboard: React.FC = () => {
           p: 3,
         }}
       >
-        {/* Filters */}
         <Box display="flex" gap={2} flexWrap="wrap" mb={3} alignItems="center">
+          <FormControl sx={{ minWidth: 150 }}>
+            <InputLabel>Table View</InputLabel>
+            <Select
+              value={activeTable}
+              label="Table View"
+              onChange={(e) => {
+                setActiveTable(e.target.value as TableType);
+                setCurrentPage(1);
+              }}
+            >
+              <MenuItem value="customers">Customers</MenuItem>
+              <MenuItem value="orders">Orders</MenuItem>
+              <MenuItem value="employees">Employees</MenuItem>
+            </Select>
+          </FormControl>
+
           <TextField
             label="Search"
             value={searchQuery}
@@ -263,6 +231,7 @@ const Dashboard: React.FC = () => {
             }}
             sx={{ minWidth: 200 }}
           />
+
           <TextField
             type="date"
             label="Start Date"
@@ -273,6 +242,7 @@ const Dashboard: React.FC = () => {
             }}
             InputLabelProps={{ shrink: true }}
           />
+
           <TextField
             type="date"
             label="End Date"
@@ -286,6 +256,7 @@ const Dashboard: React.FC = () => {
               min: startDate || undefined,
             }}
           />
+
           <FormControl sx={{ minWidth: 120 }}>
             <InputLabel>Items per page</InputLabel>
             <Select
@@ -305,7 +276,6 @@ const Dashboard: React.FC = () => {
           </FormControl>
         </Box>
 
-        {/* Table Container */}
         <Box
           sx={{
             flex: 1,
@@ -313,67 +283,13 @@ const Dashboard: React.FC = () => {
             minHeight: 0,
           }}
         >
-          <TableContainer component={Paper} sx={{ maxHeight: "100%" }}>
-            <Table stickyHeader>
-              <TableHead>
-                <TableRow>
-                  {["name", "date", "address", "id", "price"].map((key) => (
-                    <TableCell
-                      key={key}
-                      onClick={() => handleSort(key as keyof CustomerEntry)}
-                      sx={{ cursor: "pointer", userSelect: "none" }}
-                    >
-                      <Box display="flex" alignItems="center" gap={0.5}>
-                        {key.charAt(0).toUpperCase() + key.slice(1)}
-                        <Box display="flex" flexDirection="column" ml={0.25}>
-                          <ArrowDropUpIcon
-                            fontSize="small"
-                            sx={{ m: 0, lineHeight: 1 }}
-                            color={
-                              sortConfig.key === key &&
-                              sortConfig.direction === "asc"
-                                ? "primary"
-                                : "disabled"
-                            }
-                          />
-                          <ArrowDropDownIcon
-                            fontSize="small"
-                            sx={{ m: 0, lineHeight: 1, mt: -1 }}
-                            color={
-                              sortConfig.key === key &&
-                              sortConfig.direction === "desc"
-                                ? "primary"
-                                : "disabled"
-                            }
-                          />
-                        </Box>
-                      </Box>
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedData.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell>{entry.name}</TableCell>
-                    <TableCell>
-                      {new Date(entry.date).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>{entry.address}</TableCell>
-                    <TableCell>{entry.id}</TableCell>
-                    <TableCell>${entry.price}</TableCell>
-                  </TableRow>
-                ))}
-                {paginatedData.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={5} align="center">
-                      No results found.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+          <DataTable
+            tableType={activeTable}
+            data={paginatedData}
+            onSort={handleSort}
+            sortConfig={sortConfig}
+            onActionClick={handleActionClick}
+          />
 
           <Box display="flex" justifyContent="center" mt={2}>
             <Pagination
