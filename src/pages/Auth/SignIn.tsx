@@ -28,7 +28,6 @@ const SignIn: React.FC = () => {
       localStorage.removeItem("authToken");
       return;
     }
-
     try {
       const response = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/auth/verifyToken`,
@@ -39,7 +38,6 @@ const SignIn: React.FC = () => {
           },
         }
       );
-
       const data = await response.json();
       if (response.ok && data.status === "success") {
         dispatch(login(data.user));
@@ -55,15 +53,12 @@ const SignIn: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     if (!email || !password) {
       setError("Both email and password are required.");
       return;
     }
-
     setError(null);
     setLoading(true);
-
     try {
       const res = await fetch(
         `${import.meta.env.VITE_BACKEND_URL}/auth/login`,
@@ -78,9 +73,7 @@ const SignIn: React.FC = () => {
           }),
         }
       );
-
       const data = await res.json();
-
       if (!res.ok) {
         throw new Error(data.message || "Login failed");
       }
