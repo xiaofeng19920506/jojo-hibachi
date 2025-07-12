@@ -159,7 +159,7 @@ const Dashboard: React.FC = () => {
 
         const data = await response.json();
         if (response.ok && data.status === "success") {
-          dispatch(login());
+          dispatch(login(data.user));
         } else {
           dispatch(logout());
         }
