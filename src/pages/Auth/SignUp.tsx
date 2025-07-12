@@ -15,7 +15,10 @@ const SignUp: React.FC = () => {
   const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
+  const [streetAddress, setStreetAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [zipCode, setZipCode] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -30,12 +33,17 @@ const SignUp: React.FC = () => {
       !lastName ||
       !phoneNumber ||
       !email ||
-      !address ||
+      !streetAddress ||
+      !city ||
+      !state ||
+      !zipCode ||
       !password
     ) {
       setError("Please fill in all fields.");
       return;
     }
+
+    const fullAddress = `${streetAddress}, ${city}, ${state} ${zipCode}`;
 
     try {
       setLoading(true);
@@ -49,13 +57,13 @@ const SignUp: React.FC = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            username: email,
+            email,
             password,
             role: "user",
             firstName,
             lastName,
-            phoneNumber,
-            address,
+            phone: phoneNumber,
+            address: fullAddress,
           }),
         }
       );
@@ -110,10 +118,31 @@ const SignUp: React.FC = () => {
         />
         <Input
           type="text"
-          placeholder="Address"
-          value={address}
+          placeholder="Street Address"
+          value={streetAddress}
           required
-          onChange={(e) => setAddress(e.target.value)}
+          onChange={(e) => setStreetAddress(e.target.value)}
+        />
+        <Input
+          type="text"
+          placeholder="City"
+          value={city}
+          required
+          onChange={(e) => setCity(e.target.value)}
+        />
+        <Input
+          type="text"
+          placeholder="State"
+          value={state}
+          required
+          onChange={(e) => setState(e.target.value)}
+        />
+        <Input
+          type="text"
+          placeholder="Zip Code"
+          value={zipCode}
+          required
+          onChange={(e) => setZipCode(e.target.value)}
         />
         <Input
           type="password"
