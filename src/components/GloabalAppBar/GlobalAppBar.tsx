@@ -2,8 +2,6 @@ import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import { logout } from "../../features/userSlice";
-
-// Types for button configuration
 interface ActionButton {
   label: string;
   variant?: "contained" | "outlined" | "text";
@@ -58,13 +56,11 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     subtitle ||
     `${getGreeting()}! Welcome back to your ${title.toLowerCase()}.`;
 
-  // Generate navigation buttons based on authentication state and current route
   const getNavigationButtons = () => {
     const buttons: ActionButton[] = [];
     const currentPath = location.pathname;
 
     if (!isAuthenticated) {
-      // Unauthenticated users see Sign In and Sign Up
       if (currentPath !== "/signin") {
         buttons.push({
           label: "Sign In",
@@ -82,7 +78,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
         });
       }
     } else {
-      // Authenticated users see Dashboard and Book Now
       if (currentPath !== "/dashboard") {
         buttons.push({
           label: "Dashboard",
@@ -104,7 +99,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     return buttons;
   };
 
-  // Combine navigation buttons with custom action buttons
   const allActionButtons = showNavigation
     ? [...getNavigationButtons(), ...actionButtons]
     : actionButtons;

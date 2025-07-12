@@ -18,17 +18,20 @@ import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 
-// Types
-export interface CustomerEntry {
+// Base interface that all entry types extend
+interface BaseEntry {
   id: string;
+}
+
+// Types
+export interface CustomerEntry extends BaseEntry {
   name: string;
   date: string;
   address: string;
   price: number;
 }
 
-export interface OrderEntry {
-  id: string;
+export interface OrderEntry extends BaseEntry {
   customerName: string;
   service: string;
   date: string;
@@ -37,8 +40,7 @@ export interface OrderEntry {
   price: number;
 }
 
-export interface EmployeeEntry {
-  id: string;
+export interface EmployeeEntry extends BaseEntry {
   name: string;
   email: string;
   role: "employee" | "admin";
@@ -47,8 +49,25 @@ export interface EmployeeEntry {
   ordersAssigned: number;
 }
 
-export type TableType = "customers" | "orders" | "employees";
-export type SortableEntry = CustomerEntry | OrderEntry | EmployeeEntry;
+// Add reservation entry type
+export interface ReservationEntry extends BaseEntry {
+  customerId: string;
+  customerName: string;
+  employeeId?: string;
+  employeeName?: string;
+  service: string;
+  date: string;
+  time: string;
+  status: "pending" | "confirmed" | "completed" | "cancelled";
+  notes?: string;
+}
+
+export type TableType = "customers" | "orders" | "employees" | "reservations";
+export type SortableEntry =
+  | CustomerEntry
+  | OrderEntry
+  | EmployeeEntry
+  | ReservationEntry;
 
 // Mock Data
 export const mockCustomers: CustomerEntry[] = [
@@ -135,6 +154,64 @@ export const mockEmployees: EmployeeEntry[] = [
   },
 ];
 
+// Add mock reservations
+export const mockReservations: ReservationEntry[] = [
+  {
+    id: "res001",
+    customerId: "cust001",
+    customerName: "John Doe",
+    employeeId: "emp001",
+    employeeName: "Sarah Johnson",
+    service: "Hair Cut",
+    date: "2024-02-15",
+    time: "10:00 AM",
+    status: "confirmed",
+    notes: "Regular customer, prefers shorter cut",
+  },
+  {
+    id: "res002",
+    customerId: "cust002",
+    customerName: "Jane Smith",
+    service: "Manicure",
+    date: "2024-02-16",
+    time: "2:00 PM",
+    status: "pending",
+    notes: "First time customer",
+  },
+  {
+    id: "res003",
+    customerId: "cust001",
+    customerName: "John Doe",
+    employeeId: "emp002",
+    employeeName: "Mike Wilson",
+    service: "Beard Trim",
+    date: "2024-02-17",
+    time: "3:30 PM",
+    status: "completed",
+  },
+  {
+    id: "res004",
+    customerId: "cust003",
+    customerName: "Alice Brown",
+    employeeId: "emp001",
+    employeeName: "Sarah Johnson",
+    service: "Hair Color",
+    date: "2024-02-18",
+    time: "11:00 AM",
+    status: "confirmed",
+    notes: "Wants blonde highlights",
+  },
+  {
+    id: "res005",
+    customerId: "cust004",
+    customerName: "Bob Johnson",
+    service: "Shampoo & Style",
+    date: "2024-02-19",
+    time: "1:00 PM",
+    status: "pending",
+  },
+];
+
 // Table Component
 interface DataTableProps {
   tableType: TableType;
@@ -142,6 +219,7 @@ interface DataTableProps {
   onSort: (key: string) => void;
   sortConfig: { key: string; direction: "asc" | "desc" };
   onActionClick: (action: string, item: SortableEntry) => void;
+  availableActions?: (item: SortableEntry) => string[];
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -150,6 +228,7 @@ const DataTable: React.FC<DataTableProps> = ({
   onSort,
   sortConfig,
   onActionClick,
+  availableActions,
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItem, setSelectedItem] = useState<SortableEntry | null>(null);
@@ -186,6 +265,8 @@ const DataTable: React.FC<DataTableProps> = ({
         return "success";
       case "cancelled":
         return "error";
+      case "confirmed":
+        return "success";
       case "active":
         return "success";
       case "inactive":
@@ -328,6 +409,56 @@ const DataTable: React.FC<DataTableProps> = ({
             </Box>
           </TableCell>
         ));
+      case "reservations":
+        return [
+          "id",
+          "customerName",
+          "service",
+          "date",
+          "time",
+          "status",
+          "employeeName",
+          "actions",
+        ].map((key) => (
+          <TableCell
+            key={key}
+            onClick={key !== "actions" ? () => onSort(key) : undefined}
+            sx={{
+              cursor: key !== "actions" ? "pointer" : "default",
+              userSelect: "none",
+            }}
+          >
+            <Box display="flex" alignItems="center" gap={0.5}>
+              {key === "customerName"
+                ? "Customer"
+                : key === "employeeName"
+                ? "Employee"
+                : key.charAt(0).toUpperCase() + key.slice(1)}
+              {key !== "actions" && (
+                <Box display="flex" flexDirection="column" ml={0.25}>
+                  <ArrowDropUpIcon
+                    fontSize="small"
+                    sx={{ m: 0, lineHeight: 1 }}
+                    color={
+                      sortConfig.key === key && sortConfig.direction === "asc"
+                        ? "primary"
+                        : "disabled"
+                    }
+                  />
+                  <ArrowDropDownIcon
+                    fontSize="small"
+                    sx={{ m: 0, lineHeight: 1, mt: -1 }}
+                    color={
+                      sortConfig.key === key && sortConfig.direction === "desc"
+                        ? "primary"
+                        : "disabled"
+                    }
+                  />
+                </Box>
+              )}
+            </Box>
+          </TableCell>
+        ));
       default:
         return null;
     }
@@ -404,11 +535,44 @@ const DataTable: React.FC<DataTableProps> = ({
             </TableCell>
           </>
         )}
+        {tableType === "reservations" && (
+          <>
+            <TableCell>{item.id}</TableCell>
+            <TableCell>{(item as ReservationEntry).customerName}</TableCell>
+            <TableCell>{(item as ReservationEntry).service}</TableCell>
+            <TableCell>
+              {new Date((item as ReservationEntry).date).toLocaleDateString()}
+            </TableCell>
+            <TableCell>{(item as ReservationEntry).time}</TableCell>
+            <TableCell>
+              <Chip
+                label={(item as ReservationEntry).status}
+                color={getStatusColor((item as ReservationEntry).status)}
+                size="small"
+              />
+            </TableCell>
+            <TableCell>
+              {(item as ReservationEntry).employeeName || "Unassigned"}
+            </TableCell>
+            <TableCell>
+              {availableActions && availableActions(item).length > 0 && (
+                <IconButton onClick={(e) => handleMenuClick(e, item)}>
+                  <MoreVertIcon />
+                </IconButton>
+              )}
+            </TableCell>
+          </>
+        )}
       </TableRow>
     ));
   };
 
   const getMenuItems = () => {
+    if (availableActions && selectedItem) {
+      return availableActions(selectedItem);
+    }
+
+    // Fallback to default menu items
     switch (tableType) {
       case "orders":
         return [
@@ -426,8 +590,25 @@ const DataTable: React.FC<DataTableProps> = ({
           "Edit Employee",
           "Reset Password",
         ];
+      case "reservations":
+        return ["Edit", "Cancel", "Assign Employee", "Update Status"];
       default:
         return [];
+    }
+  };
+
+  const getColumnSpan = () => {
+    switch (tableType) {
+      case "customers":
+        return 5;
+      case "orders":
+        return 8;
+      case "employees":
+        return 7;
+      case "reservations":
+        return 8;
+      default:
+        return 5;
     }
   };
 
@@ -442,16 +623,7 @@ const DataTable: React.FC<DataTableProps> = ({
             {renderTableRows()}
             {data.length === 0 && (
               <TableRow>
-                <TableCell
-                  colSpan={
-                    tableType === "customers"
-                      ? 5
-                      : tableType === "orders"
-                      ? 8
-                      : 7
-                  }
-                  align="center"
-                >
+                <TableCell colSpan={getColumnSpan()} align="center">
                   No results found.
                 </TableCell>
               </TableRow>
