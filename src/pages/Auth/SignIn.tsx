@@ -10,6 +10,8 @@ import {
   ErrorMessage,
   RegisterPrompt,
 } from "./elements";
+import { useAppDispatch } from "../../utils/hooks";
+import { login } from "../../features/userSlice";
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -17,6 +19,7 @@ const SignIn: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -50,6 +53,7 @@ const SignIn: React.FC = () => {
         throw new Error(data.message || "Login failed");
       }
       localStorage.setItem("authToken", data.token);
+      dispatch(login());
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message || "Something went wrong");

@@ -15,9 +15,11 @@ import {
   TableContainer,
   Paper,
 } from "@mui/material";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { login, logout } from "../../features/userSlice";
+import { useAppDispatch } from "../../utils/hooks";
 
 interface CustomerEntry {
   id: string;
@@ -52,6 +54,7 @@ const mockData: CustomerEntry[] = [
 ];
 
 const Dashboard: React.FC = () => {
+  const dispatch = useAppDispatch();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortConfig, setSortConfig] = useState<{
     key: keyof CustomerEntry;
@@ -117,6 +120,39 @@ const Dashboard: React.FC = () => {
     return result;
   }, [searchQuery, startDate, endDate, sortConfig]);
 
+  useEffect(() => {
+    const verifyToken = async () => {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        dispatch(logout());
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/auth/verifyToken`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+        if (response.ok && data.status === "success") {
+          dispatch(login());
+        } else {
+          dispatch(logout());
+        }
+      } catch (error) {
+        dispatch(logout());
+      }
+    };
+
+    verifyToken();
+  }, []);
+
   const totalPages = Math.ceil(filteredSortedData.length / itemsPerPage);
   const paginatedData = filteredSortedData.slice(
     (currentPage - 1) * itemsPerPage,
@@ -124,12 +160,20 @@ const Dashboard: React.FC = () => {
   );
 
   return (
-    <Box p={3}>
+    <Box
+      sx={{
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        p: 3,
+      }}
+    >
       <Typography variant="h5" mb={2}>
         Dashboard
       </Typography>
 
-      <Box display="flex" gap={2} flexWrap="wrap" mb={3} alignItems="center">
+      <Box display="flex" gap={2} flexWrap="wrap" mb={2} alignItems="center">
         <TextField
           label="Search"
           value={searchQuery}
@@ -169,7 +213,7 @@ const Dashboard: React.FC = () => {
               setCurrentPage(1);
             }}
           >
-            {[5, 10, 20, 50, 100].map((num) => (
+            {[5, 10, 20, 50].map((num) => (
               <MenuItem key={num} value={num}>
                 {num}
               </MenuItem>
@@ -178,87 +222,85 @@ const Dashboard: React.FC = () => {
         </FormControl>
       </Box>
 
-      <TableContainer component={Paper} sx={{ backgroundColor: "transparent" }}>
-        <Table sx={{ borderCollapse: "separate", borderSpacing: 0 }}>
-          <TableHead sx={{ backgroundColor: "#e3f2fd" }}>
-            <TableRow>
-              {["name", "date", "address", "id", "price"].map((key) => (
-                <TableCell
-                  key={key}
-                  onClick={() => handleSort(key as keyof CustomerEntry)}
-                  sx={{
-                    cursor: "pointer",
-                    userSelect: "none",
-                    borderRight: "1px solid #ccc",
-                  }}
-                >
-                  <Box display="flex" alignItems="center" gap={0.5}>
-                    {key.charAt(0).toUpperCase() + key.slice(1)}
-                    <Box display="flex" flexDirection="column" ml={0.25}>
-                      <ArrowDropUpIcon
-                        fontSize="small"
-                        sx={{ m: 0, lineHeight: 1 }}
-                        color={
-                          sortConfig.key === key &&
-                          sortConfig.direction === "asc"
-                            ? "primary"
-                            : "disabled"
-                        }
-                      />
-                      <ArrowDropDownIcon
-                        fontSize="small"
-                        sx={{ m: 0, lineHeight: 1, mt: -1 }}
-                        color={
-                          sortConfig.key === key &&
-                          sortConfig.direction === "desc"
-                            ? "primary"
-                            : "disabled"
-                        }
-                      />
-                    </Box>
-                  </Box>
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedData.map((entry) => (
-              <TableRow key={entry.id}>
-                <TableCell sx={{ borderRight: "1px solid #ccc" }}>
-                  {entry.name}
-                </TableCell>
-                <TableCell sx={{ borderRight: "1px solid #ccc" }}>
-                  {new Date(entry.date).toLocaleDateString()}
-                </TableCell>
-                <TableCell sx={{ borderRight: "1px solid #ccc" }}>
-                  {entry.address}
-                </TableCell>
-                <TableCell sx={{ borderRight: "1px solid #ccc" }}>
-                  {entry.id}
-                </TableCell>
-                <TableCell>{entry.price}</TableCell>
-              </TableRow>
-            ))}
-            {paginatedData.length === 0 && (
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: "auto",
+          minHeight: 0,
+        }}
+      >
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={5} align="center">
-                  No results found.
-                </TableCell>
+                {["name", "date", "address", "id", "price"].map((key) => (
+                  <TableCell
+                    key={key}
+                    onClick={() => handleSort(key as keyof CustomerEntry)}
+                    sx={{ cursor: "pointer", userSelect: "none" }}
+                  >
+                    <Box display="flex" alignItems="center" gap={0.5}>
+                      {key.charAt(0).toUpperCase() + key.slice(1)}
+                      <Box display="flex" flexDirection="column" ml={0.25}>
+                        <ArrowDropUpIcon
+                          fontSize="small"
+                          sx={{ m: 0, lineHeight: 1 }}
+                          color={
+                            sortConfig.key === key &&
+                            sortConfig.direction === "asc"
+                              ? "primary"
+                              : "disabled"
+                          }
+                        />
+                        <ArrowDropDownIcon
+                          fontSize="small"
+                          sx={{ m: 0, lineHeight: 1, mt: -1 }}
+                          color={
+                            sortConfig.key === key &&
+                            sortConfig.direction === "desc"
+                              ? "primary"
+                              : "disabled"
+                          }
+                        />
+                      </Box>
+                    </Box>
+                  </TableCell>
+                ))}
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {paginatedData.map((entry) => (
+                <TableRow key={entry.id}>
+                  <TableCell>{entry.name}</TableCell>
+                  <TableCell>
+                    {new Date(entry.date).toLocaleDateString()}
+                  </TableCell>
+                  <TableCell>{entry.address}</TableCell>
+                  <TableCell>{entry.id}</TableCell>
+                  <TableCell>${entry.price}</TableCell>
+                </TableRow>
+              ))}
+              {paginatedData.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} align="center">
+                    No results found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-      {totalPages > 1 && (
-        <Box display="flex" justifyContent="center" mt={3}>
-          <Pagination
-            count={totalPages}
-            page={currentPage}
-            onChange={(_, page) => setCurrentPage(page)}
-          />
-        </Box>
-      )}
+        {totalPages > 1 && (
+          <Box display="flex" justifyContent="center" mt={2}>
+            <Pagination
+              count={totalPages}
+              page={currentPage}
+              onChange={(_, page) => setCurrentPage(page)}
+            />
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 };
