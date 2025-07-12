@@ -143,7 +143,6 @@ const Dashboard: React.FC = () => {
       const token = localStorage.getItem("authToken");
       if (!token) {
         dispatch(logout());
-        localStorage.removeItem("authToken");
         return;
       }
 
@@ -160,14 +159,12 @@ const Dashboard: React.FC = () => {
 
         const data = await response.json();
         if (response.ok && data.status === "success") {
-          dispatch(login(data.user));
+          dispatch(login());
         } else {
           dispatch(logout());
-          localStorage.removeItem("authToken");
         }
       } catch (error) {
         dispatch(logout());
-        localStorage.removeItem("authToken");
       }
     };
 
@@ -180,6 +177,7 @@ const Dashboard: React.FC = () => {
     currentPage * itemsPerPage
   );
 
+  // Get current time for greeting
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good morning";
@@ -198,8 +196,10 @@ const Dashboard: React.FC = () => {
         bgcolor: "background.default",
       }}
     >
+      {/* Header */}
       <AppBar position="static" color="default" elevation={1}>
         <Toolbar sx={{ justifyContent: "space-between", py: 1 }}>
+          {/* Left side - Title and Greeting */}
           <Box>
             <Typography
               variant="h4"
@@ -212,6 +212,8 @@ const Dashboard: React.FC = () => {
               {getGreeting()}! Welcome back to your dashboard.
             </Typography>
           </Box>
+
+          {/* Right side - Navigation */}
           <Box display="flex" gap={2} alignItems="center">
             <Button
               variant="contained"
@@ -239,6 +241,8 @@ const Dashboard: React.FC = () => {
           </Box>
         </Toolbar>
       </AppBar>
+
+      {/* Main Content */}
       <Box
         sx={{
           flex: 1,
@@ -248,6 +252,7 @@ const Dashboard: React.FC = () => {
           p: 3,
         }}
       >
+        {/* Filters */}
         <Box display="flex" gap={2} flexWrap="wrap" mb={3} alignItems="center">
           <TextField
             label="Search"
@@ -277,6 +282,9 @@ const Dashboard: React.FC = () => {
               setCurrentPage(1);
             }}
             InputLabelProps={{ shrink: true }}
+            inputProps={{
+              min: startDate || undefined,
+            }}
           />
           <FormControl sx={{ minWidth: 120 }}>
             <InputLabel>Items per page</InputLabel>
@@ -296,6 +304,8 @@ const Dashboard: React.FC = () => {
             </Select>
           </FormControl>
         </Box>
+
+        {/* Table Container */}
         <Box
           sx={{
             flex: 1,
