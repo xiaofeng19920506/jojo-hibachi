@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { type customerInfos } from "./types";
+import { type customerInfos, type User } from "./types";
 
 const initialState = {
   customerInfo: {
@@ -18,6 +18,7 @@ const initialState = {
     date: "",
     time: "",
   } as customerInfos,
+  user: {} as User,
   isAuthenticated: false,
 };
 
@@ -25,8 +26,9 @@ const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    login: (state) => {
+    login: (state, action) => {
       state.isAuthenticated = true;
+      state.user = action.payload;
     },
     logout: (state) => {
       state.isAuthenticated = false;

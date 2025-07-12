@@ -19,3 +19,11 @@ export interface customerInfos {
   reservationMonth: string;
   reservationYear: string;
 }
+
+export interface User {
+  email: string;
+  firstName: string;
+  lastName: string;
+  id: string;
+  role: "user" | "employee" | "admin";
+}

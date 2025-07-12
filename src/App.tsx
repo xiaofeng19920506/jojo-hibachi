@@ -1,14 +1,11 @@
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SignIn from "./pages/Auth/SignIn";
 import SignUp from "./pages/Auth/SignUp";
 import ReservationStepper from "./components/ReservatioinStepper/ReservationStepper";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
+import HomeNav from "./components/HomeNav/HomeNav";
+// import Reservations from "./pages/Reservations/Reservations"; // You'll need to create this component
 
 const App: React.FC = () => {
   return (
@@ -17,12 +14,21 @@ const App: React.FC = () => {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/booknow" element={<ReservationStepper />} />
-        <Route path="/" element={<Navigate to="/booknow" replace />} />
+        <Route path="/" element={<HomeNav />} />
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reservations"
+          element={
+            <ProtectedRoute>
+              {/* <Reservations /> */}
+              <div>Reservations Page - Employee View</div>
             </ProtectedRoute>
           }
         />

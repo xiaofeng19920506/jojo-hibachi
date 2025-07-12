@@ -11,7 +11,7 @@ import {
   RegisterPrompt,
 } from "./elements";
 import { useAppDispatch } from "../../utils/hooks";
-import { login } from "../../features/userSlice";
+import { login, logout } from "../../features/userSlice";
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -20,6 +20,38 @@ const SignIn: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+
+  const verifyToken = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      dispatch(logout());
+      localStorage.removeItem("authToken");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/verifyToken`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+      if (response.ok && data.status === "success") {
+        dispatch(login(data.user));
+      } else {
+        dispatch(logout());
+        localStorage.removeItem("authToken");
+      }
+    } catch (error) {
+      dispatch(logout());
+      localStorage.removeItem("authToken");
+    }
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,8 +85,8 @@ const SignIn: React.FC = () => {
         throw new Error(data.message || "Login failed");
       }
       localStorage.setItem("authToken", data.token);
-      dispatch(login());
-      navigate("/dashboard");
+      verifyToken();
+      navigate("/");
     } catch (err: any) {
       setError(err.message || "Something went wrong");
     } finally {

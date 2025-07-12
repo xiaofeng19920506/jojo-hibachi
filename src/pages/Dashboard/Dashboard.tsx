@@ -14,6 +14,9 @@ import {
   InputLabel,
   TableContainer,
   Paper,
+  Button,
+  AppBar,
+  Toolbar,
 } from "@mui/material";
 import { useState, useMemo, useEffect } from "react";
 import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
@@ -75,6 +78,21 @@ const Dashboard: React.FC = () => {
     }));
   };
 
+  const handleBookNow = () => {
+    // Navigate to book now page
+    console.log("Navigate to book now");
+  };
+
+  const handleProfile = () => {
+    // Navigate to profile page
+    console.log("Navigate to profile");
+  };
+
+  const handleLogout = () => {
+    dispatch(logout());
+    localStorage.removeItem("authToken");
+  };
+
   const filteredSortedData = useMemo(() => {
     let result = [...mockData];
 
@@ -125,6 +143,7 @@ const Dashboard: React.FC = () => {
       const token = localStorage.getItem("authToken");
       if (!token) {
         dispatch(logout());
+        localStorage.removeItem("authToken");
         return;
       }
 
@@ -141,12 +160,14 @@ const Dashboard: React.FC = () => {
 
         const data = await response.json();
         if (response.ok && data.status === "success") {
-          dispatch(login());
+          dispatch(login(data.user));
         } else {
           dispatch(logout());
+          localStorage.removeItem("authToken");
         }
       } catch (error) {
         dispatch(logout());
+        localStorage.removeItem("authToken");
       }
     };
 
@@ -159,147 +180,213 @@ const Dashboard: React.FC = () => {
     currentPage * itemsPerPage
   );
 
+  // Get current time for greeting
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
   return (
     <Box
       sx={{
         height: "100vh",
+        width: "100vw",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        p: 3,
+        bgcolor: "background.default",
       }}
     >
-      <Typography variant="h5" mb={2}>
-        Dashboard
-      </Typography>
+      {/* Header */}
+      <AppBar position="static" color="default" elevation={1}>
+        <Toolbar sx={{ justifyContent: "space-between", py: 1 }}>
+          {/* Left side - Title and Greeting */}
+          <Box>
+            <Typography
+              variant="h4"
+              component="h1"
+              sx={{ fontWeight: "bold", mb: 0.5 }}
+            >
+              Dashboard
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              {getGreeting()}! Welcome back to your dashboard.
+            </Typography>
+          </Box>
 
-      <Box display="flex" gap={2} flexWrap="wrap" mb={2} alignItems="center">
-        <TextField
-          label="Search"
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setCurrentPage(1);
-          }}
-          sx={{ minWidth: 200 }}
-        />
-        <TextField
-          type="date"
-          label="Start Date"
-          value={startDate}
-          onChange={(e) => {
-            setStartDate(e.target.value);
-            setCurrentPage(1);
-          }}
-          InputLabelProps={{ shrink: true }}
-        />
-        <TextField
-          type="date"
-          label="End Date"
-          value={endDate}
-          onChange={(e) => {
-            setEndDate(e.target.value);
-            setCurrentPage(1);
-          }}
-          InputLabelProps={{ shrink: true }}
-        />
-        <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>Items per page</InputLabel>
-          <Select
-            value={itemsPerPage}
-            label="Items per page"
-            onChange={(e) => {
-              setItemsPerPage(Number(e.target.value));
-              setCurrentPage(1);
-            }}
-          >
-            {[5, 10, 20, 50].map((num) => (
-              <MenuItem key={num} value={num}>
-                {num}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
+          {/* Right side - Navigation */}
+          <Box display="flex" gap={2} alignItems="center">
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleBookNow}
+              sx={{ textTransform: "none" }}
+            >
+              Book Now
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={handleProfile}
+              sx={{ textTransform: "none" }}
+            >
+              Profile
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={handleLogout}
+              sx={{ textTransform: "none" }}
+            >
+              Logout
+            </Button>
+          </Box>
+        </Toolbar>
+      </AppBar>
 
+      {/* Main Content */}
       <Box
         sx={{
           flex: 1,
-          overflowY: "auto",
-          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          p: 3,
         }}
       >
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                {["name", "date", "address", "id", "price"].map((key) => (
-                  <TableCell
-                    key={key}
-                    onClick={() => handleSort(key as keyof CustomerEntry)}
-                    sx={{ cursor: "pointer", userSelect: "none" }}
-                  >
-                    <Box display="flex" alignItems="center" gap={0.5}>
-                      {key.charAt(0).toUpperCase() + key.slice(1)}
-                      <Box display="flex" flexDirection="column" ml={0.25}>
-                        <ArrowDropUpIcon
-                          fontSize="small"
-                          sx={{ m: 0, lineHeight: 1 }}
-                          color={
-                            sortConfig.key === key &&
-                            sortConfig.direction === "asc"
-                              ? "primary"
-                              : "disabled"
-                          }
-                        />
-                        <ArrowDropDownIcon
-                          fontSize="small"
-                          sx={{ m: 0, lineHeight: 1, mt: -1 }}
-                          color={
-                            sortConfig.key === key &&
-                            sortConfig.direction === "desc"
-                              ? "primary"
-                              : "disabled"
-                          }
-                        />
-                      </Box>
-                    </Box>
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedData.map((entry) => (
-                <TableRow key={entry.id}>
-                  <TableCell>{entry.name}</TableCell>
-                  <TableCell>
-                    {new Date(entry.date).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>{entry.address}</TableCell>
-                  <TableCell>{entry.id}</TableCell>
-                  <TableCell>${entry.price}</TableCell>
-                </TableRow>
+        {/* Filters */}
+        <Box display="flex" gap={2} flexWrap="wrap" mb={3} alignItems="center">
+          <TextField
+            label="Search"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+            sx={{ minWidth: 200 }}
+          />
+          <TextField
+            type="date"
+            label="Start Date"
+            value={startDate}
+            onChange={(e) => {
+              setStartDate(e.target.value);
+              setCurrentPage(1);
+            }}
+            InputLabelProps={{ shrink: true }}
+          />
+          <TextField
+            type="date"
+            label="End Date"
+            value={endDate}
+            onChange={(e) => {
+              setEndDate(e.target.value);
+              setCurrentPage(1);
+            }}
+            InputLabelProps={{ shrink: true }}
+          />
+          <FormControl sx={{ minWidth: 120 }}>
+            <InputLabel>Items per page</InputLabel>
+            <Select
+              value={itemsPerPage}
+              label="Items per page"
+              onChange={(e) => {
+                setItemsPerPage(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+            >
+              {[5, 10, 20, 50].map((num) => (
+                <MenuItem key={num} value={num}>
+                  {num}
+                </MenuItem>
               ))}
-              {paginatedData.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} align="center">
-                    No results found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+            </Select>
+          </FormControl>
+        </Box>
 
-        {totalPages > 1 && (
+        {/* Table Container */}
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: "auto",
+            minHeight: 0,
+          }}
+        >
+          <TableContainer component={Paper} sx={{ maxHeight: "100%" }}>
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  {["name", "date", "address", "id", "price"].map((key) => (
+                    <TableCell
+                      key={key}
+                      onClick={() => handleSort(key as keyof CustomerEntry)}
+                      sx={{ cursor: "pointer", userSelect: "none" }}
+                    >
+                      <Box display="flex" alignItems="center" gap={0.5}>
+                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                        <Box display="flex" flexDirection="column" ml={0.25}>
+                          <ArrowDropUpIcon
+                            fontSize="small"
+                            sx={{ m: 0, lineHeight: 1 }}
+                            color={
+                              sortConfig.key === key &&
+                              sortConfig.direction === "asc"
+                                ? "primary"
+                                : "disabled"
+                            }
+                          />
+                          <ArrowDropDownIcon
+                            fontSize="small"
+                            sx={{ m: 0, lineHeight: 1, mt: -1 }}
+                            color={
+                              sortConfig.key === key &&
+                              sortConfig.direction === "desc"
+                                ? "primary"
+                                : "disabled"
+                            }
+                          />
+                        </Box>
+                      </Box>
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedData.map((entry) => (
+                  <TableRow key={entry.id}>
+                    <TableCell>{entry.name}</TableCell>
+                    <TableCell>
+                      {new Date(entry.date).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>{entry.address}</TableCell>
+                    <TableCell>{entry.id}</TableCell>
+                    <TableCell>${entry.price}</TableCell>
+                  </TableRow>
+                ))}
+                {paginatedData.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center">
+                      No results found.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+
           <Box display="flex" justifyContent="center" mt={2}>
             <Pagination
-              count={totalPages}
+              count={Math.max(totalPages, 1)}
               page={currentPage}
               onChange={(_, page) => setCurrentPage(page)}
+              showFirstButton
+              showLastButton
+              siblingCount={1}
+              boundaryCount={1}
             />
           </Box>
-        )}
+        </Box>
       </Box>
     </Box>
   );
