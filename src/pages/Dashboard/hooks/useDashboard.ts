@@ -46,6 +46,13 @@ export const useDashboard = () => {
     useState<ReservationStatus>("pending");
 
   // RTK Query hooks
+  const shouldFetchEmployees =
+    userRole.toLowerCase() === "admin" &&
+    (activeTable === "employees" ||
+      (dialogOpen &&
+        dialogType === "assign" &&
+        activeTable === "reservations"));
+
   const {
     data: reservationsData,
     isLoading: reservationsLoading,
@@ -67,7 +74,7 @@ export const useDashboard = () => {
     isLoading: employeesLoading,
     error: employeesError,
   } = useGetEmployeesQuery(undefined, {
-    skip: activeTable !== "employees" || userRole.toLowerCase() !== "admin",
+    skip: !shouldFetchEmployees,
   });
 
   // Update mutation
@@ -78,6 +85,11 @@ export const useDashboard = () => {
   const getCurrentData = (): SortableEntry[] => {
     switch (activeTable) {
       case "reservations":
+        if (userRole === "employee" && reservationsData && user?.id) {
+          return reservationsData.filter(
+            (r) => r.employeeId === user.id || r.assignedChef === user.id
+          );
+        }
         return reservationsData || [];
       case "customers":
         return customersData || [];
@@ -305,10 +317,7 @@ export const useDashboard = () => {
       case "user":
         return [{ value: "reservations", label: "My Reservations" }];
       case "employee":
-        return [
-          { value: "reservations", label: "My Reservations" },
-          { value: "orders", label: "My Orders" },
-        ];
+        return [{ value: "reservations", label: "My Reservations" }];
       case "admin":
         return [
           { value: "reservations", label: "All Reservations" },
@@ -482,14 +491,13 @@ export const useDashboard = () => {
     error: getErrorState(),
     userRole,
     user,
-
+    employeesData, // Export employeesData
     // Computed
     filteredSortedData,
     totalPages,
     paginatedData,
-    getAvailableTables: getAvailableTables(),
+    getAvailableTables, // Return the function, not getAvailableTables()
     getGreeting: getGreeting(),
-
     // Handlers
     handleSort,
     handleActionClick,

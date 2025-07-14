@@ -28,10 +28,13 @@ export const transformApiData = (
     employeeId: item.assignedChef ?? undefined,
     employeeName: item.assignedChef ?? undefined,
     service: item.eventType || "Dining",
-    date: `${item.reservationYear}-${item.reservationMonth.padStart(
-      2,
-      "0"
-    )}-${item.reservationDay.padStart(2, "0")}`,
+    // Use reservationDate object for date
+    date: item.reservationDate
+      ? `${item.reservationDate.year}-${item.reservationDate.month.padStart(
+          2,
+          "0"
+        )}-${item.reservationDate.day.padStart(2, "0")}`
+      : "",
     time: item.time,
     status: item.status,
     price: item.price || 0,
@@ -136,10 +139,10 @@ export const api = createApi({
       query: () => "/reservation",
       transformResponse: (response: {
         status: string;
-        data: { data: ApiReservationData[] };
+        data: ApiReservationData[];
       }) => {
         if (response.status === "success") {
-          return transformApiData(response.data.data || []);
+          return transformApiData(response.data || []);
         }
         return [];
       },
@@ -150,10 +153,10 @@ export const api = createApi({
       query: () => "/reservation",
       transformResponse: (response: {
         status: string;
-        data: { data: ApiReservationData[] };
+        data: ApiReservationData[];
       }) => {
         if (response.status === "success") {
-          return transformApiData(response.data.data || []);
+          return transformApiData(response.data || []);
         }
         return [];
       },
@@ -208,7 +211,7 @@ export const api = createApi({
 
     // Customers
     getCustomers: builder.query<any[], void>({
-      query: () => "/customers",
+      query: () => "/admin/customers",
       transformResponse: (response: {
         status: string;
         data: { customers: any[] };
@@ -235,7 +238,7 @@ export const api = createApi({
 
     // Employees
     getEmployees: builder.query<Employee[], void>({
-      query: () => "/employees",
+      query: () => "/admin/employees",
       transformResponse: (response: { status: string; data: any[] }) => {
         if (response.status === "success") {
           return transformEmployeeData(response.data || []);

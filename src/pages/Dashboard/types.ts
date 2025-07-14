@@ -40,9 +40,11 @@ export interface ApiReservationData {
   firstName: string;
   lastName: string;
   email: string;
-  reservationDay: string;
-  reservationMonth: string;
-  reservationYear: string;
+  reservationDate: {
+    day: string;
+    month: string;
+    year: string;
+  };
   phoneNumber: string;
   address: string;
   city: string;

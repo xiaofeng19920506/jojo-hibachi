@@ -49,7 +49,21 @@ const Dashboard: React.FC = () => {
     handleDialogSave,
     getAvailableActions,
     getEmployeeDisplayName,
+    // Get employeesData from useDashboard
+    employeesData,
   } = useDashboard();
+
+  // Add this for debugging
+  console.log("Dashboard error:", error);
+
+  // Compute availableEmployees for assign dialog
+  const availableEmployees =
+    dialogOpen &&
+    dialogType === "assign" &&
+    activeTable === "reservations" &&
+    userRole.toLowerCase() === "admin"
+      ? employeesData
+      : undefined;
 
   return (
     <Box
@@ -92,7 +106,7 @@ const Dashboard: React.FC = () => {
             setItemsPerPage(value);
             setCurrentPage(1);
           }}
-          availableTables={getAvailableTables}
+          availableTables={getAvailableTables()} // Call as function
         />
 
         {loading ? (
@@ -157,6 +171,7 @@ const Dashboard: React.FC = () => {
         selectedStatus={selectedStatus}
         onStatusChange={handleStatusChange}
         getEmployeeDisplayName={getEmployeeDisplayName}
+        availableEmployees={availableEmployees}
       />
     </Box>
   );
