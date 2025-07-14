@@ -5,7 +5,6 @@ import {
   Select,
   FormControl,
   InputLabel,
-  type SelectChangeEvent,
 } from "@mui/material";
 import type { ReservationStatus } from "../types";
 
@@ -23,7 +22,6 @@ interface FilterControlsProps {
   itemsPerPage: number;
   onItemsPerPageChange: (value: number) => void;
   availableTables: { value: string; label: string }[];
-  userRole: string;
 }
 
 const FilterControls: React.FC<FilterControlsProps> = ({
@@ -40,7 +38,6 @@ const FilterControls: React.FC<FilterControlsProps> = ({
   itemsPerPage,
   onItemsPerPageChange,
   availableTables,
-  userRole,
 }) => {
   return (
     <Box mb={2} display="flex" gap={2} flexWrap="wrap" alignItems="center">

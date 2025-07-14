@@ -1,10 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
-import { useAppDispatch, useAppSelector } from "../../../utils/hooks";
+import { useAppSelector } from "../../../utils/hooks";
 import {
   useGetReservationsQuery,
   useGetUserReservationsQuery,
   useGetCustomersQuery,
-  useGetOrdersQuery,
   useGetEmployeesQuery,
   useUpdateReservationMutation,
 } from "../../../services/api";
@@ -12,7 +11,6 @@ import type { ReservationEntry, Employee, ReservationStatus } from "../types";
 import type { SortableEntry } from "../../../components/DataTable/types";
 
 export const useDashboard = () => {
-  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.user);
   const userRole = user?.role || "user";
 
@@ -86,7 +84,7 @@ export const useDashboard = () => {
       case "orders":
         return reservationsData || [];
       case "employees":
-        return employeesData || [];
+        return (employeesData as SortableEntry[]) || [];
       default:
         return [];
     }
@@ -190,7 +188,6 @@ export const useDashboard = () => {
       switch (action) {
         case "edit":
           setEditFormData({
-            name: employee.name,
             email: employee.email,
             role: employee.role,
             status: employee.status,
@@ -213,7 +210,6 @@ export const useDashboard = () => {
       switch (action) {
         case "view":
           setEditFormData({
-            name: customer.name,
             email: customer.email,
             phone: customer.phone,
             address: customer.address,
@@ -329,7 +325,7 @@ export const useDashboard = () => {
     }
   };
 
-  const getAvailableActions = (item: SortableEntry) => {
+  const getAvailableActions = () => {
     const actions = [];
 
     switch (userRole) {

@@ -5,7 +5,6 @@ interface PaginationControlsProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   filteredDataLength: number;
-  paginatedDataLength: number;
   itemsPerPage: number;
 }
 
@@ -14,7 +13,6 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
   totalPages,
   onPageChange,
   filteredDataLength,
-  paginatedDataLength,
   itemsPerPage,
 }) => {
   return (
