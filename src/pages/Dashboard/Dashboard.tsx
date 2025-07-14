@@ -93,7 +93,6 @@ const Dashboard: React.FC = () => {
             setCurrentPage(1);
           }}
           availableTables={getAvailableTables}
-          userRole={userRole}
         />
 
         {loading ? (
@@ -139,7 +138,6 @@ const Dashboard: React.FC = () => {
           totalPages={totalPages}
           onPageChange={setCurrentPage}
           filteredDataLength={filteredSortedData.length}
-          paginatedDataLength={paginatedData.length}
           itemsPerPage={itemsPerPage}
         />
       </Box>

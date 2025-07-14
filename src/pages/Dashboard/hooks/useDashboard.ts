@@ -188,8 +188,6 @@ export const useDashboard = () => {
       switch (action) {
         case "edit":
           setEditFormData({
-            email: employee.email,
-            role: employee.role,
             status: employee.status,
           });
           setDialogType("edit");
@@ -210,8 +208,6 @@ export const useDashboard = () => {
       switch (action) {
         case "view":
           setEditFormData({
-            email: customer.email,
-            phone: customer.phone,
             address: customer.address,
           });
           setDialogType("edit");
