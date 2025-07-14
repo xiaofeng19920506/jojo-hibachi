@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../../utils/hooks";
 import {
   useGetReservationsQuery,
@@ -9,10 +9,7 @@ import {
   useUpdateReservationMutation,
 } from "../../../services/api";
 import type { ReservationEntry, Employee, ReservationStatus } from "../types";
-import type {
-  SortableEntry,
-  OrderEntry,
-} from "../../../components/DataTable/types";
+import type { SortableEntry } from "../../../components/DataTable/types";
 
 export const useDashboard = () => {
   const dispatch = useAppDispatch();
@@ -175,7 +172,7 @@ export const useDashboard = () => {
         // No-op
       }
     } else if (activeTable === "orders") {
-      const order = item as OrderEntry;
+      const order = item as any;
       setSelectedReservation(order as any);
 
       switch (action) {
@@ -394,7 +391,7 @@ export const useDashboard = () => {
   };
 
   // Computed data
-  const filteredSortedData = useMemo(() => {
+  const filteredSortedData = useEffect(() => {
     let result = [...getCurrentData()];
 
     // Search filtering for all table types
@@ -414,8 +411,7 @@ export const useDashboard = () => {
       statusFilter !== "all"
     ) {
       result = result.filter(
-        (entry) =>
-          (entry as ReservationEntry | OrderEntry).status === statusFilter
+        (entry) => (entry as ReservationEntry | any).status === statusFilter
       );
     }
 
