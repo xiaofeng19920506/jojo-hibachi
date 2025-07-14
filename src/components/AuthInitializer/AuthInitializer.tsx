@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAppDispatch } from "../../utils/hooks";
-import { initializeAuth, logout } from "../../features/userSlice";
+import { initializeAuth } from "../../features/userSlice";
 import { useVerifyTokenQuery } from "../../services/api";
 import { Box, CircularProgress, Typography } from "@mui/material";
 

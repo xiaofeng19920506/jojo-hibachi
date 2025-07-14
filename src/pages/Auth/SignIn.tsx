@@ -11,7 +11,7 @@ import {
   RegisterPrompt,
 } from "./elements";
 import { useAppDispatch } from "../../utils/hooks";
-import { login, logout } from "../../features/userSlice";
+import { login } from "../../features/userSlice";
 import { useLoginMutation } from "../../services/api";
 
 const SignIn: React.FC = () => {

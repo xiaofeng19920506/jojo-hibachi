@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../../utils/hooks";
-import { logout } from "../../../features/userSlice";
 import {
   useGetReservationsQuery,
   useGetUserReservationsQuery,
@@ -173,7 +172,7 @@ export const useDashboard = () => {
           setDialogOpen(true);
           break;
         default:
-          console.log(`Action: ${action}`, item);
+        // No-op
       }
     } else if (activeTable === "orders") {
       const order = item as OrderEntry;
@@ -199,7 +198,7 @@ export const useDashboard = () => {
           setDialogOpen(true);
           break;
         default:
-          console.log(`Action: ${action}`, item);
+        // No-op
       }
     } else if (activeTable === "employees") {
       const employee = item as any;
@@ -222,7 +221,7 @@ export const useDashboard = () => {
           setDialogOpen(true);
           break;
         default:
-          console.log(`Action: ${action}`, item);
+        // No-op
       }
     } else if (activeTable === "customers") {
       const customer = item as any;
@@ -240,10 +239,10 @@ export const useDashboard = () => {
           setDialogOpen(true);
           break;
         default:
-          console.log(`Action: ${action}`, item);
+        // No-op
       }
     } else {
-      console.log(`Action: ${action}`, item);
+      // No-op
     }
   };
 
@@ -279,11 +278,11 @@ export const useDashboard = () => {
     try {
       if (dialogType === "edit") {
         if (activeTable === "orders") {
-          console.log("Order update not implemented yet");
+          // Order update not implemented yet
         } else if (activeTable === "employees") {
-          console.log("Employee update not implemented yet");
+          // Employee update not implemented yet
         } else if (activeTable === "customers") {
-          console.log("Customer view only - no updates allowed");
+          // Customer view only - no updates allowed
         } else {
           await updateReservation({
             id: selectedReservation.id,
@@ -292,7 +291,7 @@ export const useDashboard = () => {
         }
       } else if (dialogType === "assign") {
         if (activeTable === "orders") {
-          console.log("Order assignment not implemented yet");
+          // Order assignment not implemented yet
         } else {
           await updateReservation({
             id: selectedReservation.id,
@@ -301,9 +300,9 @@ export const useDashboard = () => {
         }
       } else if (dialogType === "status") {
         if (activeTable === "orders") {
-          console.log("Order status update not implemented yet");
+          // Order status update not implemented yet
         } else if (activeTable === "employees") {
-          console.log("Employee status update not implemented yet");
+          // Employee status update not implemented yet
         } else {
           await updateReservation({
             id: selectedReservation.id,
