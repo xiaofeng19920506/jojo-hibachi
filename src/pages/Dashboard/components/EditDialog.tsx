@@ -30,7 +30,7 @@ interface EditDialogProps {
   onAssignEmployeeChange: (e: any) => void;
   selectedStatus: ReservationStatus;
   onStatusChange: (e: any) => void;
-  availableEmployees: Employee[];
+  availableEmployees?: Employee[];
   getEmployeeDisplayName: (employee: Employee) => string;
 }
 
@@ -125,7 +125,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
               label={activeTable === "orders" ? "Employee" : "Chef"}
               onChange={onAssignEmployeeChange}
             >
-              {availableEmployees.map((emp) => (
+              {availableEmployees?.map((emp) => (
                 <MenuItem key={emp.id} value={emp.id}>
                   {getEmployeeDisplayName(emp)}
                 </MenuItem>

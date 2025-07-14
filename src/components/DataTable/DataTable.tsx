@@ -135,8 +135,8 @@ const DataTable: React.FC<DataTableProps> = ({
     }
     if ("time" in item && col === "time") return item.time;
     if ("price" in item && col === "price") return `$${item.price}`;
-    if ("email" in item && col === "email") return item.email;
-    if ("phone" in item && col === "phone") return item.phone;
+    if ("email" in item && col === "email") return item.email || "";
+    if ("phone" in item && col === "phone") return item.phone || "";
     if ("role" in item && col === "role") return item.role;
     if ("address" in item && col === "address") return item.address;
     if ("customerName" in item && col === "customerName")

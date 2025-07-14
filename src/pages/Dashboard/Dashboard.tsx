@@ -30,19 +30,15 @@ const Dashboard: React.FC = () => {
     editFormData,
     selectedEmployeeId,
     selectedStatus,
-    availableEmployees,
     loading,
     error,
     userRole,
-    user,
-
     // Computed
     filteredSortedData,
     totalPages,
     paginatedData,
     getAvailableTables,
     getGreeting,
-
     // Handlers
     handleSort,
     handleActionClick,
@@ -162,7 +158,6 @@ const Dashboard: React.FC = () => {
         onAssignEmployeeChange={handleAssignEmployeeChange}
         selectedStatus={selectedStatus}
         onStatusChange={handleStatusChange}
-        availableEmployees={availableEmployees}
         getEmployeeDisplayName={getEmployeeDisplayName}
       />
     </Box>

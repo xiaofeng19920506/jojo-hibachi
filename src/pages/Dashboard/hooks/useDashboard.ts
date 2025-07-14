@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../../utils/hooks";
 import {
   useGetReservationsQuery,
@@ -39,15 +39,13 @@ export const useDashboard = () => {
   const [dialogType, setDialogType] = useState<"edit" | "assign" | "status">(
     "edit"
   );
-  const [selectedReservation, setSelectedReservation] =
-    useState<ReservationEntry | null>(null);
+  const [selectedReservation, setSelectedReservation] = useState<any>(null);
   const [editFormData, setEditFormData] = useState<Partial<ReservationEntry>>(
     {}
   );
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
   const [selectedStatus, setSelectedStatus] =
     useState<ReservationStatus>("pending");
-  const [availableEmployees, setAvailableEmployees] = useState<Employee[]>([]);
 
   // RTK Query hooks
   const {
@@ -64,14 +62,6 @@ export const useDashboard = () => {
     error: customersError,
   } = useGetCustomersQuery(undefined, {
     skip: activeTable !== "customers" || userRole !== "admin",
-  });
-
-  const {
-    data: ordersData,
-    isLoading: ordersLoading,
-    error: ordersError,
-  } = useGetOrdersQuery(undefined, {
-    skip: activeTable !== "orders" || userRole !== "admin",
   });
 
   const {
@@ -109,8 +99,6 @@ export const useDashboard = () => {
         return reservationsLoading;
       case "customers":
         return customersLoading;
-      case "orders":
-        return reservationsLoading;
       case "employees":
         return employeesLoading;
       default:
@@ -125,8 +113,6 @@ export const useDashboard = () => {
         return reservationsError ? "Failed to fetch reservations" : null;
       case "customers":
         return customersError ? "Failed to fetch customers" : null;
-      case "orders":
-        return reservationsError ? "Failed to fetch reservations" : null;
       case "employees":
         return employeesError ? "Failed to fetch employees" : null;
       default:
@@ -391,7 +377,7 @@ export const useDashboard = () => {
   };
 
   // Computed data
-  const filteredSortedData = useEffect(() => {
+  const filteredSortedData = useMemo(() => {
     let result = [...getCurrentData()];
 
     // Search filtering for all table types
@@ -500,7 +486,6 @@ export const useDashboard = () => {
     editFormData,
     selectedEmployeeId,
     selectedStatus,
-    availableEmployees,
     loading: getLoadingState() || updateLoading,
     error: getErrorState(),
     userRole,
