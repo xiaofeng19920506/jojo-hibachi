@@ -46,6 +46,7 @@ interface ReservationEntry extends BaseEntry {
   date: string;
   time: string;
   status: ReservationStatus;
+  price: number; // Added price field
   notes?: string;
   phoneNumber?: string;
   address?: string;
@@ -81,6 +82,7 @@ interface ApiReservationData {
   eventType: string;
   time: string;
   status: ReservationStatus;
+  price?: number; // Added price field
   assignedChef: string | null;
   timeStamp: string;
 }
@@ -136,6 +138,7 @@ const apiService = {
     if (data.time) transformedData.time = data.time;
     if (data.status) transformedData.status = data.status;
     if (data.notes) transformedData.notes = data.notes;
+    if (data.price !== undefined) transformedData.price = data.price; // Added price handling
     if (data.employeeId) transformedData.assignedChef = data.employeeId;
 
     const response = await fetch(
@@ -195,7 +198,8 @@ const Dashboard: React.FC = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(5);
+  //const [itemsPerPage, setItemsPerPage] = useState(5);
+  const [itemsPerPage] = useState(5);
   const [activeTable, setActiveTable] = useState<TableType>("reservations");
   const [statusFilter, setStatusFilter] = useState<ReservationStatus | "all">(
     "all"
@@ -240,6 +244,7 @@ const Dashboard: React.FC = () => {
       )}-${item.reservationDay.padStart(2, "0")}`,
       time: item.time,
       status: item.status,
+      price: item.price || 0, // Added price with default value
       notes: item.notes,
       phoneNumber: item.phoneNumber,
       address: item.address,
@@ -323,16 +328,14 @@ const Dashboard: React.FC = () => {
           service: reservation.service,
           date: reservation.date,
           time: reservation.time,
+          price: reservation.price, // Added price to edit form
           notes: reservation.notes || "",
         });
         setDialogType("edit");
         setDialogOpen(true);
         break;
-      case "cancel":
-        handleCancelReservation(reservation);
-        break;
       case "assign":
-        setSelectedEmployeeId("");
+        setSelectedEmployeeId(reservation.employeeId || "");
         fetchEmployees();
         setDialogType("assign");
         setDialogOpen(true);
@@ -347,30 +350,10 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleCancelReservation = async (reservation: ReservationEntry) => {
-    const token = localStorage.getItem("authToken");
-    if (!token) return;
-
-    try {
-      setLoading(true);
-      await apiService.updateReservation(
-        reservation.id,
-        { status: "cancelled" },
-        token
-      );
-      await fetchTableData(); // Refresh data
-    } catch (error) {
-      setError("Failed to cancel reservation");
-      console.error("Error cancelling reservation:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleBookNow = () => {
-    console.log("Navigate to book now");
-    // Add navigation logic here
-  };
+  // const handleBookNow = () => {
+  //   console.log("Navigate to book now");
+  //   // Add navigation logic here
+  // };
 
   const getCurrentData = (): ReservationEntry[] => {
     // For now, we're only handling reservations
@@ -401,31 +384,23 @@ const Dashboard: React.FC = () => {
 
   const getAvailableActions = (item: SortableEntry) => {
     if (activeTable !== "reservations") {
+      console.log(item);
       return [];
     }
 
-    const reservation = item as ReservationEntry;
+    //const reservation = item as ReservationEntry;
     const actions = [];
 
     switch (userRole) {
       case "user":
-        if (reservation.status === "pending") {
-          actions.push("edit", "cancel");
-        }
+        actions.push("edit");
         break;
       case "employee":
-        if (reservation.employeeId === user?.id) {
-          actions.push("status");
-        }
+        actions.push("edit");
         break;
       case "admin":
         actions.push("edit");
-        if (reservation.status === "pending") {
-          actions.push("cancel");
-        }
-        if (!reservation.employeeId) {
-          actions.push("assign");
-        }
+        actions.push("assign");
         actions.push("status");
         break;
     }
@@ -569,7 +544,11 @@ const Dashboard: React.FC = () => {
   const handleEditFormChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setEditFormData({
+      ...editFormData,
+      [name]: name === "price" ? parseFloat(value) || 0 : value,
+    });
   };
 
   const handleAssignEmployeeChange = (e: SelectChangeEvent<string>) => {
@@ -790,7 +769,7 @@ const Dashboard: React.FC = () => {
           {dialogType === "edit"
             ? "Edit Reservation"
             : dialogType === "assign"
-            ? "Assign Employee"
+            ? "Assign Chef"
             : "Update Status"}
         </DialogTitle>
         <DialogContent>
@@ -825,6 +804,20 @@ const Dashboard: React.FC = () => {
                 onChange={handleEditFormChange}
               />
               <TextField
+                label="Price"
+                name="price"
+                type="number"
+                fullWidth
+                margin="normal"
+                inputProps={{ min: 0, step: 0.01 }}
+                value={editFormData.price || ""}
+                onChange={handleEditFormChange}
+                disabled={userRole !== "admin"}
+                helperText={
+                  userRole !== "admin" ? "Only admins can modify the price" : ""
+                }
+              />
+              <TextField
                 label="Notes"
                 name="notes"
                 fullWidth
@@ -839,11 +832,11 @@ const Dashboard: React.FC = () => {
 
           {dialogType === "assign" && (
             <FormControl fullWidth sx={{ mt: 2 }}>
-              <InputLabel id="assign-employee-label">Employee</InputLabel>
+              <InputLabel id="assign-employee-label">Chef</InputLabel>
               <Select
                 labelId="assign-employee-label"
                 value={selectedEmployeeId}
-                label="Employee"
+                label="Chef"
                 onChange={handleAssignEmployeeChange}
               >
                 {availableEmployees.map((emp) => (
