@@ -1,7 +1,14 @@
 import { useState, useMemo, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../../utils/hooks";
 import { logout } from "../../../features/userSlice";
-import { apiService, transformApiData } from "../apiService";
+import {
+  useGetReservationsQuery,
+  useGetUserReservationsQuery,
+  useGetCustomersQuery,
+  useGetOrdersQuery,
+  useGetEmployeesQuery,
+  useUpdateReservationMutation,
+} from "../../../services/api";
 import type { ReservationEntry, Employee, ReservationStatus } from "../types";
 import type {
   SortableEntry,
@@ -46,137 +53,88 @@ export const useDashboard = () => {
     useState<ReservationStatus>("pending");
   const [availableEmployees, setAvailableEmployees] = useState<Employee[]>([]);
 
-  // API state
-  const [data, setData] = useState<SortableEntry[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // RTK Query hooks
+  const {
+    data: reservationsData,
+    isLoading: reservationsLoading,
+    error: reservationsError,
+  } = userRole === "admin"
+    ? useGetReservationsQuery()
+    : useGetUserReservationsQuery();
 
-  // Data fetching
-  const fetchTableData = async () => {
-    const token = localStorage.getItem("authToken");
-    if (!token) {
-      dispatch(logout());
-      return;
-    }
+  const {
+    data: customersData,
+    isLoading: customersLoading,
+    error: customersError,
+  } = useGetCustomersQuery(undefined, {
+    skip: activeTable !== "customers" || userRole !== "admin",
+  });
 
-    setLoading(true);
-    setError(null);
+  const {
+    data: ordersData,
+    isLoading: ordersLoading,
+    error: ordersError,
+  } = useGetOrdersQuery(undefined, {
+    skip: activeTable !== "orders" || userRole !== "admin",
+  });
 
-    try {
-      let response;
-      let transformedData: SortableEntry[] = [];
+  const {
+    data: employeesData,
+    isLoading: employeesLoading,
+    error: employeesError,
+  } = useGetEmployeesQuery(undefined, {
+    skip: activeTable !== "employees" || userRole !== "admin",
+  });
 
-      if (activeTable === "reservations") {
-        if (userRole === "admin") {
-          response = await apiService.getAllData(token);
-        } else {
-          response = await apiService.getUserData(token);
-        }
+  // Update mutation
+  const [updateReservation, { isLoading: updateLoading }] =
+    useUpdateReservationMutation();
 
-        if (response.status === "success") {
-          const rawData = response.data.data || [];
-          transformedData = transformApiData(rawData);
-        } else {
-          setError("Failed to fetch data");
-          return;
-        }
-      } else if (activeTable === "customers") {
-        // For now, we'll create mock customer data from reservations
-        // In a real app, you'd fetch customer data from a different endpoint
-        if (userRole === "admin") {
-          response = await apiService.getAllData(token);
-        } else {
-          response = await apiService.getUserData(token);
-        }
-
-        if (response.status === "success") {
-          const rawData = response.data.data || [];
-          const reservationData = transformApiData(rawData);
-
-          // Transform reservation data to customer data
-          transformedData = reservationData.map((reservation) => ({
-            id: reservation.customerId,
-            name: reservation.customerName,
-            date: reservation.date,
-            address: reservation.address || "N/A",
-            price: reservation.price,
-          }));
-        } else {
-          setError("Failed to fetch data");
-          return;
-        }
-      } else if (activeTable === "orders") {
-        // For now, we'll create mock order data from reservations
-        // In a real app, you'd fetch order data from a different endpoint
-        if (userRole === "admin") {
-          response = await apiService.getAllData(token);
-        } else {
-          response = await apiService.getUserData(token);
-        }
-
-        if (response.status === "success") {
-          const rawData = response.data.data || [];
-          const reservationData = transformApiData(rawData);
-
-          // Transform reservation data to order data
-          transformedData = reservationData.map((reservation) => ({
-            id: reservation.id,
-            customerName: reservation.customerName,
-            service: reservation.service,
-            date: reservation.date,
-            status: reservation.status as any,
-            assignedEmployee: reservation.employeeName || "Unassigned",
-            price: reservation.price,
-          }));
-        } else {
-          setError("Failed to fetch data");
-          return;
-        }
-      } else if (activeTable === "employees") {
-        // For now, we'll create mock employee data
-        // In a real app, you'd fetch employee data from a different endpoint
-        transformedData = [
-          {
-            id: "1",
-            name: "John Doe",
-            email: "john@example.com",
-            role: "employee" as const,
-            joinDate: "2023-01-15",
-            status: "active" as const,
-            ordersAssigned: 5,
-          },
-          {
-            id: "2",
-            name: "Jane Smith",
-            email: "jane@example.com",
-            role: "admin" as const,
-            joinDate: "2023-02-20",
-            status: "active" as const,
-            ordersAssigned: 3,
-          },
-        ];
-      }
-
-      setData(transformedData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      console.error("Error fetching data:", err);
-    } finally {
-      setLoading(false);
+  // Get current data based on active table
+  const getCurrentData = (): SortableEntry[] => {
+    switch (activeTable) {
+      case "reservations":
+        return reservationsData || [];
+      case "customers":
+        return customersData || [];
+      case "orders":
+        return reservationsData || [];
+      case "employees":
+        return employeesData || [];
+      default:
+        return [];
     }
   };
 
-  const fetchEmployees = async () => {
-    const token = localStorage.getItem("authToken");
-    if (!token) return;
+  // Get loading state
+  const getLoadingState = (): boolean => {
+    switch (activeTable) {
+      case "reservations":
+        return reservationsLoading;
+      case "customers":
+        return customersLoading;
+      case "orders":
+        return reservationsLoading;
+      case "employees":
+        return employeesLoading;
+      default:
+        return false;
+    }
+  };
 
-    try {
-      const response = await apiService.getEmployees(token);
-      if (response.status === "success") {
-        setAvailableEmployees(response.data || []);
-      }
-    } catch (err) {
-      console.error("Error fetching employees:", err);
+  // Get error state
+  const getErrorState = (): string | null => {
+    switch (activeTable) {
+      case "reservations":
+        return reservationsError ? "Failed to fetch reservations" : null;
+      case "customers":
+        return customersError ? "Failed to fetch customers" : null;
+      case "orders":
+        return reservationsError ? "Failed to fetch reservations" : null;
+      case "employees":
+        return employeesError ? "Failed to fetch employees" : null;
+      default:
+        return null;
     }
   };
 
@@ -206,7 +164,6 @@ export const useDashboard = () => {
           break;
         case "assign":
           setSelectedEmployeeId(reservation.employeeId || "");
-          fetchEmployees();
           setDialogType("assign");
           setDialogOpen(true);
           break;
@@ -233,13 +190,53 @@ export const useDashboard = () => {
           break;
         case "assign":
           setSelectedEmployeeId(order.assignedEmployee || "");
-          fetchEmployees();
           setDialogType("assign");
           setDialogOpen(true);
           break;
         case "status":
           setSelectedStatus(order.status as any);
           setDialogType("status");
+          setDialogOpen(true);
+          break;
+        default:
+          console.log(`Action: ${action}`, item);
+      }
+    } else if (activeTable === "employees") {
+      const employee = item as any;
+      setSelectedReservation(employee as any);
+
+      switch (action) {
+        case "edit":
+          setEditFormData({
+            name: employee.name,
+            email: employee.email,
+            role: employee.role,
+            status: employee.status,
+          });
+          setDialogType("edit");
+          setDialogOpen(true);
+          break;
+        case "status":
+          setSelectedStatus(employee.status as any);
+          setDialogType("status");
+          setDialogOpen(true);
+          break;
+        default:
+          console.log(`Action: ${action}`, item);
+      }
+    } else if (activeTable === "customers") {
+      const customer = item as any;
+      setSelectedReservation(customer as any);
+
+      switch (action) {
+        case "view":
+          setEditFormData({
+            name: customer.name,
+            email: customer.email,
+            phone: customer.phone,
+            address: customer.address,
+          });
+          setDialogType("edit");
           setDialogOpen(true);
           break;
         default:
@@ -278,59 +275,57 @@ export const useDashboard = () => {
 
   const handleDialogSave = async () => {
     if (!selectedReservation) return;
-    const token = localStorage.getItem("authToken");
-    if (!token) return;
 
     try {
-      setLoading(true);
       if (dialogType === "edit") {
         if (activeTable === "orders") {
           console.log("Order update not implemented yet");
+        } else if (activeTable === "employees") {
+          console.log("Employee update not implemented yet");
+        } else if (activeTable === "customers") {
+          console.log("Customer view only - no updates allowed");
         } else {
-          await apiService.updateReservation(
-            selectedReservation.id,
-            editFormData,
-            token
-          );
+          await updateReservation({
+            id: selectedReservation.id,
+            data: editFormData,
+          }).unwrap();
         }
       } else if (dialogType === "assign") {
         if (activeTable === "orders") {
           console.log("Order assignment not implemented yet");
         } else {
-          await apiService.updateReservation(
-            selectedReservation.id,
-            { employeeId: selectedEmployeeId },
-            token
-          );
+          await updateReservation({
+            id: selectedReservation.id,
+            data: { employeeId: selectedEmployeeId },
+          }).unwrap();
         }
       } else if (dialogType === "status") {
         if (activeTable === "orders") {
           console.log("Order status update not implemented yet");
+        } else if (activeTable === "employees") {
+          console.log("Employee status update not implemented yet");
         } else {
-          await apiService.updateReservation(
-            selectedReservation.id,
-            { status: selectedStatus },
-            token
-          );
+          await updateReservation({
+            id: selectedReservation.id,
+            data: { status: selectedStatus },
+          }).unwrap();
         }
       }
-      await fetchTableData();
       handleDialogClose();
     } catch (error) {
-      setError(
-        `Failed to update ${activeTable === "orders" ? "order" : "reservation"}`
-      );
-      console.error(error);
-    } finally {
-      setLoading(false);
+      const tableType =
+        activeTable === "orders"
+          ? "order"
+          : activeTable === "employees"
+          ? "employee"
+          : activeTable === "customers"
+          ? "customer"
+          : "reservation";
+      console.error(`Failed to update ${tableType}:`, error);
     }
   };
 
   // Utility functions
-  const getCurrentData = (): SortableEntry[] => {
-    return data;
-  };
-
   const getAvailableTables = () => {
     switch (userRole) {
       case "user":
@@ -353,23 +348,30 @@ export const useDashboard = () => {
   };
 
   const getAvailableActions = (item: SortableEntry) => {
-    if (activeTable !== "reservations" && activeTable !== "orders") {
-      return [];
-    }
-
     const actions = [];
 
     switch (userRole) {
       case "user":
-        actions.push("edit");
+        if (activeTable === "reservations") {
+          actions.push("edit");
+        }
         break;
       case "employee":
-        actions.push("edit");
+        if (activeTable === "reservations" || activeTable === "orders") {
+          actions.push("edit");
+        }
         break;
       case "admin":
-        actions.push("edit");
-        actions.push("assign");
-        actions.push("status");
+        if (activeTable === "reservations" || activeTable === "orders") {
+          actions.push("edit");
+          actions.push("assign");
+          actions.push("status");
+        } else if (activeTable === "employees") {
+          actions.push("edit");
+          actions.push("status");
+        } else if (activeTable === "customers") {
+          actions.push("view");
+        }
         break;
     }
 
@@ -396,7 +398,8 @@ export const useDashboard = () => {
   const filteredSortedData = useMemo(() => {
     let result = [...getCurrentData()];
 
-    if (userRole !== "user" && searchQuery.trim()) {
+    // Search filtering for all table types
+    if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       result = result.filter((entry) => {
         const searchableFields = Object.values(entry).map((val) =>
@@ -406,15 +409,24 @@ export const useDashboard = () => {
       });
     }
 
-    if (activeTable === "reservations" && statusFilter !== "all") {
+    // Status filtering for reservations and orders
+    if (
+      (activeTable === "reservations" || activeTable === "orders") &&
+      statusFilter !== "all"
+    ) {
       result = result.filter(
-        (entry) => (entry as ReservationEntry).status === statusFilter
+        (entry) =>
+          (entry as ReservationEntry | OrderEntry).status === statusFilter
       );
     }
 
+    // Date filtering for all table types that have date fields
     if (startDate || endDate) {
       result = result.filter((entry) => {
-        const entryDate = new Date((entry as ReservationEntry).date);
+        const dateField = (entry as any).date || (entry as any).joinDate;
+        if (!dateField) return true; // Skip filtering if no date field
+
+        const entryDate = new Date(dateField);
         const start = startDate ? new Date(startDate) : null;
         const end = endDate ? new Date(endDate) : null;
 
@@ -422,6 +434,7 @@ export const useDashboard = () => {
       });
     }
 
+    // Sorting
     result.sort((a, b) => {
       const aVal = (a as any)[sortConfig.key];
       const bVal = (b as any)[sortConfig.key];
@@ -443,7 +456,7 @@ export const useDashboard = () => {
 
     return result;
   }, [
-    data,
+    getCurrentData,
     searchQuery,
     startDate,
     endDate,
@@ -466,12 +479,6 @@ export const useDashboard = () => {
       setActiveTable(availableTables[0].value);
     }
   }, [userRole]);
-
-  useEffect(() => {
-    if (user && user.id) {
-      fetchTableData();
-    }
-  }, [user, activeTable]);
 
   return {
     // State
@@ -499,9 +506,8 @@ export const useDashboard = () => {
     selectedEmployeeId,
     selectedStatus,
     availableEmployees,
-    data,
-    loading,
-    error,
+    loading: getLoadingState() || updateLoading,
+    error: getErrorState(),
     userRole,
     user,
 
@@ -522,6 +528,5 @@ export const useDashboard = () => {
     handleDialogSave,
     getAvailableActions,
     getEmployeeDisplayName,
-    fetchTableData,
   };
 };

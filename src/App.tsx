@@ -10,22 +10,22 @@ import AuthInitializer from "./components/AuthInitializer/AuthInitializer";
 const App: React.FC = () => {
   return (
     <AuthInitializer>
-      <Router>
-        <Routes>
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/booknow" element={<ReservationStepper />} />
-          <Route path="/" element={<HomeNav />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </Router>
+    <Router>
+      <Routes>
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/booknow" element={<ReservationStepper />} />
+        <Route path="/" element={<HomeNav />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Router>
     </AuthInitializer>
   );
 };

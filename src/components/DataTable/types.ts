@@ -5,6 +5,8 @@ export interface BaseEntry {
 
 export interface CustomerEntry extends BaseEntry {
   name: string;
+  email?: string;
+  phone?: string;
   date: string;
   address: string;
   price: number;

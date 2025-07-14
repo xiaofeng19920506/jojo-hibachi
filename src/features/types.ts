@@ -18,6 +18,8 @@ export interface customerInfos {
   reservationDay: string;
   reservationMonth: string;
   reservationYear: string;
+  transportationFee: number;
+  price: number;
 }
 
 export interface User {

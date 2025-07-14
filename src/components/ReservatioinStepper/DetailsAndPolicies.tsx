@@ -8,6 +8,7 @@ import {
 } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import { setCustomerInfo } from "../../features/userSlice";
+import { useCreateReservationMutation } from "../../services/api";
 
 interface Props {
   onNext: () => void;
@@ -33,6 +34,8 @@ const DetailsAndPolicies: React.FC<Props> = ({ onNext, onBack }) => {
 
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const [createReservation] = useCreateReservationMutation();
 
   const validateAdultGuests = () => {
     let error = "";
@@ -84,29 +87,44 @@ const DetailsAndPolicies: React.FC<Props> = ({ onNext, onBack }) => {
       notes: inputNotes.trim() || "",
     };
 
+    // Defensive check for required name fields
+    if (!updatedInfo.firstName || !updatedInfo.lastName) {
+      setSubmitError(
+        "First name and last name are required. Please fill out your information."
+      );
+      setLoading(false);
+      return;
+    }
+
+    // Transform date fields for backend
+    const { reservationYear, reservationMonth, reservationDay, id, ...rest } =
+      updatedInfo;
+    if (!reservationYear || !reservationMonth || !reservationDay) {
+      setSubmitError("Reservation date is missing. Please select a date.");
+      setLoading(false);
+      return;
+    }
+    const payload = {
+      ...rest,
+      reservationDate: {
+        year: String(reservationYear),
+        month: String(reservationMonth),
+        day: String(reservationDay),
+      },
+      timeStamp: new Date(),
+    };
+
     try {
       setLoading(true);
       setSubmitError(null);
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/reservation`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ ...updatedInfo, timeStamp: new Date() }),
-        }
-      );
-
-      const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.message || "Failed to send reservation.");
-      }
-      const reservationId = result.data.data?._id || "";
-      dispatch(setCustomerInfo({ ...updatedInfo, id: reservationId }));
+      const result = await createReservation(payload).unwrap();
+      const reservationObj = result.data || {};
+      dispatch(setCustomerInfo(reservationObj));
       onNext();
     } catch (err: any) {
-      setSubmitError(err.message || "Something went wrong.");
+      setSubmitError(
+        err.data?.message || err.message || "Something went wrong."
+      );
     } finally {
       setLoading(false);
     }

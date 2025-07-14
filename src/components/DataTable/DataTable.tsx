@@ -18,6 +18,7 @@ import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import type { SortableEntry, TableType } from "./types";
+import dayjs from "dayjs";
 
 interface DataTableProps {
   tableType: TableType;
@@ -83,13 +84,15 @@ const DataTable: React.FC<DataTableProps> = ({
   };
 
   const columnMap: Record<TableType, string[]> = {
-    customers: ["name", "date", "address", "id", "price"],
+    customers: ["name", "email", "phone", "address"],
+    // For 'orders', use the same columns as 'reservations' to show recent reservations
     orders: [
       "id",
       "customerName",
       "date",
+      "time",
       "status",
-      "assignedEmployee",
+      "employeeName",
       "price",
       "actions",
     ],
@@ -117,10 +120,23 @@ const DataTable: React.FC<DataTableProps> = ({
   const getCellValue = (item: SortableEntry, col: string): string => {
     if ("status" in item && col === "status") return item.status;
     if ("name" in item && col === "name") return item.name;
-    if ("date" in item && col === "date") return item.date;
+    if ("date" in item && col === "date") {
+      // Try to format as human-readable date
+      const dateValue = item.date;
+      if (!dateValue) return "-";
+      // Use dayjs if available, fallback to Date
+      try {
+        return dayjs(dateValue).isValid()
+          ? dayjs(dateValue).format("YYYY-MM-DD")
+          : new Date(dateValue).toLocaleDateString();
+      } catch {
+        return dateValue;
+      }
+    }
     if ("time" in item && col === "time") return item.time;
     if ("price" in item && col === "price") return `$${item.price}`;
     if ("email" in item && col === "email") return item.email;
+    if ("phone" in item && col === "phone") return item.phone;
     if ("role" in item && col === "role") return item.role;
     if ("address" in item && col === "address") return item.address;
     if ("customerName" in item && col === "customerName")
@@ -140,6 +156,8 @@ const DataTable: React.FC<DataTableProps> = ({
       return availableActions(selectedItem);
     }
     switch (tableType) {
+      case "customers":
+        return ["View Details"];
       case "orders":
         return [
           "Assign Employee",
@@ -165,8 +183,11 @@ const DataTable: React.FC<DataTableProps> = ({
 
   return (
     <>
-      <TableContainer component={Paper} sx={{ maxHeight: "100%" }}>
-        <Table stickyHeader>
+      <TableContainer
+        component={Paper}
+        sx={{ width: "100%", overflowX: "auto", maxHeight: "100%" }}
+      >
+        <Table stickyHeader sx={{ minWidth: "max-content" }}>
           <TableHead>
             <TableRow>
               {columnMap[tableType].map((col) => (
@@ -176,6 +197,7 @@ const DataTable: React.FC<DataTableProps> = ({
                   sx={{
                     cursor: col !== "actions" ? "pointer" : "default",
                     userSelect: "none",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   <Box display="flex" alignItems="center" gap={0.5}>
@@ -213,7 +235,7 @@ const DataTable: React.FC<DataTableProps> = ({
             {data.map((item) => (
               <TableRow key={item.id}>
                 {columnMap[tableType].map((col) => (
-                  <TableCell key={col}>
+                  <TableCell key={col} sx={{ whiteSpace: "nowrap" }}>
                     {col === "actions" ? (
                       availableActions && availableActions(item).length > 0 ? (
                         <IconButton onClick={(e) => handleMenuClick(e, item)}>

@@ -32,10 +32,13 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
     reservationDay,
     reservationMonth,
     reservationYear,
+    transportationFee,
+    price,
   } = customerInfo;
 
   const totalGuests = (adult || 0) + (kids || 0);
-  const totalPrice = (adult || 0) * 50 + (kids || 0) * 25;
+  const basePrice = (adult || 0) * 50 + (kids || 0) * 25;
+  console.log(transportationFee, price);
 
   const goToHome = () => {
     dispatch(resetReservation());
@@ -55,18 +58,28 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
       <Divider sx={{ my: 3 }} />
 
       <Typography variant="h6" gutterBottom>
-        Reservation Summary
+        Receipt
       </Typography>
 
-      <Box sx={{ textAlign: "left", mt: 2, m: "auto" }}>
+      <Box
+        sx={{
+          textAlign: "left",
+          mt: 2,
+          m: "auto",
+          bgcolor: "#fafafa",
+          p: 3,
+          borderRadius: 2,
+          boxShadow: 1,
+        }}
+      >
+        <Typography sx={{ fontWeight: 600, mb: 1 }}>
+          Reservation Details
+        </Typography>
         <Typography>
           <strong>Reservation ID:</strong> {id || "N/A"}
         </Typography>
         <Typography>
-          <strong>First Name:</strong> {firstName}
-        </Typography>
-        <Typography>
-          <strong>Last Name:</strong> {lastName}
+          <strong>Name:</strong> {firstName} {lastName}
         </Typography>
         <Typography>
           <strong>Email:</strong> {email}
@@ -75,16 +88,7 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
           <strong>Phone Number:</strong> {phoneNumber}
         </Typography>
         <Typography>
-          <strong>Address:</strong> {address}
-        </Typography>
-        <Typography>
-          <strong>City:</strong> {city}
-        </Typography>
-        <Typography>
-          <strong>State:</strong> {state}
-        </Typography>
-        <Typography>
-          <strong>Zip Code:</strong> {zipCode}
+          <strong>Address:</strong> {address}, {city}, {state} {zipCode}
         </Typography>
         <Typography>
           <strong>Date:</strong>{" "}
@@ -105,9 +109,6 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
         <Typography>
           <strong>Total Guests:</strong> {totalGuests}
         </Typography>
-        <Typography>
-          <strong>Total Price:</strong> ${totalPrice >= 500 ? totalPrice : 500}
-        </Typography>
         {allergies && (
           <Typography>
             <strong>Allergies:</strong> {allergies}
@@ -118,6 +119,29 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
             <strong>Additional Notes:</strong> {notes}
           </Typography>
         )}
+
+        <Divider sx={{ my: 2 }} />
+        <Typography sx={{ fontWeight: 600, mb: 1 }}>Charges</Typography>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+          <span>Base Price:</span>
+          <span>${basePrice.toFixed(2)}</span>
+        </Box>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
+          <span>Transportation Fee:</span>
+          <span>${transportationFee.toFixed(2)}</span>
+        </Box>
+        <Divider sx={{ my: 1 }} />
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            fontWeight: 700,
+            fontSize: 18,
+          }}
+        >
+          <span>Estimated Total:</span>
+          <span>${price.toFixed(2)}</span>
+        </Box>
       </Box>
 
       <Box sx={{ mt: 4, display: "flex", gap: 2, justifyContent: "center" }}>

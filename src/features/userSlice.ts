@@ -17,6 +17,8 @@ const initialState = {
     reservationYear: "",
     date: "",
     time: "",
+    transportationFee: 0,
+    price: 0,
   } as customerInfos,
   user: {} as User,
   isAuthenticated: false,
