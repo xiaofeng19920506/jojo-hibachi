@@ -59,7 +59,7 @@ export const useDashboard = () => {
     isLoading: customersLoading,
     error: customersError,
   } = useGetCustomersQuery(undefined, {
-    skip: activeTable !== "customers" || userRole !== "admin",
+    skip: activeTable !== "customers" || userRole.toLowerCase() !== "admin",
   });
 
   const {
@@ -67,7 +67,7 @@ export const useDashboard = () => {
     isLoading: employeesLoading,
     error: employeesError,
   } = useGetEmployeesQuery(undefined, {
-    skip: activeTable !== "employees" || userRole !== "admin",
+    skip: activeTable !== "employees" || userRole.toLowerCase() !== "admin",
   });
 
   // Update mutation
