@@ -643,117 +643,140 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <Box p={3}>
+    <Box
+      sx={{
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
       <GlobalAppBar />
-      <Typography variant="h4" mb={3}>
-        {getGreeting()}
-      </Typography>
+      <Box sx={{ flex: 1, p: 3, overflow: "auto" }}>
+        <Typography variant="h4" mb={3}>
+          {getGreeting()}
+        </Typography>
 
-      <Box mb={2} display="flex" gap={2} flexWrap="wrap" alignItems="center">
-        <Button variant="contained" onClick={handleBookNow}>
-          Book Now
-        </Button>
-
-        <FormControl sx={{ minWidth: 160 }}>
-          <InputLabel id="table-select-label">Table</InputLabel>
-          <Select
-            labelId="table-select-label"
-            value={activeTable}
-            label="Table"
-            onChange={handleTableChange}
-          >
-            {getAvailableTables().map((table) => (
-              <MenuItem key={table.value} value={table.value}>
-                {table.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-
-        <TextField
-          label="Search"
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setCurrentPage(1);
-          }}
-          sx={{ minWidth: 200 }}
-        />
-
-        <TextField
-          label="Start Date"
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          InputLabelProps={{ shrink: true }}
-          sx={{ minWidth: 150 }}
-        />
-
-        <TextField
-          label="End Date"
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-          InputLabelProps={{ shrink: true }}
-          sx={{ minWidth: 150 }}
-        />
-
-        {activeTable === "reservations" && (
-          <FormControl sx={{ minWidth: 140 }}>
-            <InputLabel id="status-filter-label">Status</InputLabel>
+        <Box mb={2} display="flex" gap={2} flexWrap="wrap" alignItems="center">
+          <FormControl sx={{ minWidth: 160 }}>
+            <InputLabel id="table-select-label">Table</InputLabel>
             <Select
-              labelId="status-filter-label"
-              value={statusFilter}
-              label="Status"
-              onChange={handleStatusFilterChange}
+              labelId="table-select-label"
+              value={activeTable}
+              label="Table"
+              onChange={handleTableChange}
             >
-              <MenuItem value="all">All</MenuItem>
-              <MenuItem value="pending">Pending</MenuItem>
-              <MenuItem value="confirmed">Confirmed</MenuItem>
-              <MenuItem value="completed">Completed</MenuItem>
-              <MenuItem value="cancelled">Cancelled</MenuItem>
+              {getAvailableTables().map((table) => (
+                <MenuItem key={table.value} value={table.value}>
+                  {table.label}
+                </MenuItem>
+              ))}
             </Select>
           </FormControl>
-        )}
-      </Box>
 
-      {loading ? (
-        <Box display="flex" justifyContent="center" mt={5}>
-          <CircularProgress />
+          <TextField
+            label="Search"
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
+            sx={{ minWidth: 200 }}
+          />
+
+          <TextField
+            label="Start Date"
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ minWidth: 150 }}
+          />
+
+          <TextField
+            label="End Date"
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ minWidth: 150 }}
+          />
+
+          {activeTable === "reservations" && (
+            <FormControl sx={{ minWidth: 140 }}>
+              <InputLabel id="status-filter-label">Status</InputLabel>
+              <Select
+                labelId="status-filter-label"
+                value={statusFilter}
+                label="Status"
+                onChange={handleStatusFilterChange}
+              >
+                <MenuItem value="all">All</MenuItem>
+                <MenuItem value="pending">Pending</MenuItem>
+                <MenuItem value="confirmed">Confirmed</MenuItem>
+                <MenuItem value="completed">Completed</MenuItem>
+                <MenuItem value="cancelled">Cancelled</MenuItem>
+              </Select>
+            </FormControl>
+          )}
         </Box>
-      ) : error ? (
-        <Alert severity="error" sx={{ mt: 2 }}>
-          {error}
-        </Alert>
-      ) : (
-        <DataTable
-          tableType={activeTable}
-          data={paginatedData}
-          onSort={handleSort}
-          sortConfig={sortConfig}
-          onActionClick={handleActionClick}
-          availableActions={getAvailableActions}
-        />
-      )}
 
-      <Box
-        mt={2}
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <Typography variant="body2" color="text.secondary">
-          Showing {paginatedData.length} of {filteredSortedData.length} entries
-        </Typography>
-        <Pagination
-          count={totalPages}
-          page={currentPage}
-          onChange={(_, value) => setCurrentPage(value)}
-          color="primary"
-          shape="rounded"
-          siblingCount={1}
-          boundaryCount={1}
-        />
+        {loading ? (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            sx={{ flex: 1 }}
+          >
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        ) : (
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            }}
+          >
+            <Box sx={{ flex: 1, overflow: "auto" }}>
+              <DataTable
+                tableType={activeTable}
+                data={paginatedData}
+                onSort={handleSort}
+                sortConfig={sortConfig}
+                onActionClick={handleActionClick}
+                availableActions={getAvailableActions}
+              />
+            </Box>
+          </Box>
+        )}
+
+        <Box
+          mt={2}
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Typography variant="body2" color="text.secondary">
+            Showing {paginatedData.length} of {filteredSortedData.length}{" "}
+            entries
+          </Typography>
+          <Pagination
+            count={totalPages}
+            page={currentPage}
+            onChange={(_, value) => setCurrentPage(value)}
+            color="primary"
+            shape="rounded"
+            siblingCount={1}
+            boundaryCount={1}
+          />
+        </Box>
       </Box>
 
       {/* Edit Dialog */}
