@@ -20,7 +20,7 @@ const HomeNav: React.FC = () => {
             navigate("/booknow");
             break;
           case "employee":
-            navigate("/reservations");
+            navigate("/dashboard");
             break;
           case "admin":
             navigate("/dashboard");

@@ -11,21 +11,22 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Chip,
+  CircularProgress,
+  Alert,
+  Typography,
+  type SelectChangeEvent,
 } from "@mui/material";
 import { useState, useMemo, useEffect } from "react";
 import { login, logout } from "../../features/userSlice";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
-import DataTable, {
-  type TableType,
-  type SortableEntry,
-  type CustomerEntry,
-  type OrderEntry,
-  type EmployeeEntry,
-  mockCustomers,
-  mockOrders,
-  mockEmployees,
-} from "../../components/DataTable/DataTable";
+import DataTable from "../../components/DataTable/DataTable";
+import type {
+  TableType,
+  SortableEntry,
+  CustomerEntry,
+  OrderEntry,
+  EmployeeEntry,
+} from "../../components/DataTable/types";
 import GlobalAppBar from "../../components/GloabalAppBar/GlobalAppBar";
 
 // Define reservation status types
@@ -46,63 +47,139 @@ interface ReservationEntry extends BaseEntry {
   time: string;
   status: ReservationStatus;
   notes?: string;
+  phoneNumber?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  adult?: number;
+  kids?: number;
+  allergies?: string;
+  eventType?: string;
+  assignedChef?: string;
+  timeStamp?: string;
 }
-const mockReservations: ReservationEntry[] = [
-  {
-    id: "res001",
-    customerId: "cust001",
-    customerName: "John Doe",
-    employeeId: "emp001",
-    employeeName: "Sarah Johnson",
-    service: "Hair Cut",
-    date: "2024-02-15",
-    time: "10:00 AM",
-    status: "confirmed",
-    notes: "Regular customer, prefers shorter cut",
+
+// API response interface
+interface ApiReservationData {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  reservationDay: string;
+  reservationMonth: string;
+  reservationYear: string;
+  phoneNumber: string;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  adult: number;
+  kids: number;
+  allergies: string;
+  notes: string;
+  eventType: string;
+  time: string;
+  status: ReservationStatus;
+  assignedChef: string | null;
+  timeStamp: string;
+}
+
+// Employee interface
+interface Employee {
+  id: string;
+  name?: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+}
+
+// API service functions
+const apiService = {
+  async fetchData(endpoint: string, token: string) {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}${endpoint}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch data: ${response.statusText}`);
+    }
+
+    return response.json();
   },
-  {
-    id: "res002",
-    customerId: "cust002",
-    customerName: "Jane Smith",
-    service: "Manicure",
-    date: "2024-02-16",
-    time: "2:00 PM",
-    status: "pending",
-    notes: "First time customer",
+
+  async getAllData(token: string) {
+    return this.fetchData("/reservation", token);
   },
-  {
-    id: "res003",
-    customerId: "cust001",
-    customerName: "John Doe",
-    employeeId: "emp002",
-    employeeName: "Mike Wilson",
-    service: "Beard Trim",
-    date: "2024-02-17",
-    time: "3:30 PM",
-    status: "completed",
+
+  async getUserData(token: string) {
+    return this.fetchData("/reservation", token);
   },
-  {
-    id: "res004",
-    customerId: "cust003",
-    customerName: "Alice Brown",
-    employeeId: "emp001",
-    employeeName: "Sarah Johnson",
-    service: "Hair Color",
-    date: "2024-02-18",
-    time: "11:00 AM",
-    status: "confirmed",
-    notes: "Wants blonde highlights",
+
+  async updateReservation(id: string, data: any, token: string) {
+    // Transform the data to match your API format
+    const transformedData: any = {};
+
+    if (data.service) transformedData.eventType = data.service;
+    if (data.date) {
+      const dateObj = new Date(data.date);
+      transformedData.reservationDay = dateObj.getDate().toString();
+      transformedData.reservationMonth = (dateObj.getMonth() + 1).toString();
+      transformedData.reservationYear = dateObj.getFullYear().toString();
+    }
+    if (data.time) transformedData.time = data.time;
+    if (data.status) transformedData.status = data.status;
+    if (data.notes) transformedData.notes = data.notes;
+    if (data.employeeId) transformedData.assignedChef = data.employeeId;
+
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/reservations/${id}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(transformedData),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to update reservation: ${response.statusText}`);
+    }
+
+    return response.json();
   },
-  {
-    id: "res005",
-    customerId: "cust004",
-    customerName: "Bob Johnson",
-    service: "Shampoo & Style",
-    date: "2024-02-19",
-    time: "1:00 PM",
-    status: "pending",
+
+  async deleteReservation(id: string, token: string) {
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}/api/v1/reservations/${id}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Failed to delete reservation: ${response.statusText}`);
+    }
+
+    return response.json();
   },
-];
+
+  async getEmployees(token: string) {
+    return this.fetchData("/api/v1/employees", token);
+  },
+};
 
 // Main Dashboard Component
 const Dashboard: React.FC = () => {
@@ -119,7 +196,7 @@ const Dashboard: React.FC = () => {
   const [endDate, setEndDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(5);
-  const [activeTable, setActiveTable] = useState<TableType>("customers");
+  const [activeTable, setActiveTable] = useState<TableType>("reservations");
   const [statusFilter, setStatusFilter] = useState<ReservationStatus | "all">(
     "all"
   );
@@ -130,10 +207,104 @@ const Dashboard: React.FC = () => {
     "edit"
   );
 
-  const { user } = useAppSelector((state) => state.user);
+  // Dialog form states
+  const [editFormData, setEditFormData] = useState<Partial<ReservationEntry>>(
+    {}
+  );
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
+  const [selectedStatus, setSelectedStatus] =
+    useState<ReservationStatus>("pending");
+  const [availableEmployees, setAvailableEmployees] = useState<Employee[]>([]);
 
-  // Get user role - assuming it's stored in user object
-  const userRole = user?.role || "user"; // "user", "employee", "admin"
+  // API state
+  const [data, setData] = useState<ReservationEntry[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const { user } = useAppSelector((state) => state.user);
+  const userRole = user?.role || "user";
+
+  const transformApiData = (
+    apiData: ApiReservationData[]
+  ): ReservationEntry[] => {
+    return apiData.map((item) => ({
+      id: item._id,
+      customerId: item._id,
+      customerName: `${item.firstName} ${item.lastName}`,
+      employeeId: item.assignedChef ?? undefined,
+      employeeName: item.assignedChef ?? undefined,
+      service: item.eventType || "Dining",
+      date: `${item.reservationYear}-${item.reservationMonth.padStart(
+        2,
+        "0"
+      )}-${item.reservationDay.padStart(2, "0")}`,
+      time: item.time,
+      status: item.status,
+      notes: item.notes,
+      phoneNumber: item.phoneNumber,
+      address: item.address,
+      city: item.city,
+      state: item.state,
+      zipCode: item.zipCode,
+      adult: item.adult,
+      kids: item.kids,
+      allergies: item.allergies,
+      eventType: item.eventType,
+      assignedChef: item.assignedChef ?? "unAssigned",
+      timeStamp: item.timeStamp,
+    }));
+  };
+
+  const fetchTableData = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      dispatch(logout());
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      let response;
+
+      if (userRole === "admin") {
+        // Admin can see all data
+        response = await apiService.getAllData(token);
+      } else {
+        // Regular users and employees see filtered data
+        response = await apiService.getUserData(token);
+      }
+
+      if (response.status === "success") {
+        const rawData = response.data.data || [];
+        const transformedData = transformApiData(rawData);
+        setData(transformedData);
+      } else {
+        setError("Failed to fetch data");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Error fetching data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch employees for assignment dialog
+  const fetchEmployees = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+
+    try {
+      const response = await apiService.getEmployees(token);
+      if (response.status === "success") {
+        setAvailableEmployees(response.data || []);
+      }
+    } catch (err) {
+      console.error("Error fetching employees:", err);
+    }
+  };
 
   const handleSort = (key: string) => {
     setSortConfig((prev) => ({
@@ -148,6 +319,12 @@ const Dashboard: React.FC = () => {
 
     switch (action) {
       case "edit":
+        setEditFormData({
+          service: reservation.service,
+          date: reservation.date,
+          time: reservation.time,
+          notes: reservation.notes || "",
+        });
         setDialogType("edit");
         setDialogOpen(true);
         break;
@@ -155,10 +332,13 @@ const Dashboard: React.FC = () => {
         handleCancelReservation(reservation);
         break;
       case "assign":
+        setSelectedEmployeeId("");
+        fetchEmployees();
         setDialogType("assign");
         setDialogOpen(true);
         break;
       case "status":
+        setSelectedStatus(reservation.status);
         setDialogType("status");
         setDialogOpen(true);
         break;
@@ -168,50 +348,34 @@ const Dashboard: React.FC = () => {
   };
 
   const handleCancelReservation = async (reservation: ReservationEntry) => {
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+
     try {
-      // API call to cancel reservation
-      console.log("Cancelling reservation:", reservation.id);
-      // Update local state or refresh data
+      setLoading(true);
+      await apiService.updateReservation(
+        reservation.id,
+        { status: "cancelled" },
+        token
+      );
+      await fetchTableData(); // Refresh data
     } catch (error) {
+      setError("Failed to cancel reservation");
       console.error("Error cancelling reservation:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleBookNow = () => {
     console.log("Navigate to book now");
+    // Add navigation logic here
   };
 
-  const getReservationData = () => {
-    switch (userRole) {
-      case "user":
-        // User can only see their own reservations
-        return mockReservations.filter((res) => res.customerId === user.id);
-      case "employee":
-        // Employee can see reservations assigned to them
-        return mockReservations.filter((res) => res.employeeId === user.id);
-      case "admin":
-        // Admin can see all reservations
-        return mockReservations;
-      default:
-        return [];
-    }
-  };
-
-  const getCurrentData = () => {
-    if (activeTable === "reservations") {
-      return getReservationData();
-    }
-
-    switch (activeTable) {
-      case "customers":
-        return userRole === "admin" ? mockCustomers : [];
-      case "orders":
-        return userRole === "admin" ? mockOrders : [];
-      case "employees":
-        return userRole === "admin" ? mockEmployees : [];
-      default:
-        return [];
-    }
+  const getCurrentData = (): ReservationEntry[] => {
+    // For now, we're only handling reservations
+    // You can extend this to handle other table types
+    return data;
   };
 
   const getAvailableTables = () => {
@@ -219,7 +383,10 @@ const Dashboard: React.FC = () => {
       case "user":
         return [{ value: "reservations", label: "My Reservations" }];
       case "employee":
-        return [{ value: "reservations", label: "My Assignments" }];
+        return [
+          { value: "reservations", label: "My Reservations" },
+          { value: "orders", label: "My Orders" },
+        ];
       case "admin":
         return [
           { value: "reservations", label: "All Reservations" },
@@ -234,7 +401,7 @@ const Dashboard: React.FC = () => {
 
   const getAvailableActions = (item: SortableEntry) => {
     if (activeTable !== "reservations") {
-      return []; // No actions for non-reservation tables for now
+      return [];
     }
 
     const reservation = item as ReservationEntry;
@@ -242,19 +409,16 @@ const Dashboard: React.FC = () => {
 
     switch (userRole) {
       case "user":
-        // Users can edit and cancel their pending reservations
         if (reservation.status === "pending") {
           actions.push("edit", "cancel");
         }
         break;
       case "employee":
-        // Employees can update status of their assigned reservations
-        if (reservation.employeeId === user.id) {
+        if (reservation.employeeId === user?.id) {
           actions.push("status");
         }
         break;
       case "admin":
-        // Admin can do everything
         actions.push("edit");
         if (reservation.status === "pending") {
           actions.push("cancel");
@@ -272,7 +436,7 @@ const Dashboard: React.FC = () => {
   const filteredSortedData = useMemo(() => {
     let result = [...getCurrentData()];
 
-    if (searchQuery.trim()) {
+    if (userRole !== "user" && searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       result = result.filter((entry) => {
         const searchableFields = Object.values(entry).map((val) =>
@@ -282,7 +446,6 @@ const Dashboard: React.FC = () => {
       });
     }
 
-    // Status filter for reservations
     if (activeTable === "reservations" && statusFilter !== "all") {
       result = result.filter(
         (entry) => (entry as ReservationEntry).status === statusFilter
@@ -293,11 +456,11 @@ const Dashboard: React.FC = () => {
       result = result.filter((entry) => {
         let dateField = "";
         if (activeTable === "customers") {
-          dateField = (entry as CustomerEntry).date;
+          dateField = (entry as unknown as CustomerEntry).date;
         } else if (activeTable === "orders") {
-          dateField = (entry as OrderEntry).date;
+          dateField = (entry as unknown as OrderEntry).date;
         } else if (activeTable === "employees") {
-          dateField = (entry as EmployeeEntry).joinDate;
+          dateField = (entry as unknown as EmployeeEntry).joinDate;
         } else if (activeTable === "reservations") {
           dateField = (entry as ReservationEntry).date;
         }
@@ -331,6 +494,7 @@ const Dashboard: React.FC = () => {
 
     return result;
   }, [
+    data,
     searchQuery,
     startDate,
     endDate,
@@ -340,6 +504,7 @@ const Dashboard: React.FC = () => {
     userRole,
   ]);
 
+  // Verify token and fetch initial data
   useEffect(() => {
     const verifyToken = async () => {
       const token = localStorage.getItem("authToken");
@@ -369,15 +534,22 @@ const Dashboard: React.FC = () => {
     };
 
     verifyToken();
-  }, []);
+  }, [dispatch]);
 
+  // Set default table based on user role
   useEffect(() => {
-    // Set default table based on user role
     const availableTables = getAvailableTables();
     if (availableTables.length > 0) {
       setActiveTable(availableTables[0].value as TableType);
     }
   }, [userRole]);
+
+  // Fetch data when component mounts or when relevant dependencies change
+  useEffect(() => {
+    if (user && user.id) {
+      fetchTableData();
+    }
+  }, [user, activeTable]);
 
   const totalPages = Math.ceil(filteredSortedData.length / itemsPerPage);
   const paginatedData = filteredSortedData.slice(
@@ -386,107 +558,289 @@ const Dashboard: React.FC = () => {
   );
 
   const getGreeting = () => {
+    if (!user) return "Welcome";
     const hour = new Date().getHours();
-    const timeGreeting =
-      hour < 12
-        ? "Good morning"
-        : hour < 17
-        ? "Good afternoon"
-        : "Good evening";
-    return `${timeGreeting}, ${user.firstName}`;
+    if (hour < 12) return `Good morning, ${user.firstName}`;
+    if (hour < 18) return `Good afternoon, ${user.firstName}`;
+    return `Good evening, ${user.firstName}`;
   };
 
-  const getRoleDisplayName = () => {
-    switch (userRole) {
-      case "admin":
-        return "Administrator";
-      case "employee":
-        return "Employee";
-      case "user":
-        return "Customer";
-      default:
-        return "User";
-    }
+  // Dialog form handlers
+  const handleEditFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setEditFormData({ ...editFormData, [e.target.name]: e.target.value });
+  };
+
+  const handleAssignEmployeeChange = (e: SelectChangeEvent<string>) => {
+    setSelectedEmployeeId(e.target.value);
+  };
+
+  const handleStatusChange = (e: SelectChangeEvent<ReservationStatus>) => {
+    setSelectedStatus(e.target.value);
+  };
+
+  const handleTableChange = (e: SelectChangeEvent<string>) => {
+    setActiveTable(e.target.value as TableType);
+    setCurrentPage(1);
+  };
+
+  const handleStatusFilterChange = (e: SelectChangeEvent<string>) => {
+    setStatusFilter(e.target.value as ReservationStatus | "all");
+    setCurrentPage(1);
   };
 
   const handleDialogClose = () => {
     setDialogOpen(false);
     setSelectedReservation(null);
+    setEditFormData({});
+    setSelectedEmployeeId("");
+    setSelectedStatus("pending");
   };
 
-  const handleDialogSave = () => {
-    // Handle save based on dialog type
-    console.log(`Saving ${dialogType} for reservation:`, selectedReservation);
-    handleDialogClose();
+  const handleDialogSave = async () => {
+    if (!selectedReservation) return;
+    const token = localStorage.getItem("authToken");
+    if (!token) return;
+
+    try {
+      setLoading(true);
+      if (dialogType === "edit") {
+        await apiService.updateReservation(
+          selectedReservation.id,
+          editFormData,
+          token
+        );
+      } else if (dialogType === "assign") {
+        await apiService.updateReservation(
+          selectedReservation.id,
+          { employeeId: selectedEmployeeId },
+          token
+        );
+      } else if (dialogType === "status") {
+        await apiService.updateReservation(
+          selectedReservation.id,
+          { status: selectedStatus },
+          token
+        );
+      }
+      await fetchTableData();
+      handleDialogClose();
+    } catch (error) {
+      setError("Failed to update reservation");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getEmployeeDisplayName = (employee: Employee) => {
+    if (employee.name) return employee.name;
+    if (employee.firstName && employee.lastName) {
+      return `${employee.firstName} ${employee.lastName}`;
+    }
+    return employee.email;
   };
 
   return (
-    <Box
-      sx={{
-        height: "100vh",
-        width: "100vw",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        bgcolor: "background.default",
-      }}
-    >
-      <GlobalAppBar
-        title={`${getRoleDisplayName()} Dashboard`}
-        subtitle={`${getGreeting()}! Welcome back to your dashboard.`}
-        showLogout={true}
-      />
+    <Box p={3}>
+      <GlobalAppBar />
+      <Typography variant="h4" mb={3}>
+        {getGreeting()}
+      </Typography>
 
-      <Box
-        sx={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-          p: 3,
-        }}
-      >
-        <Box display="flex" gap={2} flexWrap="wrap" mb={3} alignItems="center">
-          <FormControl sx={{ minWidth: 150 }}>
-            <InputLabel>Table View</InputLabel>
+      <Box mb={2} display="flex" gap={2} flexWrap="wrap" alignItems="center">
+        <Button variant="contained" onClick={handleBookNow}>
+          Book Now
+        </Button>
+
+        <FormControl sx={{ minWidth: 160 }}>
+          <InputLabel id="table-select-label">Table</InputLabel>
+          <Select
+            labelId="table-select-label"
+            value={activeTable}
+            label="Table"
+            onChange={handleTableChange}
+          >
+            {getAvailableTables().map((table) => (
+              <MenuItem key={table.value} value={table.value}>
+                {table.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+
+        <TextField
+          label="Search"
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setCurrentPage(1);
+          }}
+          sx={{ minWidth: 200 }}
+        />
+
+        <TextField
+          label="Start Date"
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+          sx={{ minWidth: 150 }}
+        />
+
+        <TextField
+          label="End Date"
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          InputLabelProps={{ shrink: true }}
+          sx={{ minWidth: 150 }}
+        />
+
+        {activeTable === "reservations" && (
+          <FormControl sx={{ minWidth: 140 }}>
+            <InputLabel id="status-filter-label">Status</InputLabel>
             <Select
-              value={activeTable}
-              label="Table View"
-              onChange={(e) => {
-                setActiveTable(e.target.value as TableType);
-                setCurrentPage(1);
-              }}
+              labelId="status-filter-label"
+              value={statusFilter}
+              label="Status"
+              onChange={handleStatusFilterChange}
             >
-              {getAvailableTables().map((table) => (
-                <MenuItem key={table.value} value={table.value}>
-                  {table.label}
-                </MenuItem>
-              ))}
+              <MenuItem value="all">All</MenuItem>
+              <MenuItem value="pending">Pending</MenuItem>
+              <MenuItem value="confirmed">Confirmed</MenuItem>
+              <MenuItem value="completed">Completed</MenuItem>
+              <MenuItem value="cancelled">Cancelled</MenuItem>
             </Select>
           </FormControl>
+        )}
+      </Box>
 
-          <TextField
-            label="Search"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-            sx={{ minWidth: 200 }}
-          />
+      {loading ? (
+        <Box display="flex" justifyContent="center" mt={5}>
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      ) : (
+        <DataTable
+          tableType={activeTable}
+          data={paginatedData}
+          onSort={handleSort}
+          sortConfig={sortConfig}
+          onActionClick={handleActionClick}
+          availableActions={getAvailableActions}
+        />
+      )}
 
-          {activeTable === "reservations" && (
-            <FormControl sx={{ minWidth: 150 }}>
-              <InputLabel>Status</InputLabel>
+      <Box
+        mt={2}
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Typography variant="body2" color="text.secondary">
+          Showing {paginatedData.length} of {filteredSortedData.length} entries
+        </Typography>
+        <Pagination
+          count={totalPages}
+          page={currentPage}
+          onChange={(_, value) => setCurrentPage(value)}
+          color="primary"
+          shape="rounded"
+          siblingCount={1}
+          boundaryCount={1}
+        />
+      </Box>
+
+      {/* Edit Dialog */}
+      <Dialog
+        open={dialogOpen}
+        onClose={handleDialogClose}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>
+          {dialogType === "edit"
+            ? "Edit Reservation"
+            : dialogType === "assign"
+            ? "Assign Employee"
+            : "Update Status"}
+        </DialogTitle>
+        <DialogContent>
+          {dialogType === "edit" && (
+            <Box sx={{ pt: 1 }}>
+              <TextField
+                label="Service"
+                name="service"
+                fullWidth
+                margin="normal"
+                value={editFormData.service || ""}
+                onChange={handleEditFormChange}
+              />
+              <TextField
+                label="Date"
+                name="date"
+                type="date"
+                fullWidth
+                margin="normal"
+                InputLabelProps={{ shrink: true }}
+                value={editFormData.date || ""}
+                onChange={handleEditFormChange}
+              />
+              <TextField
+                label="Time"
+                name="time"
+                type="time"
+                fullWidth
+                margin="normal"
+                InputLabelProps={{ shrink: true }}
+                value={editFormData.time || ""}
+                onChange={handleEditFormChange}
+              />
+              <TextField
+                label="Notes"
+                name="notes"
+                fullWidth
+                margin="normal"
+                multiline
+                rows={3}
+                value={editFormData.notes || ""}
+                onChange={handleEditFormChange}
+              />
+            </Box>
+          )}
+
+          {dialogType === "assign" && (
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              <InputLabel id="assign-employee-label">Employee</InputLabel>
               <Select
-                value={statusFilter}
-                label="Status"
-                onChange={(e) => {
-                  setStatusFilter(e.target.value as ReservationStatus | "all");
-                  setCurrentPage(1);
-                }}
+                labelId="assign-employee-label"
+                value={selectedEmployeeId}
+                label="Employee"
+                onChange={handleAssignEmployeeChange}
               >
-                <MenuItem value="all">All Status</MenuItem>
+                {availableEmployees.map((emp) => (
+                  <MenuItem key={emp.id} value={emp.id}>
+                    {getEmployeeDisplayName(emp)}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+
+          {dialogType === "status" && (
+            <FormControl fullWidth sx={{ mt: 2 }}>
+              <InputLabel id="status-select-label">Status</InputLabel>
+              <Select
+                labelId="status-select-label"
+                value={selectedStatus}
+                label="Status"
+                onChange={handleStatusChange}
+              >
                 <MenuItem value="pending">Pending</MenuItem>
                 <MenuItem value="confirmed">Confirmed</MenuItem>
                 <MenuItem value="completed">Completed</MenuItem>
@@ -494,198 +848,17 @@ const Dashboard: React.FC = () => {
               </Select>
             </FormControl>
           )}
-
-          <TextField
-            type="date"
-            label="Start Date"
-            value={startDate}
-            onChange={(e) => {
-              setStartDate(e.target.value);
-              setCurrentPage(1);
-            }}
-            InputLabelProps={{ shrink: true }}
-          />
-
-          <TextField
-            type="date"
-            label="End Date"
-            value={endDate}
-            onChange={(e) => {
-              setEndDate(e.target.value);
-              setCurrentPage(1);
-            }}
-            InputLabelProps={{ shrink: true }}
-            inputProps={{
-              min: startDate || undefined,
-            }}
-          />
-
-          <FormControl sx={{ minWidth: 120 }}>
-            <InputLabel>Items per page</InputLabel>
-            <Select
-              value={itemsPerPage}
-              label="Items per page"
-              onChange={(e) => {
-                setItemsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-            >
-              {[5, 10, 20, 50].map((num) => (
-                <MenuItem key={num} value={num}>
-                  {num}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {userRole === "admin" && activeTable === "reservations" && (
-            <Button variant="contained" onClick={handleBookNow}>
-              Create Reservation
-            </Button>
-          )}
-        </Box>
-
-        <Box
-          sx={{
-            flex: 1,
-            overflowY: "auto",
-            minHeight: 0,
-          }}
-        >
-          <DataTable
-            tableType={activeTable}
-            data={paginatedData}
-            onSort={handleSort}
-            sortConfig={sortConfig}
-            onActionClick={handleActionClick}
-            availableActions={getAvailableActions}
-          />
-
-          <Box display="flex" justifyContent="center" mt={2}>
-            <Pagination
-              count={Math.max(totalPages, 1)}
-              page={currentPage}
-              onChange={(_, page) => setCurrentPage(page)}
-              showFirstButton
-              showLastButton
-              siblingCount={1}
-              boundaryCount={1}
-            />
-          </Box>
-        </Box>
-      </Box>
-
-      {/* Dialog for editing/assigning/status updates */}
-      <Dialog
-        open={dialogOpen}
-        onClose={handleDialogClose}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          {dialogType === "edit" && "Edit Reservation"}
-          {dialogType === "assign" && "Assign Employee"}
-          {dialogType === "status" && "Update Status"}
-        </DialogTitle>
-        <DialogContent>
-          {selectedReservation && (
-            <Box sx={{ pt: 2 }}>
-              <Box sx={{ mb: 2 }}>
-                <strong>Reservation ID:</strong> {selectedReservation.id}
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <strong>Customer:</strong> {selectedReservation.customerName}
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <strong>Service:</strong> {selectedReservation.service}
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <strong>Date & Time:</strong> {selectedReservation.date} at{" "}
-                {selectedReservation.time}
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <strong>Status:</strong>
-                <Chip
-                  label={selectedReservation.status}
-                  color={
-                    selectedReservation.status === "confirmed"
-                      ? "success"
-                      : selectedReservation.status === "pending"
-                      ? "warning"
-                      : "default"
-                  }
-                  sx={{ ml: 1 }}
-                />
-              </Box>
-              {selectedReservation.employeeName && (
-                <Box sx={{ mb: 2 }}>
-                  <strong>Assigned Employee:</strong>{" "}
-                  {selectedReservation.employeeName}
-                </Box>
-              )}
-
-              {/* Add form fields based on dialog type */}
-              {dialogType === "edit" && (
-                <Box>
-                  <TextField
-                    fullWidth
-                    label="Notes"
-                    multiline
-                    rows={3}
-                    defaultValue={selectedReservation.notes || ""}
-                    sx={{ mb: 2 }}
-                  />
-                  <TextField
-                    fullWidth
-                    type="date"
-                    label="Date"
-                    defaultValue={selectedReservation.date}
-                    InputLabelProps={{ shrink: true }}
-                    sx={{ mb: 2 }}
-                  />
-                  <TextField
-                    fullWidth
-                    label="Time"
-                    defaultValue={selectedReservation.time}
-                    sx={{ mb: 2 }}
-                  />
-                </Box>
-              )}
-
-              {dialogType === "assign" && (
-                <FormControl fullWidth sx={{ mb: 2 }}>
-                  <InputLabel>Select Employee</InputLabel>
-                  <Select label="Select Employee">
-                    {mockEmployees.map((emp) => (
-                      <MenuItem key={emp.id} value={emp.id}>
-                        {emp.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              )}
-
-              {dialogType === "status" && (
-                <FormControl fullWidth sx={{ mb: 2 }}>
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                    label="Status"
-                    defaultValue={selectedReservation.status}
-                  >
-                    <MenuItem value="pending">Pending</MenuItem>
-                    <MenuItem value="confirmed">Confirmed</MenuItem>
-                    <MenuItem value="completed">Completed</MenuItem>
-                    <MenuItem value="cancelled">Cancelled</MenuItem>
-                  </Select>
-                </FormControl>
-              )}
-            </Box>
-          )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDialogClose}>Cancel</Button>
-          <Button onClick={handleDialogSave} variant="contained">
-            Save Changes
+          <Button onClick={handleDialogClose} disabled={loading}>
+            Cancel
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleDialogSave}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={20} /> : "Save"}
           </Button>
         </DialogActions>
       </Dialog>

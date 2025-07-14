@@ -23,15 +23,6 @@ const App: React.FC = () => {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/reservations"
-          element={
-            <ProtectedRoute>
-              {/* <Reservations /> */}
-              <div>Reservations Page - Employee View</div>
-            </ProtectedRoute>
-          }
-        />
       </Routes>
     </Router>
   );
