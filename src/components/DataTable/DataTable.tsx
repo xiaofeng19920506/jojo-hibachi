@@ -87,7 +87,6 @@ const DataTable: React.FC<DataTableProps> = ({
     orders: [
       "id",
       "customerName",
-      "service",
       "date",
       "status",
       "assignedEmployee",

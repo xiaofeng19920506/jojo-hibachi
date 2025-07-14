@@ -5,10 +5,14 @@ import { useAppSelector } from "../../utils/hooks";
 
 const HomeNav: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAppSelector((state) => state.user);
+  const { isAuthenticated, user, isInitialized } = useAppSelector((state) => state.user);
 
   useEffect(() => {
     const handleNavigation = () => {
+      if (!isInitialized) {
+        return; // Wait for authentication to be initialized
+      }
+
       if (!isAuthenticated) {
         navigate("/signin");
         return;
@@ -37,7 +41,7 @@ const HomeNav: React.FC = () => {
     const timer = setTimeout(handleNavigation, 100);
 
     return () => clearTimeout(timer);
-  }, [isAuthenticated, user, navigate]);
+  }, [isAuthenticated, user, isInitialized, navigate]);
 
   return (
     <Box

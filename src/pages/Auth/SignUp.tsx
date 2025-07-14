@@ -75,6 +75,8 @@ const SignUp: React.FC = () => {
       }
 
       localStorage.setItem("authToken", data.token);
+      // Note: The user will be automatically logged in by AuthInitializer
+      // when they navigate to the dashboard
       navigate("/dashboard");
     } catch (err: any) {
       setError(err.message || "Something went wrong.");

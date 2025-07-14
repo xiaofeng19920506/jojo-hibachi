@@ -20,6 +20,7 @@ const initialState = {
   } as customerInfos,
   user: {} as User,
   isAuthenticated: false,
+  isInitialized: false, // Track if auth state has been initialized
 };
 
 const userSlice = createSlice({
@@ -29,9 +30,12 @@ const userSlice = createSlice({
     login: (state, action) => {
       state.isAuthenticated = true;
       state.user = action.payload;
+      state.isInitialized = true;
     },
     logout: (state) => {
       state.isAuthenticated = false;
+      state.user = {} as User;
+      state.isInitialized = true;
     },
     setCustomerInfo(state, action: PayloadAction<customerInfos>) {
       state.customerInfo = action.payload;
@@ -39,9 +43,22 @@ const userSlice = createSlice({
     resetReservation(state) {
       state.customerInfo = {} as customerInfos;
     },
+    initializeAuth: (
+      state,
+      action: PayloadAction<{ user: User; isAuthenticated: boolean }>
+    ) => {
+      state.user = action.payload.user;
+      state.isAuthenticated = action.payload.isAuthenticated;
+      state.isInitialized = true;
+    },
   },
 });
 
-export const { login, logout, setCustomerInfo, resetReservation } =
-  userSlice.actions;
+export const {
+  login,
+  logout,
+  setCustomerInfo,
+  resetReservation,
+  initializeAuth,
+} = userSlice.actions;
 export default userSlice.reducer;

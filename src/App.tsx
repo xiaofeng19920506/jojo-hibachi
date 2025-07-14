@@ -5,26 +5,28 @@ import ReservationStepper from "./components/ReservatioinStepper/ReservationStep
 import Dashboard from "./pages/Dashboard/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import HomeNav from "./components/HomeNav/HomeNav";
-// import Reservations from "./pages/Reservations/Reservations"; // You'll need to create this component
+import AuthInitializer from "./components/AuthInitializer/AuthInitializer";
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/booknow" element={<ReservationStepper />} />
-        <Route path="/" element={<HomeNav />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </Router>
+    <AuthInitializer>
+      <Router>
+        <Routes>
+          <Route path="/signin" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/booknow" element={<ReservationStepper />} />
+          <Route path="/" element={<HomeNav />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </AuthInitializer>
   );
 };
 

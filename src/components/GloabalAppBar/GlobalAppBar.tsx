@@ -36,8 +36,8 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
 
   const handleLogout = () => {
-    dispatch(logout());
     localStorage.removeItem("authToken");
+    dispatch(logout());
     navigate("/signin");
   };
 
