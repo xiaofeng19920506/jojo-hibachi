@@ -141,24 +141,24 @@ const EditDialog: React.FC<EditDialogProps> = ({
               labelId="status-select-label"
               value={selectedStatus}
               label="Status"
-              onChange={onStatusChange}
+              onChange={(e) => {
+                console.log("Status dropdown onChange:", e.target.value);
+                onStatusChange(e);
+              }}
             >
-              {activeTable === "orders" ? (
-                <>
-                  <MenuItem value="pending">Pending</MenuItem>
-                  <MenuItem value="assigned">Assigned</MenuItem>
-                  <MenuItem value="in-progress">In Progress</MenuItem>
-                  <MenuItem value="completed">Completed</MenuItem>
-                  <MenuItem value="cancelled">Cancelled</MenuItem>
-                </>
-              ) : (
-                <>
-                  <MenuItem value="pending">Pending</MenuItem>
-                  <MenuItem value="confirmed">Confirmed</MenuItem>
-                  <MenuItem value="completed">Completed</MenuItem>
-                  <MenuItem value="cancelled">Cancelled</MenuItem>
-                </>
-              )}
+              {console.log("Current selectedStatus:", selectedStatus)}
+              {activeTable === "orders" ? [
+                <MenuItem key="pending" value="pending">Pending</MenuItem>,
+                <MenuItem key="assigned" value="assigned">Assigned</MenuItem>,
+                <MenuItem key="in-progress" value="in-progress">In Progress</MenuItem>,
+                <MenuItem key="completed" value="completed">Completed</MenuItem>,
+                <MenuItem key="cancelled" value="cancelled">Cancelled</MenuItem>
+              ] : [
+                <MenuItem key="pending" value="pending">Pending</MenuItem>,
+                <MenuItem key="confirmed" value="confirmed">Confirmed</MenuItem>,
+                <MenuItem key="completed" value="completed">Completed</MenuItem>,
+                <MenuItem key="cancelled" value="cancelled">Cancelled</MenuItem>
+              ]}
             </Select>
           </FormControl>
         )}

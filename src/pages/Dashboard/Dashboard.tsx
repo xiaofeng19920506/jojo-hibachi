@@ -33,6 +33,8 @@ const Dashboard: React.FC = () => {
     loading,
     error,
     userRole,
+    user,
+    isInitialized,
     // Computed
     filteredSortedData,
     totalPages,
@@ -51,10 +53,25 @@ const Dashboard: React.FC = () => {
     getEmployeeDisplayName,
     // Get employeesData from useDashboard
     employeesData,
+    allEmployeesData,
   } = useDashboard();
 
   // Add this for debugging
   console.log("Dashboard error:", error);
+
+  // Wait for auth/user to be initialized
+  if (!isInitialized) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   // Compute availableEmployees for assign dialog
   const availableEmployees =
@@ -62,7 +79,7 @@ const Dashboard: React.FC = () => {
     dialogType === "assign" &&
     activeTable === "reservations" &&
     userRole.toLowerCase() === "admin"
-      ? employeesData
+      ? allEmployeesData
       : undefined;
 
   return (

@@ -5,13 +5,19 @@ import {
   useGetUserReservationsQuery,
   useGetCustomersQuery,
   useGetEmployeesQuery,
+  useGetAllEmployeesQuery,
   useUpdateReservationMutation,
+  useUpdateReservationAdminMutation,
+  useUpdateReservationUserMutation,
+  useAssignEmployeeToReservationMutation,
+  useUpdateEmployeeMutation,
+  useUpdateCustomerMutation,
 } from "../../../services/api";
 import type { ReservationEntry, Employee, ReservationStatus } from "../types";
 import type { SortableEntry } from "../../../components/DataTable/types";
 
 export const useDashboard = () => {
-  const { user } = useAppSelector((state) => state.user);
+  const { user, isInitialized } = useAppSelector((state) => state.user);
   const userRole = user?.role || "user";
 
   // State management
@@ -38,9 +44,7 @@ export const useDashboard = () => {
     "edit"
   );
   const [selectedReservation, setSelectedReservation] = useState<any>(null);
-  const [editFormData, setEditFormData] = useState<Partial<ReservationEntry>>(
-    {}
-  );
+  const [editFormData, setEditFormData] = useState<any>({});
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
   const [selectedStatus, setSelectedStatus] =
     useState<ReservationStatus>("pending");
@@ -77,20 +81,41 @@ export const useDashboard = () => {
     skip: !shouldFetchEmployees,
   });
 
+  // All employees for assignment dropdowns (always available for admins)
+  const {
+    data: allEmployeesData,
+    isLoading: allEmployeesLoading,
+    error: allEmployeesError,
+  } = useGetAllEmployeesQuery(undefined, {
+    skip: userRole.toLowerCase() !== "admin",
+  });
+
   // Update mutation
   const [updateReservation, { isLoading: updateLoading }] =
     useUpdateReservationMutation();
+  const [updateReservationAdmin, { isLoading: updateReservationAdminLoading }] =
+    useUpdateReservationAdminMutation();
+  const [updateReservationUser, { isLoading: updateReservationUserLoading }] =
+    useUpdateReservationUserMutation();
+
+  const [assignEmployeeToReservation, { isLoading: assignEmployeeLoading }] =
+    useAssignEmployeeToReservationMutation();
+  const [updateEmployee, { isLoading: updateEmployeeLoading }] =
+    useUpdateEmployeeMutation();
+  const [updateCustomer, { isLoading: updateCustomerLoading }] =
+    useUpdateCustomerMutation();
 
   // Get current data based on active table
   const getCurrentData = (): SortableEntry[] => {
     switch (activeTable) {
       case "reservations":
+        let reservationData = reservationsData || [];
         if (userRole === "employee" && reservationsData && user?.id) {
-          return reservationsData.filter(
+          reservationData = reservationsData.filter(
             (r) => r.employeeId === user.id || r.assignedChef === user.id
           );
         }
-        return reservationsData || [];
+        return reservationData;
       case "customers":
         return customersData || [];
       case "orders":
@@ -160,6 +185,7 @@ export const useDashboard = () => {
           setDialogOpen(true);
           break;
         case "status":
+          console.log("Status action clicked for:", reservation.status);
           setSelectedStatus(reservation.status);
           setDialogType("status");
           setDialogOpen(true);
@@ -201,6 +227,7 @@ export const useDashboard = () => {
         case "edit":
           setEditFormData({
             status: employee.status,
+            role: employee.role,
           });
           setDialogType("edit");
           setDialogOpen(true);
@@ -221,6 +248,8 @@ export const useDashboard = () => {
         case "view":
           setEditFormData({
             address: customer.address,
+            email: customer.email,
+            phone: customer.phone,
           });
           setDialogType("edit");
           setDialogOpen(true);
@@ -248,6 +277,7 @@ export const useDashboard = () => {
   };
 
   const handleStatusChange = (e: any) => {
+    console.log("Status change triggered:", e.target.value);
     setSelectedStatus(e.target.value);
   };
 
@@ -262,43 +292,101 @@ export const useDashboard = () => {
   const handleDialogSave = async () => {
     if (!selectedReservation) return;
 
+    // Role-based validation
+    if (dialogType === "assign" && userRole !== "admin") {
+      console.error("Only admins can assign employees");
+      return;
+    }
+
+    if (
+      dialogType === "status" &&
+      activeTable === "reservations" &&
+      userRole !== "admin"
+    ) {
+      console.error("Only admins can change reservation status");
+      return;
+    }
+
     try {
+      let successMessage = "";
+
       if (dialogType === "edit") {
         if (activeTable === "orders") {
           // Order update not implemented yet
+          console.log("Order updates not implemented yet");
         } else if (activeTable === "employees") {
-          // Employee update not implemented yet
-        } else if (activeTable === "customers") {
-          // Customer view only - no updates allowed
-        } else {
-          await updateReservation({
+          if (userRole !== "admin") {
+            console.error("Only admins can edit employees");
+            return;
+          }
+          await updateEmployee({
             id: selectedReservation.id,
             data: editFormData,
           }).unwrap();
+          successMessage = "Employee updated successfully";
+        } else if (activeTable === "customers") {
+          // Customer view only - no updates allowed
+          console.log("Customer updates not allowed");
+        } else {
+          // Reservations - use role-appropriate mutation
+          if (userRole === "admin") {
+            await updateReservationAdmin({
+              id: selectedReservation.id,
+              data: editFormData,
+            }).unwrap();
+          } else {
+            // For non-admin users, filter out restricted fields
+            const restrictedData = { ...editFormData };
+            delete restrictedData.price;
+            delete restrictedData.status;
+            delete restrictedData.employeeId;
+
+            await updateReservationUser({
+              id: selectedReservation.id,
+              data: restrictedData,
+            }).unwrap();
+          }
+          successMessage = "Reservation updated successfully";
         }
       } else if (dialogType === "assign") {
         if (activeTable === "orders") {
           // Order assignment not implemented yet
+          console.log("Order assignment not implemented yet");
         } else {
-          await updateReservation({
+          // Assign employee to reservation (admin only)
+          await assignEmployeeToReservation({
             id: selectedReservation.id,
-            data: { employeeId: selectedEmployeeId },
+            employeeId: selectedEmployeeId,
           }).unwrap();
+          successMessage = "Employee assigned successfully";
         }
       } else if (dialogType === "status") {
         if (activeTable === "orders") {
           // Order status update not implemented yet
+          console.log("Order status updates not implemented yet");
         } else if (activeTable === "employees") {
-          // Employee status update not implemented yet
-        } else {
-          await updateReservation({
+          if (userRole !== "admin") {
+            console.error("Only admins can change employee status");
+            return;
+          }
+          await updateEmployee({
             id: selectedReservation.id,
             data: { status: selectedStatus },
           }).unwrap();
+          successMessage = "Employee status updated successfully";
+        } else {
+          // Update reservation status (admin only)
+          await updateReservationAdmin({
+            id: selectedReservation.id,
+            data: { status: selectedStatus },
+          }).unwrap();
+          successMessage = "Reservation status updated successfully";
         }
       }
+
+      console.log(successMessage);
       handleDialogClose();
-    } catch (error) {
+    } catch (error: any) {
       const tableType =
         activeTable === "orders"
           ? "order"
@@ -308,6 +396,7 @@ export const useDashboard = () => {
           ? "customer"
           : "reservation";
       console.error(`Failed to update ${tableType}:`, error);
+      // You could add a toast notification here for user feedback
     }
   };
 
@@ -371,10 +460,11 @@ export const useDashboard = () => {
 
   const getGreeting = () => {
     if (!user) return "Welcome";
+    const name = user.firstName || user.lastName || user.email || "User";
     const hour = new Date().getHours();
-    if (hour < 12) return `Good morning, ${user.firstName}`;
-    if (hour < 18) return `Good afternoon, ${user.firstName}`;
-    return `Good evening, ${user.firstName}`;
+    if (hour < 12) return `Good morning, ${name}`;
+    if (hour < 18) return `Good afternoon, ${name}`;
+    return `Good evening, ${name}`;
   };
 
   // Computed data
@@ -456,11 +546,12 @@ export const useDashboard = () => {
 
   // Effects
   useEffect(() => {
+    if (!user || !isInitialized) return;
     const availableTables = getAvailableTables();
-    if (availableTables.length > 0) {
+    if (!availableTables.some((t) => t.value === activeTable)) {
       setActiveTable(availableTables[0].value);
     }
-  }, [userRole]);
+  }, [userRole, user, isInitialized]);
 
   return {
     // State
@@ -487,11 +578,20 @@ export const useDashboard = () => {
     editFormData,
     selectedEmployeeId,
     selectedStatus,
-    loading: getLoadingState() || updateLoading,
+    loading:
+      getLoadingState() ||
+      updateLoading ||
+      updateReservationAdminLoading ||
+      updateReservationUserLoading ||
+      assignEmployeeLoading ||
+      updateEmployeeLoading ||
+      updateCustomerLoading,
     error: getErrorState(),
     userRole,
     user,
+    isInitialized,
     employeesData, // Export employeesData
+    allEmployeesData, // Export allEmployeesData for assignment dropdowns
     // Computed
     filteredSortedData,
     totalPages,

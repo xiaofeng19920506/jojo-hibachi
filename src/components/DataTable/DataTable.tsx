@@ -113,6 +113,7 @@ const DataTable: React.FC<DataTableProps> = ({
       "status",
       "employeeName",
       "price",
+      "notes",
       "actions",
     ],
   };
@@ -147,6 +148,7 @@ const DataTable: React.FC<DataTableProps> = ({
       return item.assignedEmployee;
     if ("ordersAssigned" in item && col === "ordersAssigned")
       return `${item.ordersAssigned}`;
+    if ("notes" in item && col === "notes") return item.notes || "-";
     if (col === "id") return item.id;
     return "-";
   };
@@ -193,16 +195,23 @@ const DataTable: React.FC<DataTableProps> = ({
               {columnMap[tableType].map((col) => (
                 <TableCell
                   key={col}
-                  onClick={col !== "actions" ? () => onSort(col) : undefined}
+                  onClick={
+                    col !== "actions" && col !== "notes"
+                      ? () => onSort(col)
+                      : undefined
+                  }
                   sx={{
-                    cursor: col !== "actions" ? "pointer" : "default",
+                    cursor:
+                      col !== "actions" && col !== "notes"
+                        ? "pointer"
+                        : "default",
                     userSelect: "none",
                     whiteSpace: "nowrap",
                   }}
                 >
                   <Box display="flex" alignItems="center" gap={0.5}>
                     {col.charAt(0).toUpperCase() + col.slice(1)}
-                    {col !== "actions" && (
+                    {col !== "actions" && col !== "notes" && (
                       <Box display="flex" flexDirection="column" ml={0.25}>
                         <ArrowDropUpIcon
                           fontSize="small"

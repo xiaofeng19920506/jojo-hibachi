@@ -34,6 +34,14 @@ export interface ReservationEntry extends BaseEntry {
   timeStamp?: string;
 }
 
+// Employee object structure from API
+export interface ApiEmployeeData {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  fullName?: string;
+}
+
 // API response interface
 export interface ApiReservationData {
   _id: string;
@@ -58,7 +66,7 @@ export interface ApiReservationData {
   time: string;
   status: ReservationStatus;
   price?: number;
-  assignedChef: string | null;
+  assignedChef: ApiEmployeeData | string | null;
   timeStamp: string;
 }
 
@@ -89,3 +97,4 @@ export interface FilterState {
   itemsPerPage: number;
   activeTable: string;
 }
+ 

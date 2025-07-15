@@ -42,8 +42,11 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
       localStorage.removeItem("authToken");
       dispatch(initializeAuth({ user: {} as any, isAuthenticated: false }));
     } else {
-      const user = data.user || data.data || data;
-      dispatch(initializeAuth({ user: user as any, isAuthenticated: true }));
+      let userObj = data.user || data.data || data;
+      if (userObj.user) userObj = userObj.user; // Unwrap if nested
+      console.log("Auth verification response:", data);
+      console.log("User set in Redux:", userObj);
+      dispatch(initializeAuth({ user: userObj as any, isAuthenticated: true }));
     }
   }, [data, error, isLoading, skip, dispatch]);
 
