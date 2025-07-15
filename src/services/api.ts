@@ -64,6 +64,7 @@ export const transformApiData = (
       city: item.city,
       state: item.state,
       zipCode: item.zipCode,
+      email: item.email,
       adult: item.adult,
       kids: item.kids,
       allergies: item.allergies,
@@ -417,6 +418,40 @@ export const api = createApi({
       },
       providesTags: ["Reservations"],
     }),
+
+    // Fetch reservations for an employee for a specific week
+    getEmployeeWeekReservations: builder.query<
+      ReservationEntry[],
+      { employeeId: string; weekStart: string; weekEnd: string }
+    >({
+      query: ({ employeeId, weekStart, weekEnd }) =>
+        `/reservation/employee/${employeeId}/week?weekStart=${weekStart}&weekEnd=${weekEnd}`,
+      transformResponse: (response: {
+        status: string;
+        data: ApiReservationData[];
+      }) => {
+        if (response.status === "success") {
+          return transformApiData(response.data || []);
+        }
+        return [];
+      },
+      providesTags: ["Reservations"],
+    }),
+
+    // Fetch a single reservation by ID
+    getReservationById: builder.query<ReservationEntry | null, string>({
+      query: (id) => `/reservation/${id}`,
+      transformResponse: (response: {
+        status: string;
+        data: ApiReservationData;
+      }) => {
+        if (response.status === "success" && response.data) {
+          return transformApiData([response.data])[0];
+        }
+        return null;
+      },
+      providesTags: ["Reservations"],
+    }),
   }),
 });
 
@@ -440,4 +475,6 @@ export const {
   useCreateReservationMutation,
   useUpdateEmployeeMutation,
   useUpdateCustomerMutation,
+  useGetEmployeeWeekReservationsQuery,
+  useGetReservationByIdQuery,
 } = api;

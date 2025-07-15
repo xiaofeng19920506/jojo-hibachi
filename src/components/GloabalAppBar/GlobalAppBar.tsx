@@ -52,10 +52,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     return "Good evening";
   };
 
-  const defaultSubtitle =
-    subtitle ||
-    `${getGreeting()}! Welcome back to your ${title.toLowerCase()}.`;
-
   const getNavigationButtons = () => {
     const buttons: ActionButton[] = [];
     const currentPath = location.pathname;
@@ -104,7 +100,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     : actionButtons;
 
   return (
-    <AppBar position="static" color={color} elevation={elevation}>
+    <AppBar position="fixed" color={color} elevation={elevation}>
       <Toolbar sx={{ justifyContent: "space-between", py: 1 }}>
         <Box>
           <Typography
@@ -113,9 +109,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
             sx={{ fontWeight: "bold", mb: 0.5 }}
           >
             {title}
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            {defaultSubtitle}
           </Typography>
         </Box>
 

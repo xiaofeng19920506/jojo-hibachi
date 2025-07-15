@@ -11,9 +11,8 @@ import {
 import { enUS } from "date-fns/locale";
 import { useAppSelector } from "../../utils/hooks";
 import {
-  useGetAssignedReservationsQuery,
   useGetAllEmployeesQuery,
-  useGetReservationsQuery,
+  useGetEmployeeWeekReservationsQuery,
 } from "../../services/api";
 import {
   Box,
@@ -25,6 +24,8 @@ import {
 } from "@mui/material";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./employee-calendar-custom.css";
+import { skipToken } from "@reduxjs/toolkit/query";
+import { useNavigate } from "react-router-dom";
 
 const locales = {
   "en-US": enUS,
@@ -50,52 +51,36 @@ const EmployeeCalendar: React.FC = () => {
   const { user } = useAppSelector((state) => state.user);
   const userRole = user?.role || "user";
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
+  const navigate = useNavigate();
 
   // Fetch all employees for admin filter
   const { data: allEmployees = [] } = useGetAllEmployeesQuery(undefined, {
     skip: userRole !== "admin",
   });
 
-  // Fetch reservations
-  const assignedEmployeeId =
-    userRole === "employee" ? user?.id : selectedEmployeeId;
-  const { data: assignedReservations = [], isLoading: assignedLoading } =
-    useGetAssignedReservationsQuery(undefined, {
-      skip: userRole !== "employee" && !selectedEmployeeId,
-    });
-  const { data: allReservations = [], isLoading: allLoading } =
-    useGetReservationsQuery(undefined, {
-      skip: userRole !== "admin" || !selectedEmployeeId,
-      refetchOnMountOrArgChange: true,
-    });
-
-  // Filter reservations for the selected employee (admin) or current user (employee)
-  const reservations = useMemo(() => {
-    if (userRole === "employee") {
-      return assignedReservations;
-    }
-    if (userRole === "admin" && selectedEmployeeId) {
-      // Filter all reservations for the selected employee
-      return allReservations.filter(
-        (r: any) => r.employeeId === selectedEmployeeId
-      );
-    }
-    return [];
-  }, [userRole, assignedReservations, allReservations, selectedEmployeeId]);
-
-  // Only show reservations for the current week
+  // Compute week start and end (Sunday to Saturday)
   const now = new Date();
-  const weekReservations = reservations.filter((r: any) => {
-    const date = new Date(r.date + "T" + (r.time || "00:00"));
-    return isSameWeek(date, now, { weekStartsOn: 0 });
-  });
+  const weekStart = startOfWeek(now, { weekStartsOn: 0 });
+  const weekEnd = addDays(weekStart, 6);
+  const weekStartStr = format(weekStart, "yyyy-MM-dd");
+  const weekEndStr = format(weekEnd, "yyyy-MM-dd");
+
+  // Determine which employeeId to use
+  const employeeId = userRole === "employee" ? user?.id : selectedEmployeeId;
+
+  // Fetch reservations for the selected employee and week
+  const { data: weekReservations = [], isLoading: reservationsLoading } =
+    useGetEmployeeWeekReservationsQuery(
+      employeeId
+        ? { employeeId, weekStart: weekStartStr, weekEnd: weekEndStr }
+        : skipToken
+    );
 
   // Map reservations to calendar events
   const events: CalendarEvent[] = weekReservations.map((r: any) => {
     const start = new Date(r.date + "T" + (r.time || "00:00"));
-    // Assume 2-hour reservation for display
-    const end = addDays(start, 0);
-    end.setHours(start.getHours() + 2);
+    // Reservation lasts 90 minutes
+    const end = new Date(start.getTime() + 90 * 60000); // 90 minutes in ms
     return {
       id: r.id,
       title: r.customerName || "Reservation",
@@ -199,6 +184,9 @@ const EmployeeCalendar: React.FC = () => {
           defaultView="week"
           toolbar={true}
           popup
+          onSelectEvent={(event: CalendarEvent) =>
+            navigate(`/reservation/${event.reservationId}`)
+          }
           eventPropGetter={() => ({
             style: {
               backgroundColor: userRole === "admin" ? "#43a047" : "#1976d2",
@@ -212,6 +200,9 @@ const EmployeeCalendar: React.FC = () => {
           })}
           components={{
             event: ({ event }: { event: CalendarEvent }) => {
+              const reservation = weekReservations.find(
+                (r) => r.id === event.reservationId
+              );
               return (
                 <div
                   style={{
@@ -224,7 +215,7 @@ const EmployeeCalendar: React.FC = () => {
                     fontWeight: 500,
                     fontSize: 15,
                     minWidth: 120,
-                    maxWidth: 220,
+                    maxWidth: 260,
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "normal",
@@ -235,10 +226,34 @@ const EmployeeCalendar: React.FC = () => {
                   }}
                 >
                   <div style={{ fontWeight: 700 }}>{event.title}</div>
+                  <div style={{ fontSize: 14 }}>
+                    <strong>Time:</strong>{" "}
+                    {event.start
+                      ? event.start.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : ""}
+                  </div>
+                  {reservation && (
+                    <>
+                      <div style={{ fontSize: 14 }}>
+                        <strong>Address:</strong> {reservation.address},{" "}
+                        {reservation.city}, {reservation.state}{" "}
+                        {reservation.zipCode}
+                      </div>
+                      <div style={{ fontSize: 14 }}>
+                        <strong>Phone:</strong> {reservation.phoneNumber}
+                      </div>
+                      <div style={{ fontSize: 14 }}>
+                        <strong>Adults:</strong> {reservation.adult} &nbsp;{" "}
+                        <strong>Kids:</strong> {reservation.kids}
+                      </div>
+                    </>
+                  )}
                   {event.notes && (
                     <div style={{ fontSize: 13 }}>{event.notes}</div>
                   )}
-                  {/* Add more reservation details here if needed */}
                 </div>
               );
             },

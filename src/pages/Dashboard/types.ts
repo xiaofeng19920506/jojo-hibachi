@@ -26,6 +26,7 @@ export interface ReservationEntry extends BaseEntry {
   city?: string;
   state?: string;
   zipCode?: string;
+  email?: string;
   adult?: number;
   kids?: number;
   allergies?: string;
@@ -97,4 +98,3 @@ export interface FilterState {
   itemsPerPage: number;
   activeTable: string;
 }
- 

@@ -7,6 +7,7 @@ import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import HomeNav from "./components/HomeNav/HomeNav";
 import AuthInitializer from "./components/AuthInitializer/AuthInitializer";
 import EmployeeCalendar from "./pages/Calendar";
+import ReservationDetail from "./pages/Reservation/ReservationDetail";
 
 const App: React.FC = () => {
   return (
@@ -33,6 +34,7 @@ const App: React.FC = () => {
               </ProtectedRoute>
             }
           />
+          <Route path="/reservation/:id" element={<ReservationDetail />} />
         </Routes>
       </Router>
     </AuthInitializer>
