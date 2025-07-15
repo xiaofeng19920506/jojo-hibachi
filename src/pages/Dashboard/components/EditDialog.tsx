@@ -144,6 +144,10 @@ const EditDialog: React.FC<EditDialogProps> = ({
               onChange={(e) => {
                 console.log("Status dropdown onChange:", e.target.value);
                 onStatusChange(e);
+                // Auto-save and close when status is selected
+                setTimeout(() => {
+                  onSave();
+                }, 100);
               }}
             >
               {console.log("Current selectedStatus:", selectedStatus)}

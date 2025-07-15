@@ -376,6 +376,7 @@ export const useDashboard = () => {
           successMessage = "Employee status updated successfully";
         } else {
           // Update reservation status (admin only)
+          console.log("Updating reservation status to:", selectedStatus);
           await updateReservationAdmin({
             id: selectedReservation.id,
             data: { status: selectedStatus },

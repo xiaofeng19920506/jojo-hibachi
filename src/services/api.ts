@@ -219,28 +219,36 @@ export const api = createApi({
       any,
       { id: string; data: Partial<ReservationEntry> }
     >({
-      query: ({ id, data }) => ({
-        url: `/admin/reservation/${id}/status`,
-        method: "PATCH",
-        body: (() => {
-          const transformedData: any = {};
-          if (data.service) transformedData.eventType = data.service;
-          if (data.date) {
-            const dateObj = new Date(data.date);
-            transformedData.reservationDay = dateObj.getDate().toString();
-            transformedData.reservationMonth = (
-              dateObj.getMonth() + 1
-            ).toString();
-            transformedData.reservationYear = dateObj.getFullYear().toString();
-          }
-          if (data.time) transformedData.time = data.time;
-          if (data.status) transformedData.status = data.status;
-          if (data.notes) transformedData.notes = data.notes;
-          if (data.price !== undefined) transformedData.price = data.price;
-          if (data.employeeId) transformedData.assignedChef = data.employeeId;
-          return transformedData;
-        })(),
-      }),
+      query: ({ id, data }) => {
+        const transformedData: any = {};
+        if (data.service) transformedData.eventType = data.service;
+        if (data.date) {
+          const dateObj = new Date(data.date);
+          transformedData.reservationDay = dateObj.getDate().toString();
+          transformedData.reservationMonth = (
+            dateObj.getMonth() + 1
+          ).toString();
+          transformedData.reservationYear = dateObj.getFullYear().toString();
+        }
+        if (data.time) transformedData.time = data.time;
+        if (data.status) transformedData.status = data.status;
+        if (data.notes) transformedData.notes = data.notes;
+        if (data.price !== undefined) transformedData.price = data.price;
+        if (data.employeeId) transformedData.assignedChef = data.employeeId;
+
+        console.log(
+          "updateReservationAdmin - URL:",
+          `/admin/reservation/${id}/status`
+        );
+        console.log("updateReservationAdmin - Data:", data);
+        console.log("updateReservationAdmin - Transformed:", transformedData);
+
+        return {
+          url: `/admin/reservation/${id}/status`,
+          method: "PATCH",
+          body: transformedData,
+        };
+      },
       invalidatesTags: ["Reservations"],
     }),
 
