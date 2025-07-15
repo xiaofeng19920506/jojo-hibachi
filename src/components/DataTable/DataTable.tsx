@@ -233,13 +233,19 @@ const DataTable: React.FC<DataTableProps> = ({
                 <TableCell
                   key={col}
                   onClick={
-                    col !== "actions" && col !== "notes"
+                    col !== "actions" &&
+                    col !== "notes" &&
+                    !(col === "id" && tableType === "reservations") &&
+                    col !== "price"
                       ? () => onSort(col)
                       : undefined
                   }
                   sx={{
                     cursor:
-                      col !== "actions" && col !== "notes"
+                      col !== "actions" &&
+                      col !== "notes" &&
+                      !(col === "id" && tableType === "reservations") &&
+                      col !== "price"
                         ? "pointer"
                         : "default",
                     userSelect: "none",
@@ -247,31 +253,36 @@ const DataTable: React.FC<DataTableProps> = ({
                   }}
                 >
                   <Box display="flex" alignItems="center" gap={0.5}>
-                    {col.charAt(0).toUpperCase() + col.slice(1)}
-                    {col !== "actions" && col !== "notes" && (
-                      <Box display="flex" flexDirection="column" ml={0.25}>
-                        <ArrowDropUpIcon
-                          fontSize="small"
-                          sx={{ m: 0, lineHeight: 1 }}
-                          color={
-                            sortConfig.key === col &&
-                            sortConfig.direction === "asc"
-                              ? "primary"
-                              : "disabled"
-                          }
-                        />
-                        <ArrowDropDownIcon
-                          fontSize="small"
-                          sx={{ m: 0, lineHeight: 1, mt: -1 }}
-                          color={
-                            sortConfig.key === col &&
-                            sortConfig.direction === "desc"
-                              ? "primary"
-                              : "disabled"
-                          }
-                        />
-                      </Box>
-                    )}
+                    {col === "id" && tableType === "reservations"
+                      ? "Reservation Id"
+                      : col.charAt(0).toUpperCase() + col.slice(1)}
+                    {col !== "actions" &&
+                      col !== "notes" &&
+                      !(col === "id" && tableType === "reservations") &&
+                      col !== "price" && (
+                        <Box display="flex" flexDirection="column" ml={0.25}>
+                          <ArrowDropUpIcon
+                            fontSize="small"
+                            sx={{ m: 0, lineHeight: 1 }}
+                            color={
+                              sortConfig.key === col &&
+                              sortConfig.direction === "asc"
+                                ? "primary"
+                                : "disabled"
+                            }
+                          />
+                          <ArrowDropDownIcon
+                            fontSize="small"
+                            sx={{ m: 0, lineHeight: 1, mt: -1 }}
+                            color={
+                              sortConfig.key === col &&
+                              sortConfig.direction === "desc"
+                                ? "primary"
+                                : "disabled"
+                            }
+                          />
+                        </Box>
+                      )}
                   </Box>
                 </TableCell>
               ))}
