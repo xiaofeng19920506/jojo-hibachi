@@ -105,8 +105,8 @@ const Dashboard: React.FC = () => {
       }}
     >
       <GlobalAppBar actionButtons={calendarButton} />
-      <Box sx={{ flex: 1, p: 3, overflow: "auto" }}>
-        <Typography variant="h4" mb={3}>
+      <Box sx={{ flex: 1, p: { xs: 1, sm: 3 }, overflow: "auto" }}>
+        <Typography variant="h4" mb={3} sx={{ fontSize: { xs: 22, sm: 32 } }}>
           {userRole === "admin" ? getGreeting() : "Reservations"}
         </Typography>
 
@@ -164,19 +164,30 @@ const Dashboard: React.FC = () => {
               overflow: "hidden",
             }}
           >
-            <Box sx={{ flex: 1, overflow: "auto" }}>
-              <DataTable
-                tableType={activeTable as TableType}
-                data={paginatedData}
-                onSort={handleSort}
-                sortConfig={{
-                  key: "date",
-                  direction: "desc",
-                }}
-                onActionClick={handleActionClick}
-                availableActions={getAvailableActions}
-                userRole={userRole}
-              />
+            <Box
+              sx={{
+                flex: 1,
+                overflow: "auto",
+                width: "100%",
+                maxWidth: "100vw",
+              }}
+            >
+              <Box
+                sx={{ width: "100%", overflowX: { xs: "auto", sm: "visible" } }}
+              >
+                <DataTable
+                  tableType={activeTable as TableType}
+                  data={paginatedData}
+                  onSort={handleSort}
+                  sortConfig={{
+                    key: "date",
+                    direction: "desc",
+                  }}
+                  onActionClick={handleActionClick}
+                  availableActions={getAvailableActions}
+                  userRole={userRole}
+                />
+              </Box>
             </Box>
           </Box>
         )}

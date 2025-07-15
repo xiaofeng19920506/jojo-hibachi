@@ -87,8 +87,8 @@ const SignUp: React.FC = () => {
 
   return (
     <SignInWrapper>
-      <Form onSubmit={handleSubmit}>
-        <Title>Sign Up</Title>
+      <Form onSubmit={handleSubmit} style={{ padding: "16px 0" }}>
+        <Title sx={{ fontSize: { xs: 22, sm: 32 } }}>Sign Up</Title>
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Input
           type="text"
@@ -96,6 +96,7 @@ const SignUp: React.FC = () => {
           value={firstName}
           required
           onChange={(e) => setFirstName(e.target.value)}
+          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, mb: 1 }}
         />
         <Input
           type="text"
@@ -103,6 +104,7 @@ const SignUp: React.FC = () => {
           value={lastName}
           required
           onChange={(e) => setLastName(e.target.value)}
+          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, mb: 1 }}
         />
         <Input
           type="tel"
@@ -110,6 +112,7 @@ const SignUp: React.FC = () => {
           value={phoneNumber}
           required
           onChange={(e) => setPhoneNumber(e.target.value)}
+          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, mb: 1 }}
         />
         <Input
           type="email"
@@ -117,6 +120,7 @@ const SignUp: React.FC = () => {
           value={email}
           required
           onChange={(e) => setEmail(e.target.value)}
+          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, mb: 1 }}
         />
         <Input
           type="text"
@@ -124,6 +128,7 @@ const SignUp: React.FC = () => {
           value={streetAddress}
           required
           onChange={(e) => setStreetAddress(e.target.value)}
+          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, mb: 1 }}
         />
         <Input
           type="text"
@@ -131,6 +136,7 @@ const SignUp: React.FC = () => {
           value={city}
           required
           onChange={(e) => setCity(e.target.value)}
+          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, mb: 1 }}
         />
         <Input
           type="text"
@@ -138,6 +144,7 @@ const SignUp: React.FC = () => {
           value={state}
           required
           onChange={(e) => setState(e.target.value)}
+          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, mb: 1 }}
         />
         <Input
           type="text"
@@ -145,6 +152,7 @@ const SignUp: React.FC = () => {
           value={zipCode}
           required
           onChange={(e) => setZipCode(e.target.value)}
+          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, mb: 1 }}
         />
         <Input
           type="password"
@@ -152,12 +160,17 @@ const SignUp: React.FC = () => {
           value={password}
           required
           onChange={(e) => setPassword(e.target.value)}
+          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, mb: 1 }}
         />
-        <Button type="submit" disabled={loading}>
+        <Button
+          type="submit"
+          disabled={loading}
+          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, minWidth: 44 }}
+        >
           {loading ? "Signing Up..." : "Sign Up"}
         </Button>
 
-        <RegisterPrompt>
+        <RegisterPrompt style={{ fontSize: "16px", marginTop: 8 }}>
           Already have an account? <Link to="/signin">Sign In</Link>
         </RegisterPrompt>
       </Form>

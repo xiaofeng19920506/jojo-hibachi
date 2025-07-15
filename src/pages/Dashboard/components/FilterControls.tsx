@@ -40,7 +40,13 @@ const FilterControls: React.FC<FilterControlsProps> = ({
   availableTables,
 }) => {
   return (
-    <Box mb={2} display="flex" gap={2} flexWrap="wrap" alignItems="center">
+    <Box
+      mb={2}
+      display="flex"
+      flexWrap="wrap"
+      alignItems="center"
+      sx={{ flexDirection: { xs: "column", sm: "row" }, gap: { xs: 1, sm: 2 } }}
+    >
       {onTableChange && availableTables && (
         <FormControl sx={{ minWidth: 160 }}>
           <InputLabel id="table-select-label">Table</InputLabel>
@@ -63,7 +69,9 @@ const FilterControls: React.FC<FilterControlsProps> = ({
         label="Search"
         value={searchQuery}
         onChange={(e) => onSearchChange(e.target.value)}
-        sx={{ minWidth: 200 }}
+        sx={{ minWidth: 200, fontSize: { xs: 16, sm: 18 } }}
+        InputProps={{ style: { fontSize: 16 } }}
+        InputLabelProps={{ style: { fontSize: 16 } }}
       />
 
       <TextField
@@ -71,8 +79,9 @@ const FilterControls: React.FC<FilterControlsProps> = ({
         type="date"
         value={startDate}
         onChange={(e) => onStartDateChange(e.target.value)}
-        InputLabelProps={{ shrink: true }}
-        sx={{ minWidth: 150 }}
+        InputLabelProps={{ shrink: true, style: { fontSize: 16 } }}
+        sx={{ minWidth: 150, fontSize: { xs: 16, sm: 18 } }}
+        InputProps={{ style: { fontSize: 16 } }}
       />
 
       <TextField
@@ -80,12 +89,13 @@ const FilterControls: React.FC<FilterControlsProps> = ({
         type="date"
         value={endDate}
         onChange={(e) => onEndDateChange(e.target.value)}
-        InputLabelProps={{ shrink: true }}
-        sx={{ minWidth: 150 }}
+        InputLabelProps={{ shrink: true, style: { fontSize: 16 } }}
+        sx={{ minWidth: 150, fontSize: { xs: 16, sm: 18 } }}
+        InputProps={{ style: { fontSize: 16 } }}
       />
 
       {activeTable === "reservations" && (
-        <FormControl sx={{ minWidth: 140 }}>
+        <FormControl sx={{ minWidth: 140, fontSize: { xs: 16, sm: 18 } }}>
           <InputLabel id="status-filter-label">Status</InputLabel>
           <Select
             labelId="status-filter-label"
@@ -94,6 +104,7 @@ const FilterControls: React.FC<FilterControlsProps> = ({
             onChange={(e) =>
               onStatusFilterChange(e.target.value as ReservationStatus | "all")
             }
+            sx={{ fontSize: { xs: 16, sm: 18 } }}
           >
             <MenuItem value="all">All</MenuItem>
             <MenuItem value="pending">Pending</MenuItem>
@@ -104,7 +115,7 @@ const FilterControls: React.FC<FilterControlsProps> = ({
         </FormControl>
       )}
 
-      <FormControl sx={{ minWidth: 120 }}>
+      <FormControl sx={{ minWidth: 120, fontSize: { xs: 16, sm: 18 } }}>
         <InputLabel id="items-per-page-label">Items per page</InputLabel>
         <Select
           labelId="items-per-page-label"
@@ -113,6 +124,7 @@ const FilterControls: React.FC<FilterControlsProps> = ({
           onChange={(e) => {
             onItemsPerPageChange(Number(e.target.value));
           }}
+          sx={{ fontSize: { xs: 16, sm: 18 } }}
         >
           <MenuItem value={5}>5</MenuItem>
           <MenuItem value={10}>10</MenuItem>

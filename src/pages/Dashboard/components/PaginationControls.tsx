@@ -19,16 +19,16 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
     <Box
       mt={2}
       display="flex"
-      flexDirection="column"
       alignItems="center"
-      gap={2}
+      sx={{ flexDirection: { xs: "column", sm: "row" }, gap: { xs: 1, sm: 2 } }}
     >
-      <Box display="flex" alignItems="center" gap={1}>
+      <Box display="flex" alignItems="center" gap={1} sx={{ flexWrap: "wrap" }}>
         <Button
           variant="outlined"
           onClick={() => onPageChange(1)}
           disabled={currentPage === 1}
           size="small"
+          sx={{ fontSize: { xs: 16, sm: 18 }, minWidth: 44, minHeight: 44 }}
         >
           First
         </Button>
@@ -37,6 +37,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 1}
           size="small"
+          sx={{ fontSize: { xs: 16, sm: 18 }, minWidth: 44, minHeight: 44 }}
         >
           Previous
         </Button>
@@ -50,6 +51,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
           siblingCount={1}
           boundaryCount={1}
           size="small"
+          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44 }}
         />
 
         <Button
@@ -57,6 +59,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
           size="small"
+          sx={{ fontSize: { xs: 16, sm: 18 }, minWidth: 44, minHeight: 44 }}
         >
           Next
         </Button>
@@ -65,6 +68,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
           onClick={() => onPageChange(totalPages)}
           disabled={currentPage === totalPages}
           size="small"
+          sx={{ fontSize: { xs: 16, sm: 18 }, minWidth: 44, minHeight: 44 }}
         >
           Last
         </Button>
@@ -83,4 +87,3 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
 };
 
 export default PaginationControls;
- 

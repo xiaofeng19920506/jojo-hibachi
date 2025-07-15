@@ -51,8 +51,17 @@ const EditDialog: React.FC<EditDialogProps> = ({
   availableEmployees,
   getEmployeeDisplayName,
 }) => {
+  const isMobile =
+    typeof window !== "undefined" &&
+    window.matchMedia("(max-width:600px)").matches;
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      fullScreen={isMobile}
+    >
       <DialogTitle>
         {dialogType === "edit"
           ? `Edit ${activeTable === "orders" ? "Order" : "Reservation"}`
@@ -69,9 +78,10 @@ const EditDialog: React.FC<EditDialogProps> = ({
               type="date"
               fullWidth
               margin="normal"
-              InputLabelProps={{ shrink: true }}
+              InputLabelProps={{ shrink: true, style: { fontSize: 16 } }}
               value={editFormData.date || ""}
               onChange={onEditFormChange}
+              sx={{ fontSize: { xs: 16, sm: 18 } }}
             />
             {activeTable === "reservations" && (
               <TextField
@@ -80,9 +90,10 @@ const EditDialog: React.FC<EditDialogProps> = ({
                 type="time"
                 fullWidth
                 margin="normal"
-                InputLabelProps={{ shrink: true }}
+                InputLabelProps={{ shrink: true, style: { fontSize: 16 } }}
                 value={editFormData.time || ""}
                 onChange={onEditFormChange}
+                sx={{ fontSize: { xs: 16, sm: 18 } }}
               />
             )}
             <TextField
@@ -91,13 +102,14 @@ const EditDialog: React.FC<EditDialogProps> = ({
               type="number"
               fullWidth
               margin="normal"
-              inputProps={{ min: 0, step: 0.01 }}
+              inputProps={{ min: 0, step: 0.01, style: { fontSize: 16 } }}
               value={editFormData.price || ""}
               onChange={onEditFormChange}
               disabled={userRole !== "admin"}
               helperText={
                 userRole !== "admin" ? "Only admins can modify the price" : ""
               }
+              sx={{ fontSize: { xs: 16, sm: 18 } }}
             />
             {activeTable === "reservations" && (
               <TextField
@@ -109,13 +121,16 @@ const EditDialog: React.FC<EditDialogProps> = ({
                 rows={3}
                 value={editFormData.notes || ""}
                 onChange={onEditFormChange}
+                sx={{ fontSize: { xs: 16, sm: 18 } }}
+                InputLabelProps={{ style: { fontSize: 16 } }}
+                inputProps={{ style: { fontSize: 16 } }}
               />
             )}
           </Box>
         )}
 
         {dialogType === "assign" && (
-          <FormControl fullWidth sx={{ mt: 2 }}>
+          <FormControl fullWidth sx={{ mt: 2, fontSize: { xs: 16, sm: 18 } }}>
             <InputLabel id="assign-employee-label">
               {activeTable === "orders" ? "Employee" : "Chef"}
             </InputLabel>
@@ -124,6 +139,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
               value={selectedEmployeeId}
               label={activeTable === "orders" ? "Employee" : "Chef"}
               onChange={onAssignEmployeeChange}
+              sx={{ fontSize: { xs: 16, sm: 18 } }}
             >
               {availableEmployees?.map((emp) => (
                 <MenuItem key={emp.id} value={emp.id}>
@@ -135,13 +151,14 @@ const EditDialog: React.FC<EditDialogProps> = ({
         )}
 
         {dialogType === "status" && (
-          <FormControl fullWidth sx={{ mt: 2 }}>
+          <FormControl fullWidth sx={{ mt: 2, fontSize: { xs: 16, sm: 18 } }}>
             <InputLabel id="status-select-label">Status</InputLabel>
             <Select
               labelId="status-select-label"
               value={selectedStatus}
               label="Status"
               onChange={onStatusChange}
+              sx={{ fontSize: { xs: 16, sm: 18 } }}
             >
               {activeTable === "orders"
                 ? [
@@ -186,7 +203,12 @@ const EditDialog: React.FC<EditDialogProps> = ({
         )}
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={loading}>
+        <Button
+          onClick={onClose}
+          color="secondary"
+          disabled={loading}
+          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, minWidth: 44 }}
+        >
           Cancel
         </Button>
         {dialogType === "cancel" ? (

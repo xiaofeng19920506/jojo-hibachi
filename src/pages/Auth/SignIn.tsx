@@ -34,8 +34,8 @@ const SignIn: React.FC = () => {
 
     try {
       const result = await loginMutation({
-            username: email,
-            password,
+        username: email,
+        password,
       }).unwrap();
 
       const { token, user } = result;
@@ -58,8 +58,8 @@ const SignIn: React.FC = () => {
 
   return (
     <SignInWrapper>
-      <Form onSubmit={handleSubmit}>
-        <Title>Sign In</Title>
+      <Form onSubmit={handleSubmit} style={{ padding: "16px 0" }}>
+        <Title sx={{ fontSize: { xs: 22, sm: 32 } }}>Sign In</Title>
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Input
           type="email"
@@ -67,6 +67,7 @@ const SignIn: React.FC = () => {
           value={email}
           required
           onChange={(e) => setEmail(e.target.value)}
+          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, mb: 1 }}
         />
         <Input
           type="password"
@@ -74,12 +75,17 @@ const SignIn: React.FC = () => {
           value={password}
           required
           onChange={(e) => setPassword(e.target.value)}
+          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, mb: 1 }}
         />
-        <Button type="submit" disabled={isLoading}>
+        <Button
+          type="submit"
+          disabled={isLoading}
+          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, minWidth: 44 }}
+        >
           {isLoading ? "Signing In..." : "Sign In"}
         </Button>
 
-        <RegisterPrompt>
+        <RegisterPrompt style={{ fontSize: "16px", marginTop: 8 }}>
           Don't have an account? <Link to="/signup">Register</Link>
         </RegisterPrompt>
       </Form>
