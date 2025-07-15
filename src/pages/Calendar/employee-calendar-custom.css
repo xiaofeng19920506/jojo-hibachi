@@ -1,0 +1,223 @@
+/* Calendar container */
+.rbc-calendar {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  padding: 8px;
+}
+
+/* Toolbar */
+.rbc-toolbar {
+  background: #f5f5f5;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  font-size: 1.1rem;
+}
+
+/* Weekday headers */
+.rbc-header {
+  background: #f0f4f8;
+  color: #1976d2;
+  font-weight: 600;
+  font-size: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Ensure date header border aligns with time slot grid */
+.rbc-header {
+  border-bottom: 1px solid #e0e0e0;
+  box-sizing: border-box;
+}
+.rbc-time-header-cell {
+  border-bottom: 1px solid #e0e0e0;
+  box-sizing: border-box;
+}
+
+/* Time gutter */
+.rbc-time-gutter {
+  background: #fafafa;
+  color: #888;
+  font-size: 0.95rem;
+}
+
+/* Event styling */
+.rbc-event {
+  border-radius: 8px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+  padding: 4px 8px;
+  font-size: 14px;
+  border: none;
+  margin-bottom: 2px;
+}
+
+/* Selected event */
+.rbc-event.rbc-selected {
+  border: 2px solid #ff9800 !important;
+}
+
+/* Remove current day highlight and set all day columns to blue background */
+.rbc-today,
+.rbc-day-bg {
+  background: #e3f2fd !important;
+}
+
+/* Hide the all-day row for week view */
+.rbc-allday-cell {
+  display: none;
+}
+
+/* Make time slots fill available space, with a minimum height of the viewport */
+.rbc-time-content > .rbc-timeslot-group {
+  height: 100%;
+  min-height: 100vh;
+}
+
+/* Make event text larger and more readable */
+.rbc-event-content {
+  font-size: 1.1rem;
+  line-height: 1.4;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Make each individual time slot taller for better readability */
+.rbc-time-slot {
+  min-height: 3.5rem;
+}
+
+/* Comprehensive fix for vertical border alignment */
+.rbc-header,
+.rbc-day-bg,
+.rbc-timeslot-group,
+.rbc-time-gutter,
+.rbc-timeslot-group > .rbc-time-slot {
+  box-sizing: border-box;
+}
+
+.rbc-time-gutter {
+  border-right: 1px solid #e0e0e0;
+  background: #fafafa;
+}
+
+.rbc-header,
+.rbc-day-bg {
+  border-right: 1px solid #e0e0e0;
+}
+
+.rbc-header:last-child,
+.rbc-day-bg:last-child {
+  border-right: none;
+}
+
+.rbc-header,
+.rbc-day-bg {
+  padding: 0;
+  margin: 0;
+}
+
+.rbc-header {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.rbc-row-content {
+  border-top: none;
+}
+
+/* Remove forced scrollbar/padding from header */
+.rbc-time-header {
+  overflow-y: visible;
+  padding-right: 0;
+}
+
+/* Optionally, style the scrollbar for the grid for consistency */
+.rbc-time-content {
+  scrollbar-width: thin;
+  scrollbar-color: #e0e0e0 #fafafa;
+}
+
+/* Hide scrollbar but keep scrollability for the grid */
+.rbc-time-content {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+.rbc-time-content::-webkit-scrollbar {
+  display: none; /* Chrome/Safari/Webkit */
+} 
+
+/* Force all day columns to have the blue background, including today, with maximum specificity */
+.rbc-time-view .rbc-day-bg,
+.rbc-time-view .rbc-day-bg.rbc-today,
+.rbc-time-view .rbc-row-bg > .rbc-day-bg {
+  background: #e3f2fd !important;
+  background-color: #e3f2fd !important;
+  opacity: 1 !important;
+}
+
+/* Remove extra padding/margin from date headers for alignment */
+.rbc-header {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Use overlay scrollbar if supported for better alignment */
+.rbc-time-content {
+  overflow-y: overlay;
+} 
+
+/* Remove right margin from date header cells for alignment */
+.rbc-header {
+  margin-right: 0 !important;
+} 
+
+/* Remove all margin and padding from date header cells and their children for alignment */
+.rbc-header {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+.rbc-header > * {
+  margin: 0 !important;
+  padding: 0 !important;
+} 
+
+/* Override inline margin-right set by react-big-calendar for header alignment */
+.rbc-time-header.rbc-overflowing {
+  margin-right: 0 !important;
+} 
+
+/* Force blue background for all day columns, including today and now */
+.rbc-day-slot,
+.rbc-day-slot.rbc-now,
+.rbc-day-slot.rbc-today {
+  background: #e3f2fd !important;
+}
+
+.rbc-day-slot > *,
+.rbc-day-slot.rbc-now > *,
+.rbc-day-slot.rbc-today > * {
+  background: transparent !important;
+} 
+
+/* Set date header background to uniform grey for all days */
+.rbc-header,
+.rbc-header.rbc-today {
+  background: #f5f5f5 !important;
+  color: #1976d2;
+} 
+
+/* Apply a dashed border to the current day column and its header */
+.rbc-header.rbc-today,
+.rbc-day-slot.rbc-today {
+  border: 2px dashed #1976d2 !important;
+  box-sizing: border-box;
+} 
+
+/* Remove the bottom border from the date header and the top border from the current day column */
+.rbc-header.rbc-today {
+  border-bottom: none !important;
+}
+.rbc-day-slot.rbc-today {
+  border-top: none !important;
+} 
