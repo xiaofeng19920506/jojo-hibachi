@@ -25,7 +25,7 @@ const SignUp: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const [register, { isLoading }] = useRegisterMutation();
+  const [register] = useRegisterMutation();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -44,8 +44,6 @@ const SignUp: React.FC = () => {
       setError("Please fill in all fields.");
       return;
     }
-
-    const fullAddress = `${streetAddress}, ${city}, ${state} ${zipCode}`;
 
     try {
       setLoading(true);

@@ -4,7 +4,7 @@ import { format, parse, startOfWeek, getDay, addDays } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { useAppSelector } from "../../utils/hooks";
 import {
-  useGetAllEmployeesQuery,
+  useGetAdminEmployeesQuery,
   useGetEmployeeAssignedByDateQuery,
 } from "../../services/api";
 import {
@@ -57,7 +57,7 @@ const EmployeeCalendar: React.FC = () => {
   );
 
   // Fetch all employees for admin filter
-  const { data: allEmployees = [] } = useGetAllEmployeesQuery(undefined, {
+  const { data: allEmployees = [] } = useGetAdminEmployeesQuery(undefined, {
     skip: userRole !== "admin",
   });
 

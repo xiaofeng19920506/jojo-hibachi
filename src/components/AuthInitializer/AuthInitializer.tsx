@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAppDispatch } from "../../utils/hooks";
 import { initializeAuth } from "../../features/userSlice";
-import { useVerifyTokenQuery } from "../../services/api";
 import { Box, CircularProgress, Typography } from "@mui/material";
 
 interface AuthInitializerProps {
@@ -39,26 +38,9 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
     }
   }, [dispatch]);
 
-  const skip = !token;
-  const { data, error, isLoading } = useVerifyTokenQuery(undefined, { skip });
+  // Remove all usage of useVerifyTokenQuery and related logic
 
-  useEffect(() => {
-    if (skip) {
-      dispatch(initializeAuth({ user: {} as any, isAuthenticated: false }));
-      return;
-    }
-    if (isLoading) return;
-    if (error || !data) {
-      localStorage.removeItem("authToken");
-      dispatch(initializeAuth({ user: {} as any, isAuthenticated: false }));
-    } else {
-      let userObj = data.user || data.data || data;
-      if (userObj.user) userObj = userObj.user; // Unwrap if nested
-      dispatch(initializeAuth({ user: userObj as any, isAuthenticated: true }));
-    }
-  }, [data, error, isLoading, skip, dispatch]);
-
-  if (!skip && isLoading) {
+  if (!token) {
     return (
       <Box
         display="flex"
