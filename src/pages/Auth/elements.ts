@@ -11,13 +11,26 @@ export const SignInWrapper = styled.div`
 
 export const Form = styled.form`
   background: white;
-  padding: 2rem;
+  padding: 3.5rem 2.5rem;
   border-radius: 8px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   width: 50%;
   max-width: 30rem;
   display: flex;
   flex-direction: column;
+
+  @media (max-width: 600px) {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
 `;
 
 export const Title = styled.h2`

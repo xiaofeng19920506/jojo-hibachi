@@ -34,8 +34,8 @@ const SignIn: React.FC = () => {
 
     try {
       const result = await loginMutation({
-            username: email,
-            password,
+        username: email,
+        password,
       }).unwrap();
 
       const { token, user } = result;
@@ -62,7 +62,7 @@ const SignIn: React.FC = () => {
 
   return (
     <SignInWrapper>
-      <Form onSubmit={handleSubmit} style={{ padding: "16px 0" }}>
+      <Form onSubmit={handleSubmit}>
         <Title style={{ fontSize: 22 }}>Sign In</Title>
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Input
