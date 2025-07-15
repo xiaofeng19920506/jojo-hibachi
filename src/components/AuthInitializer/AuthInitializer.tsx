@@ -11,6 +11,7 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
   const dispatch = useAppDispatch();
   // Track the token in state to ensure reactivity
   const [token, setToken] = useState(() => localStorage.getItem("authToken"));
+  const [initialized, setInitialized] = useState(false);
 
   // Listen for changes to localStorage (e.g., after login in another tab)
   useEffect(() => {
@@ -28,19 +29,20 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
     return () => clearInterval(id);
   }, [token]);
 
-  // On mount, rehydrate user from localStorage if available
+  // On mount, always initialize auth state
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
-    if (storedUser) {
+    if (token && storedUser) {
       dispatch(
         initializeAuth({ user: JSON.parse(storedUser), isAuthenticated: true })
       );
+    } else {
+      dispatch(initializeAuth({ user: {} as any, isAuthenticated: false }));
     }
-  }, [dispatch]);
+    setInitialized(true);
+  }, [dispatch, token]);
 
-  // Remove all usage of useVerifyTokenQuery and related logic
-
-  if (!token) {
+  if (!initialized) {
     return (
       <Box
         display="flex"
