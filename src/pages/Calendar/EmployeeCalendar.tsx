@@ -224,167 +224,198 @@ const EmployeeCalendar: React.FC = () => {
 
   return (
     <>
-      <GlobalAppBar />
       <Box
         sx={{
-          p: { xs: 0, sm: 2 },
-          m: 0,
-          width: "100vw",
           height: "100vh",
-          minHeight: "100vh",
-          minWidth: "100vw",
-          overflow: "hidden",
+          width: "100vw",
           display: "flex",
           flexDirection: "column",
-          alignItems: "center",
         }}
       >
-        <Typography variant="h4" mb={2} sx={{ p: 3 }}>
-          Weekly Calendar
-        </Typography>
-        {userRole === "admin" && (
-          <FormControl sx={{ mb: 2, minWidth: 240, mx: 3 }}>
-            <InputLabel id="employee-select-label">Select Employee</InputLabel>
-            <Select
-              labelId="employee-select-label"
-              value={selectedEmployeeId}
-              label="Select Employee"
-              onChange={(e) => setSelectedEmployeeId(e.target.value)}
-            >
-              <MenuItem value="">-- Select --</MenuItem>
-              {allEmployees.map((emp: any) => (
-                <MenuItem key={emp.id} value={emp.id}>
-                  {emp.name || emp.email}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
+        <Box sx={{ flex: "0 0 10vh", minHeight: 0 }}>
+          <GlobalAppBar />
+        </Box>
         <Box
           sx={{
-            flex: 1,
-            width: "100%",
-            maxWidth: 900,
-            height: "100%",
+            flex: "1 1 90vh",
             minHeight: 0,
-            minWidth: 0,
-            mx: "auto",
-            px: { xs: 1, sm: 2 },
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: "100%",
           }}
         >
-          {/* Hidden native date input for calendar icon trigger */}
-          <input
-            type="date"
-            ref={dateInputRef}
-            style={{ opacity: 0, position: "absolute", left: "-9999px" }}
-            onChange={(e) => {
-              if (e.target.value) {
-                const pickedDate = new Date(e.target.value);
-                setCalendarDate(startOfWeek(pickedDate, { weekStartsOn: 0 }));
-              }
+          {/* Title and Select Employee on the same row for admin, directly under AppBar */}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              alignItems: "center",
+              justifyContent: "center",
+              width: "100%",
+              mb: 3,
+              gap: 2,
             }}
-          />
-          <Calendar
-            localizer={localizer}
-            events={events}
-            startAccessor="start"
-            endAccessor="end"
-            date={startOfWeek(calendarDate, { weekStartsOn: 0 })}
-            onNavigate={(date: any) => setCalendarDate(date)}
-            style={{
-              height: "100%",
+          >
+            <Typography
+              variant="h4"
+              sx={{
+                textAlign: "center",
+                width: { xs: "100%", sm: "auto" },
+                p: 1,
+              }}
+            >
+              Weekly Calendar
+            </Typography>
+            {userRole === "admin" && (
+              <FormControl sx={{ minWidth: 240, mx: { xs: 0, sm: 3 } }}>
+                <InputLabel id="employee-select-label">
+                  Select Employee
+                </InputLabel>
+                <Select
+                  labelId="employee-select-label"
+                  value={selectedEmployeeId}
+                  label="Select Employee"
+                  onChange={(e) => setSelectedEmployeeId(e.target.value)}
+                >
+                  <MenuItem value="">-- Select --</MenuItem>
+                  {allEmployees.map((emp: any) => (
+                    <MenuItem key={emp.id} value={emp.id}>
+                      {emp.name || emp.email}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          </Box>
+          <Box
+            sx={{
+              flex: 1,
               width: "100%",
               maxWidth: 900,
-              background: "#fff",
-              borderRadius: 16,
-              boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-              padding: 16,
               minHeight: 0,
               minWidth: 0,
-              margin: "0 auto",
+              mx: "auto",
+              px: { xs: 1, sm: 2 },
+              overflow: "auto",
+              height: "100%",
+              maxHeight: "100%",
             }}
-            views={["week"]}
-            defaultView="week"
-            toolbar={true}
-            components={{
-              toolbar: (props: any) => (
-                <CustomToolbar {...props} calendarDate={calendarDate} />
-              ),
-              event: ({ event }: { event: CalendarEvent }) => {
-                const reservation = weekReservations.find(
-                  (r) => r.id === event.reservationId
-                );
-                return (
-                  <div
-                    style={{
-                      background: "#fff",
-                      border: "1px solid #1976d2",
-                      borderRadius: 8,
-                      boxShadow: "0 2px 8px rgba(25, 118, 210, 0.08)",
-                      color: "#1976d2",
-                      padding: "8px 12px",
-                      fontWeight: 500,
-                      fontSize: 15,
-                      minWidth: 120,
-                      maxWidth: 260,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "normal",
-                      wordBreak: "break-word",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 4,
-                    }}
-                  >
-                    <div style={{ fontWeight: 700 }}>{event.title}</div>
-                    <div style={{ fontSize: 14 }}>
-                      <strong>Time:</strong>{" "}
-                      {event.start
-                        ? event.start.toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : ""}
+          >
+            {/* Hidden native date input for calendar icon trigger */}
+            <input
+              type="date"
+              ref={dateInputRef}
+              style={{ opacity: 0, position: "absolute", left: "-9999px" }}
+              onChange={(e) => {
+                if (e.target.value) {
+                  const pickedDate = new Date(e.target.value);
+                  setCalendarDate(startOfWeek(pickedDate, { weekStartsOn: 0 }));
+                }
+              }}
+            />
+            <Calendar
+              localizer={localizer}
+              events={events}
+              startAccessor="start"
+              endAccessor="end"
+              date={startOfWeek(calendarDate, { weekStartsOn: 0 })}
+              onNavigate={(date: any) => setCalendarDate(date)}
+              style={{
+                height: "100%",
+                width: "100%",
+                maxWidth: 900,
+                background: "#fff",
+                borderRadius: 16,
+                boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
+                padding: 16,
+                minHeight: 0,
+                minWidth: 0,
+                margin: "0 auto",
+              }}
+              views={["week"]}
+              defaultView="week"
+              toolbar={true}
+              components={{
+                toolbar: (props: any) => (
+                  <CustomToolbar {...props} calendarDate={calendarDate} />
+                ),
+                event: ({ event }: { event: CalendarEvent }) => {
+                  const reservation = weekReservations.find(
+                    (r) => r.id === event.reservationId
+                  );
+                  return (
+                    <div
+                      style={{
+                        background: "#fff",
+                        border: "1px solid #1976d2",
+                        borderRadius: 8,
+                        boxShadow: "0 2px 8px rgba(25, 118, 210, 0.08)",
+                        color: "#1976d2",
+                        padding: "8px 12px",
+                        fontWeight: 500,
+                        fontSize: 15,
+                        minWidth: 120,
+                        maxWidth: 260,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "normal",
+                        wordBreak: "break-word",
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 4,
+                      }}
+                    >
+                      <div style={{ fontWeight: 700 }}>{event.title}</div>
+                      <div style={{ fontSize: 14 }}>
+                        <strong>Time:</strong>{" "}
+                        {event.start
+                          ? event.start.toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })
+                          : ""}
+                      </div>
+                      {reservation && (
+                        <>
+                          <div style={{ fontSize: 14 }}>
+                            <strong>Address:</strong> {reservation.address},{" "}
+                            {reservation.city}, {reservation.state}{" "}
+                            {reservation.zipCode}
+                          </div>
+                          <div style={{ fontSize: 14 }}>
+                            <strong>Phone:</strong> {reservation.phoneNumber}
+                          </div>
+                          <div style={{ fontSize: 14 }}>
+                            <strong>Adults:</strong> {reservation.adult} &nbsp;{" "}
+                            <strong>Kids:</strong> {reservation.kids}
+                          </div>
+                        </>
+                      )}
+                      {event.notes && (
+                        <div style={{ fontSize: 13 }}>{event.notes}</div>
+                      )}
                     </div>
-                    {reservation && (
-                      <>
-                        <div style={{ fontSize: 14 }}>
-                          <strong>Address:</strong> {reservation.address},{" "}
-                          {reservation.city}, {reservation.state}{" "}
-                          {reservation.zipCode}
-                        </div>
-                        <div style={{ fontSize: 14 }}>
-                          <strong>Phone:</strong> {reservation.phoneNumber}
-                        </div>
-                        <div style={{ fontSize: 14 }}>
-                          <strong>Adults:</strong> {reservation.adult} &nbsp;{" "}
-                          <strong>Kids:</strong> {reservation.kids}
-                        </div>
-                      </>
-                    )}
-                    {event.notes && (
-                      <div style={{ fontSize: 13 }}>{event.notes}</div>
-                    )}
-                  </div>
-                );
-              },
-            }}
-            popup
-            onSelectEvent={(event: CalendarEvent) =>
-              navigate(`/reservation/${event.reservationId}`)
-            }
-            eventPropGetter={() => ({
-              style: {
-                backgroundColor: userRole === "admin" ? "#43a047" : "#1976d2",
-                color: "#fff",
-                borderRadius: 8,
-                boxShadow: "0 1px 4px rgba(0,0,0,0.10)",
-                padding: "4px 8px",
-                fontSize: 14,
-                border: "none",
-              },
-            })}
-          />
+                  );
+                },
+              }}
+              popup
+              onSelectEvent={(event: CalendarEvent) =>
+                navigate(`/reservation/${event.reservationId}`)
+              }
+              eventPropGetter={() => ({
+                style: {
+                  backgroundColor: userRole === "admin" ? "#43a047" : "#1976d2",
+                  color: "#fff",
+                  borderRadius: 8,
+                  boxShadow: "0 1px 4px rgba(0,0,0,0.10)",
+                  padding: "4px 8px",
+                  fontSize: 14,
+                  border: "none",
+                },
+              })}
+            />
+          </Box>
         </Box>
       </Box>
     </>
