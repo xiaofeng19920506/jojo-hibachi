@@ -66,7 +66,7 @@ const SignUp: React.FC = () => {
 
   return (
     <SignInWrapper>
-      <Form onSubmit={handleSubmit} style={{ padding: "16px 0" }}>
+      <Form onSubmit={handleSubmit}>
         <Title style={{ fontSize: 22 }}>Sign Up</Title>
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Input
