@@ -6,9 +6,11 @@ import FilterControls from "./components/FilterControls";
 import PaginationControls from "./components/PaginationControls";
 import EditDialog from "./components/EditDialog";
 import { useDashboard } from "./hooks/useDashboard";
+import { useNavigate } from "react-router-dom";
 
 // Main Dashboard Component
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const {
     // State
     searchQuery,
@@ -79,6 +81,19 @@ const Dashboard: React.FC = () => {
   // Add this for debugging
   console.log("EditDialog props:", { dialogType, dialogOpen });
 
+  // Add Weekly Calendar button for admin and employee
+  const calendarButton =
+    userRole === "admin" || userRole === "employee"
+      ? [
+          {
+            label: "Weekly Calendar",
+            variant: "contained" as const,
+            color: "primary" as const,
+            onClick: () => navigate("/calendar"),
+          },
+        ]
+      : [];
+
   return (
     <Box
       sx={{
@@ -89,7 +104,7 @@ const Dashboard: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      <GlobalAppBar />
+      <GlobalAppBar actionButtons={calendarButton} />
       <Box sx={{ flex: 1, p: 3, overflow: "auto" }}>
         <Typography variant="h4" mb={3}>
           {userRole === "admin" ? getGreeting() : "Reservations"}

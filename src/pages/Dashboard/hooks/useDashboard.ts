@@ -19,6 +19,9 @@ export const useDashboard = () => {
   const { user, isInitialized } = useAppSelector((state) => state.user);
   const userRole = user?.role || "user";
 
+  // Debug log for userRole
+  console.log("[useDashboard] userRole:", userRole);
+
   // State management
   const [searchQuery, setSearchQuery] = useState("");
   const [sortConfig, setSortConfig] = useState<{
@@ -36,6 +39,9 @@ export const useDashboard = () => {
   const [statusFilter, setStatusFilter] = useState<ReservationStatus | "all">(
     "all"
   );
+
+  // Debug log for activeTable
+  console.log("[useDashboard] activeTable:", activeTable);
 
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -61,7 +67,9 @@ export const useDashboard = () => {
     data: allReservationsData,
     isLoading: allReservationsLoading,
     error: allReservationsError,
-  } = useGetReservationsQuery();
+  } = useGetReservationsQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
 
   const {
     data: assignedReservationsData = [],
