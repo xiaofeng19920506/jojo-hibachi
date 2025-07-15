@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import type { ToolbarProps } from "react-big-calendar";
 import {
   format,
   parse,
   startOfWeek,
   getDay,
   addDays,
-  differenceInCalendarWeeks,
   format as formatDate,
 } from "date-fns";
 import { enUS } from "date-fns/locale";
@@ -23,10 +21,6 @@ import {
   Select,
   FormControl,
   InputLabel,
-  Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
 } from "@mui/material";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./employee-calendar-custom.css";
@@ -72,7 +66,6 @@ const EmployeeCalendar: React.FC = () => {
     skip: userRole !== "admin",
   });
 
-  const now = new Date();
   const weekStart = startOfWeek(calendarDate, { weekStartsOn: 0 });
   const weekEnd = addDays(weekStart, 6);
   const weekStartStr = format(weekStart, "yyyy-MM-dd");
@@ -314,7 +307,7 @@ const EmployeeCalendar: React.FC = () => {
             defaultView="week"
             toolbar={true}
             components={{
-              toolbar: (props: ToolbarProps & { calendarDate: Date }) => (
+              toolbar: (props: any) => (
                 <CustomToolbar {...props} calendarDate={calendarDate} />
               ),
               event: ({ event }: { event: CalendarEvent }) => {

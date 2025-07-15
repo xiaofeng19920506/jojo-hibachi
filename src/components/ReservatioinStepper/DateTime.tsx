@@ -155,7 +155,7 @@ const DateTime: React.FC<{ onNext: () => void; onBack: () => void }> = ({
               displayStaticWrapperAs="desktop"
               openTo="day"
               value={date < minDate ? minDate : date}
-              onChange={handleDateChange}
+              onChange={(value, _context) => handleDateChange(value as any)}
               minDate={minDate}
             />
           </Box>

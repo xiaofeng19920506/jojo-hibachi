@@ -19,7 +19,6 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import type { SortableEntry, TableType } from "./types";
 import dayjs from "dayjs";
-import { useTheme } from "@mui/material/styles";
 
 interface DataTableProps {
   tableType: TableType;
@@ -40,7 +39,6 @@ const DataTable: React.FC<DataTableProps> = ({
   availableActions,
   userRole,
 }) => {
-  const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItem, setSelectedItem] = useState<SortableEntry | null>(null);
 
