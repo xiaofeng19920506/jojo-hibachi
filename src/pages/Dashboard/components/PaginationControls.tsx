@@ -23,8 +23,10 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
     <Box
       mt={2}
       display="flex"
+      flexDirection="column"
       alignItems="center"
-      sx={{ flexDirection: { xs: "column", sm: "row" }, gap: { xs: 1, sm: 2 } }}
+      justifyContent="center"
+      sx={{ gap: 1 }}
     >
       <Box
         display="flex"
@@ -34,7 +36,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
           flexWrap: "wrap",
           flexDirection: "row",
           width: { xs: "100%", sm: "auto" },
-          justifyContent: { xs: "center", sm: "flex-start" },
+          justifyContent: "center",
         }}
       >
         <Tooltip title="First Page">
@@ -99,9 +101,9 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
         variant="body2"
         color="text.secondary"
         sx={{
-          textAlign: { xs: "center", sm: "left" },
-          width: { xs: "100%", sm: "auto" },
-          mt: { xs: 1, sm: 0 },
+          textAlign: "center",
+          width: "100%",
+          mt: 0,
         }}
       >
         {filteredDataLength > 0

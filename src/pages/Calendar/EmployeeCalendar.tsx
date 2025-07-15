@@ -34,8 +34,7 @@ import { skipToken } from "@reduxjs/toolkit/query";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import dayjs, { Dayjs } from "dayjs";
+import { useRef } from "react";
 import GlobalAppBar from "../../components/GloabalAppBar/GlobalAppBar";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 
@@ -67,7 +66,7 @@ const EmployeeCalendar: React.FC = () => {
   const [calendarDate, setCalendarDate] = useState<Date>(() => {
     return new Date();
   });
-  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   const { data: allEmployees = [] } = useGetAdminEmployeesQuery(undefined, {
     skip: userRole !== "admin",
@@ -133,9 +132,11 @@ const EmployeeCalendar: React.FC = () => {
     }
   }, []);
 
-  // Custom toolbar to remove navigation buttons and add left/right arrows and date picker
+  useEffect(() => {
+    console.log("calendarDate changed:", calendarDate);
+  }, [calendarDate]);
+
   const CustomToolbar = (toolbar: any & { calendarDate: Date }) => {
-    // Calculate the week range for the selected week
     const weekStartDate = startOfWeek(toolbar.calendarDate, {
       weekStartsOn: 0,
     });
@@ -144,6 +145,7 @@ const EmployeeCalendar: React.FC = () => {
       weekEndDate,
       "M/d/yy"
     )}`;
+    console.log("CustomToolbar calendarDate:", toolbar.calendarDate);
     return (
       <div
         className="rbc-toolbar"
@@ -189,7 +191,31 @@ const EmployeeCalendar: React.FC = () => {
             mr: 1,
             flex: "0 0 auto",
           }}
-          onClick={() => setDatePickerOpen(true)}
+          onClick={() => {
+            if (dateInputRef.current) {
+              dateInputRef.current.focus();
+              dateInputRef.current.click();
+            }
+          }}
+        />
+        <input
+          type="date"
+          ref={dateInputRef}
+          tabIndex={-1}
+          style={{
+            opacity: 0,
+            position: "absolute",
+            left: "-9999px",
+            width: 0,
+            height: 0,
+            pointerEvents: "none",
+          }}
+          onChange={(e) => {
+            if (e.target.value) {
+              const pickedDate = new Date(e.target.value);
+              setCalendarDate(startOfWeek(pickedDate, { weekStartsOn: 0 }));
+            }
+          }}
         />
         <ArrowForwardIosIcon
           style={{ cursor: "pointer", marginLeft: 8, flex: "0 0 auto" }}
@@ -253,40 +279,17 @@ const EmployeeCalendar: React.FC = () => {
             px: { xs: 1, sm: 2 },
           }}
         >
-          <DatePicker
-            open={datePickerOpen}
-            onOpen={() => setDatePickerOpen(true)}
-            onClose={() => setDatePickerOpen(false)}
-            value={dayjs(calendarDate)}
-            onChange={(value: any) => {
-              if (value && typeof value.toDate === "function") {
-                const picked = value.toDate();
-                // Calculate week difference from current calendar week
-                const currentWeek = startOfWeek(calendarDate, {
-                  weekStartsOn: 0,
-                });
-                const targetWeek = startOfWeek(picked, { weekStartsOn: 0 });
-                const weekDiff = differenceInCalendarWeeks(
-                  targetWeek,
-                  currentWeek
-                );
-                // Simulate clicking the arrow icon weekDiff times
-                let newDate = new Date(currentWeek);
-                if (weekDiff > 0) {
-                  for (let i = 0; i < weekDiff; i++) {
-                    newDate = addDays(newDate, 7);
-                  }
-                } else if (weekDiff < 0) {
-                  for (let i = 0; i < Math.abs(weekDiff); i++) {
-                    newDate = addDays(newDate, -7);
-                  }
-                }
-                setCalendarDate(newDate);
-                setDatePickerOpen(false);
+          {/* Hidden native date input for calendar icon trigger */}
+          <input
+            type="date"
+            ref={dateInputRef}
+            style={{ opacity: 0, position: "absolute", left: "-9999px" }}
+            onChange={(e) => {
+              if (e.target.value) {
+                const pickedDate = new Date(e.target.value);
+                setCalendarDate(startOfWeek(pickedDate, { weekStartsOn: 0 }));
               }
             }}
-            // Hide the text field
-            slotProps={{ textField: { style: { display: "none" } } }}
           />
           <Calendar
             localizer={localizer}
@@ -311,7 +314,7 @@ const EmployeeCalendar: React.FC = () => {
             defaultView="week"
             toolbar={true}
             components={{
-              toolbar: (props) => (
+              toolbar: (props: ToolbarProps & { calendarDate: Date }) => (
                 <CustomToolbar {...props} calendarDate={calendarDate} />
               ),
               event: ({ event }: { event: CalendarEvent }) => {
