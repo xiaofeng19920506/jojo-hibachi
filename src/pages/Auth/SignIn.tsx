@@ -34,8 +34,8 @@ const SignIn: React.FC = () => {
 
     try {
       const result = await loginMutation({
-        username: email,
-        password,
+            username: email,
+            password,
       }).unwrap();
 
       const { token, user } = result;

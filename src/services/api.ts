@@ -120,7 +120,7 @@ export const api = createApi({
   baseQuery,
   tagTypes: ["Reservations", "Customers", "Orders", "Employees", "Auth"],
   endpoints: (builder) => ({
-    // Authentication
+    // --- AUTH ENDPOINTS ---
     login: builder.mutation<
       { token: string; user: any },
       { username: string; password: string }
@@ -147,7 +147,36 @@ export const api = createApi({
       },
       invalidatesTags: ["Auth"],
     }),
-
+    register: builder.mutation<
+      { token: string; user: any },
+      { username: string; password: string; email: string }
+    >({
+      query: (credentials) => ({
+        url: "/auth/register",
+        method: "POST",
+        body: credentials,
+      }),
+      transformResponse: (response: {
+        data?: { token: string; user: any };
+        token?: string;
+        user?: any;
+      }) => {
+        const token = response.data?.token || response.token;
+        const user = response.data?.user || response.user;
+        if (!token) {
+          throw new Error("No token received from server");
+        }
+        if (!user) {
+          throw new Error("No user data received from server");
+        }
+        return { token, user };
+      },
+      invalidatesTags: ["Auth"],
+    }),
+    getAuthProfile: builder.query<any, void>({
+      query: () => "/auth/profile",
+      providesTags: ["Auth"],
+    }),
     verifyToken: builder.query<any, void>({
       query: () => ({
         url: "/auth/verifyToken",
@@ -156,23 +185,21 @@ export const api = createApi({
       providesTags: ["Auth"],
     }),
 
-    // Reservations
-    getReservations: builder.query<ReservationEntry[], void>({
-      query: () => "/reservation",
-      transformResponse: (response: {
-        status: string;
-        data: ApiReservationData[];
-      }) => {
-        if (response.status === "success") {
-          return transformApiData(response.data || []);
-        }
-        return [];
-      },
-      providesTags: ["Reservations"],
+    // --- USER ENDPOINTS ---
+    getUserProfile: builder.query<any, void>({
+      query: () => "/user/profile",
+      providesTags: ["Auth"],
     }),
-
+    updateUserProfile: builder.mutation<any, Partial<any>>({
+      query: (data) => ({
+        url: "/user/profile",
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Auth"],
+    }),
     getUserReservations: builder.query<ReservationEntry[], void>({
-      query: () => "/reservation",
+      query: () => "/user/reservations",
       transformResponse: (response: {
         status: string;
         data: ApiReservationData[];
@@ -184,244 +211,8 @@ export const api = createApi({
       },
       providesTags: ["Reservations"],
     }),
-
-    updateReservation: builder.mutation<
-      any,
-      { id: string; data: Partial<ReservationEntry> }
-    >({
-      query: ({ id, data }) => ({
-        url: `/reservation/${id}`,
-        method: "PATCH",
-        body: (() => {
-          const transformedData: any = {};
-          if (data.service) transformedData.eventType = data.service;
-          if (data.date) {
-            const dateObj = new Date(data.date);
-            transformedData.reservationDay = dateObj.getDate().toString();
-            transformedData.reservationMonth = (
-              dateObj.getMonth() + 1
-            ).toString();
-            transformedData.reservationYear = dateObj.getFullYear().toString();
-          }
-          if (data.time) transformedData.time = data.time;
-          if (data.status) transformedData.status = data.status;
-          if (data.notes) transformedData.notes = data.notes;
-          if (data.price !== undefined) transformedData.price = data.price;
-          if (data.employeeId) transformedData.assignedChef = data.employeeId;
-          return transformedData;
-        })(),
-      }),
-      invalidatesTags: ["Reservations"],
-    }),
-
-    // Admin-only reservation updates
-    updateReservationAdmin: builder.mutation<
-      any,
-      { id: string; data: Partial<ReservationEntry> }
-    >({
-      query: ({ id, data }) => {
-        const transformedData: any = {};
-        if (data.service) transformedData.eventType = data.service;
-        if (data.date) {
-          const dateObj = new Date(data.date);
-          transformedData.reservationDay = dateObj.getDate().toString();
-          transformedData.reservationMonth = (
-            dateObj.getMonth() + 1
-          ).toString();
-          transformedData.reservationYear = dateObj.getFullYear().toString();
-        }
-        if (data.time) transformedData.time = data.time;
-        if (data.status) transformedData.status = data.status;
-        if (data.notes) transformedData.notes = data.notes;
-        if (data.price !== undefined) transformedData.price = data.price;
-        if (data.employeeId) transformedData.assignedChef = data.employeeId;
-
-        return {
-          url: `/admin/reservations/${id}`,
-          method: "PUT",
-          body: transformedData,
-        };
-      },
-      invalidatesTags: ["Reservations"],
-    }),
-
-    // User/Employee reservation updates (restricted)
-    updateReservationUser: builder.mutation<
-      any,
-      { id: string; data: Partial<ReservationEntry> }
-    >({
-      query: ({ id, data }) => ({
-        url: `/reservation/${id}/user`,
-        method: "PATCH",
-        body: (() => {
-          const transformedData: any = {};
-          // Only allow basic fields for regular users
-          if (data.date) {
-            const dateObj = new Date(data.date);
-            transformedData.reservationDay = dateObj.getDate().toString();
-            transformedData.reservationMonth = (
-              dateObj.getMonth() + 1
-            ).toString();
-            transformedData.reservationYear = dateObj.getFullYear().toString();
-          }
-          if (data.time) transformedData.time = data.time;
-          if (data.notes) transformedData.notes = data.notes;
-          // Explicitly NOT allowing: status, price, employeeId
-          return transformedData;
-        })(),
-      }),
-      invalidatesTags: ["Reservations"],
-    }),
-
-    // Admin-only status updates
-    updateReservationStatus: builder.mutation<
-      any,
-      { id: string; status: string }
-    >({
-      query: ({ id, status }) => {
-        return {
-          url: `/admin/reservations/${id}/status`,
-          method: "PATCH",
-          body: { status },
-        };
-      },
-      invalidatesTags: ["Reservations"],
-    }),
-
-    // Admin-only employee assignment
-    assignEmployeeToReservation: builder.mutation<
-      any,
-      { id: string; employeeId: string }
-    >({
-      query: ({ id, employeeId }) => ({
-        url: `/admin/reservations/${id}/assign-employee`,
-        method: "PATCH",
-        body: { assignedChef: employeeId },
-      }),
-      invalidatesTags: ["Reservations"],
-    }),
-
-    deleteReservation: builder.mutation<any, string>({
-      query: (id) => ({
-        url: `/reservations/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Reservations"],
-    }),
-
-    createReservation: builder.mutation<any, any>({
-      query: (reservation) => ({
-        url: "/reservation",
-        method: "POST",
-        body: reservation,
-      }),
-      invalidatesTags: ["Reservations"],
-    }),
-
-    // Customers
-    getCustomers: builder.query<any[], void>({
-      query: () => "/admin/customers",
-      transformResponse: (response: {
-        status: string;
-        data: { customers: any[] };
-      }) => {
-        if (response.status === "success") {
-          return transformCustomerData(response.data.customers || []);
-        }
-        return [];
-      },
-      providesTags: ["Customers"],
-    }),
-
-    // Orders
-    getOrders: builder.query<any[], void>({
-      query: () => "/orders",
-      transformResponse: (response: { status: string; data: any[] }) => {
-        if (response.status === "success") {
-          return transformOrderData(response.data || []);
-        }
-        return [];
-      },
-      providesTags: ["Orders"],
-    }),
-
-    // Employees
-    getEmployees: builder.query<Employee[], void>({
-      query: () => "/admin/employees",
-      transformResponse: (response: {
-        status: string;
-        data: { employees: any[] };
-      }) => {
-        if (response.status === "success") {
-          return transformEmployeeData(response.data.employees || []);
-        }
-        return [];
-      },
-      providesTags: ["Employees"],
-    }),
-
-    // All Employees (for assignment dropdowns)
-    getAllEmployees: builder.query<Employee[], void>({
-      query: () => "/admin/employees",
-      transformResponse: (response: {
-        status: string;
-        data: { employees: any[] };
-      }) => {
-        if (response.status === "success") {
-          return transformEmployeeData(response.data.employees || []);
-        }
-        return [];
-      },
-      providesTags: ["Employees"],
-    }),
-
-    // Employee mutations
-    updateEmployee: builder.mutation<any, { id: string; data: any }>({
-      query: ({ id, data }) => ({
-        url: `/admin/employees/${id}`,
-        method: "PATCH",
-        body: data,
-      }),
-      invalidatesTags: ["Employees"],
-    }),
-
-    // Customer mutations
-    updateCustomer: builder.mutation<any, { id: string; data: any }>({
-      query: ({ id, data }) => ({
-        url: `/admin/customers/${id}`,
-        method: "PATCH",
-        body: data,
-      }),
-      invalidatesTags: ["Customers"],
-    }),
-
-    getAssignedReservations: builder.query<any[], void>({
-      query: () => "/reservation/assigned",
-      transformResponse: (response: { status: string; data: any[] }) => {
-        if (response.status === "success") {
-          return (response.data || []).map((item) => ({
-            ...item,
-            customerName: item.customerFullName,
-            date:
-              item.reservationDateString ||
-              (item.reservationDate
-                ? `${item.reservationDate.month}/${item.reservationDate.day}/${item.reservationDate.year}`
-                : ""),
-            id: item._id || item.id,
-            address: item.address || "",
-            city: item.city || "",
-            state: item.state || "",
-            zipCode: item.zipCode || "",
-          }));
-        }
-        return [];
-      },
-      providesTags: ["Reservations"],
-    }),
-
-    // Fetch a single reservation by ID
-    getReservationById: builder.query<ReservationEntry | null, string>({
-      query: (id) => `/reservation/${id}`,
+    getUserReservationById: builder.query<ReservationEntry | null, string>({
+      query: (id) => `/user/reservation/${id}`,
       transformResponse: (response: {
         status: string;
         data: ApiReservationData;
@@ -434,6 +225,37 @@ export const api = createApi({
       providesTags: ["Reservations"],
     }),
 
+    // --- EMPLOYEE ENDPOINTS ---
+    getEmployeeProfile: builder.query<any, void>({
+      query: () => "/employee/profile",
+      providesTags: ["Auth"],
+    }),
+    getEmployeeAssigned: builder.query<ReservationEntry[], void>({
+      query: () => "/employee/assigned",
+      transformResponse: (response: {
+        status: string;
+        data: ApiReservationData[];
+      }) => {
+        if (response.status === "success") {
+          return transformApiData(response.data || []);
+        }
+        return [];
+      },
+      providesTags: ["Reservations"],
+    }),
+    getEmployeeAssignedById: builder.query<ReservationEntry | null, string>({
+      query: (id) => `/employee/assigned/${id}`,
+      transformResponse: (response: {
+        status: string;
+        data: ApiReservationData;
+      }) => {
+        if (response.status === "success" && response.data) {
+          return transformApiData([response.data])[0];
+        }
+        return null;
+      },
+      providesTags: ["Reservations"],
+    }),
     getEmployeeAssignedByDate: builder.query<
       ReservationEntry[],
       { startDate: string; endDate: string }
@@ -451,29 +273,127 @@ export const api = createApi({
       },
       providesTags: ["Reservations"],
     }),
+
+    // --- ADMIN ENDPOINTS ---
+    getAdminCustomers: builder.query<any[], void>({
+      query: () => "/admin/customers",
+      transformResponse: (response: {
+        status: string;
+        data: { customers: any[] };
+      }) => {
+        if (response.status === "success") {
+          return transformCustomerData(response.data.customers || []);
+        }
+        return [];
+      },
+      providesTags: ["Customers"],
+    }),
+    getAdminEmployees: builder.query<Employee[], void>({
+      query: () => "/admin/employees",
+      transformResponse: (response: {
+        status: string;
+        data: { employees: any[] };
+      }) => {
+        if (response.status === "success") {
+          return transformEmployeeData(response.data.employees || []);
+        }
+        return [];
+      },
+      providesTags: ["Employees"],
+    }),
+    getAdminReservations: builder.query<ReservationEntry[], void>({
+      query: () => "/admin/reservations",
+      transformResponse: (response: {
+        status: string;
+        data: ApiReservationData[];
+      }) => {
+        if (response.status === "success") {
+          return transformApiData(response.data || []);
+        }
+        return [];
+      },
+      providesTags: ["Reservations"],
+    }),
+    getAdminReservationById: builder.query<ReservationEntry | null, string>({
+      query: (id) => `/admin/reservation/${id}`,
+      transformResponse: (response: {
+        status: string;
+        data: ApiReservationData;
+      }) => {
+        if (response.status === "success" && response.data) {
+          return transformApiData([response.data])[0];
+        }
+        return null;
+      },
+      providesTags: ["Reservations"],
+    }),
+    updateReservationStatus: builder.mutation<
+      any,
+      { id: string; status: string }
+    >({
+      query: ({ id, status }) => ({
+        url: `/reservation/${id}/status`,
+        method: "PATCH",
+        body: { status },
+      }),
+      invalidatesTags: ["Reservations"],
+    }),
+    assignChefToReservation: builder.mutation<
+      any,
+      { id: string; chefId: string }
+    >({
+      query: ({ id, chefId }) => ({
+        url: `/reservation/${id}/assign-chef`,
+        method: "PATCH",
+        body: { chefId },
+      }),
+      invalidatesTags: ["Reservations"],
+    }),
+
+    // --- RESERVATION ENDPOINTS ---
+    createReservation: builder.mutation<any, any>({
+      query: (reservation) => ({
+        url: "/reservation",
+        method: "POST",
+        body: reservation,
+      }),
+      invalidatesTags: ["Reservations"],
+    }),
+    getReservationById: builder.query<ReservationEntry | null, string>({
+      query: (id) => `/reservation/${id}`,
+      transformResponse: (response: {
+        status: string;
+        data: ApiReservationData;
+      }) => {
+        if (response.status === "success" && response.data) {
+          return transformApiData([response.data])[0];
+        }
+        return null;
+      },
+      providesTags: ["Reservations"],
+    }),
   }),
 });
 
 // Export hooks
 export const {
   useLoginMutation,
-  useVerifyTokenQuery,
-  useGetReservationsQuery,
+  useRegisterMutation,
+  useGetAuthProfileQuery,
+  useGetUserProfileQuery,
+  useUpdateUserProfileMutation,
   useGetUserReservationsQuery,
-  useGetAssignedReservationsQuery,
-  useUpdateReservationMutation,
-  useUpdateReservationAdminMutation,
-  useUpdateReservationUserMutation,
-  useUpdateReservationStatusMutation,
-  useAssignEmployeeToReservationMutation,
-  useDeleteReservationMutation,
-  useGetCustomersQuery,
-  useGetOrdersQuery,
-  useGetEmployeesQuery,
-  useGetAllEmployeesQuery,
-  useCreateReservationMutation,
-  useUpdateEmployeeMutation,
-  useUpdateCustomerMutation,
-  useGetReservationByIdQuery,
+  useGetUserReservationByIdQuery,
+  useGetEmployeeProfileQuery,
+  useGetEmployeeAssignedQuery,
+  useGetEmployeeAssignedByIdQuery,
   useGetEmployeeAssignedByDateQuery,
+  useGetAdminCustomersQuery,
+  useGetAdminEmployeesQuery,
+  useGetAdminReservationsQuery,
+  useGetAdminReservationByIdQuery,
+  useUpdateReservationStatusMutation,
+  useAssignChefToReservationMutation,
+  useCreateReservationMutation,
+  useGetReservationByIdQuery,
 } = api;
