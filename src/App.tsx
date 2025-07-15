@@ -3,6 +3,7 @@ import { lazy, Suspense } from "react";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import HomeNav from "./components/HomeNav/HomeNav";
 import AuthInitializer from "./components/AuthInitializer/AuthInitializer";
+import LoadingSpinner from "./components/LoadingSpinner";
 
 const SignIn = lazy(() => import("./pages/Auth/SignIn"));
 const SignUp = lazy(() => import("./pages/Auth/SignUp"));
@@ -23,7 +24,7 @@ const App: React.FC = () => {
           <Route
             path="/signin"
             element={
-              <Suspense fallback={<div>Loading...</div>}>
+              <Suspense fallback={<LoadingSpinner />}>
                 <SignIn />
               </Suspense>
             }
@@ -31,7 +32,7 @@ const App: React.FC = () => {
           <Route
             path="/signup"
             element={
-              <Suspense fallback={<div>Loading...</div>}>
+              <Suspense fallback={<LoadingSpinner />}>
                 <SignUp />
               </Suspense>
             }
@@ -39,7 +40,7 @@ const App: React.FC = () => {
           <Route
             path="/booknow"
             element={
-              <Suspense fallback={<div>Loading...</div>}>
+              <Suspense fallback={<LoadingSpinner />}>
                 <ReservationStepper />
               </Suspense>
             }
@@ -49,7 +50,7 @@ const App: React.FC = () => {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<LoadingSpinner />}>
                   <Dashboard />
                 </Suspense>
               </ProtectedRoute>
@@ -59,7 +60,7 @@ const App: React.FC = () => {
             path="/calendar"
             element={
               <ProtectedRoute>
-                <Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<LoadingSpinner />}>
                   <EmployeeCalendar />
                 </Suspense>
               </ProtectedRoute>
@@ -68,7 +69,7 @@ const App: React.FC = () => {
           <Route
             path="/reservation/:id"
             element={
-              <Suspense fallback={<div>Loading...</div>}>
+              <Suspense fallback={<LoadingSpinner />}>
                 <ReservationDetail />
               </Suspense>
             }

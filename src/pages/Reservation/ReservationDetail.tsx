@@ -82,24 +82,39 @@ const ReservationDetail: React.FC = () => {
           }}
         >
           <Box sx={{ marginLeft: "25%", width: "75%" }}>
-            <Typography variant="h3" sx={{ fontWeight: 900, mb: 0.2 }}>
+            <Typography
+              variant="h3"
+              sx={{ fontWeight: 900, mb: 0.2, fontSize: { xs: 28, sm: 36 } }}
+            >
               Reservation Details
             </Typography>
           </Box>
           <Divider sx={{ my: 0.5 }} />
           <Box sx={{ marginLeft: "25%", width: "75%" }}>
-            <Typography variant="h6" sx={{ mt: 0 }}>
+            <Typography
+              variant="h6"
+              sx={{ mt: 0, fontSize: { xs: 20, sm: 24 } }}
+            >
               Customer
             </Typography>
-            <Typography>Name: {reservation.customerName || "N/A"}</Typography>
-            <Typography>Email: {reservation.email || "N/A"}</Typography>
-            <Typography>
+            <Typography sx={{ fontSize: { xs: 18, sm: 20 } }}>
+              Name: {reservation.customerName || "N/A"}
+            </Typography>
+            <Typography sx={{ fontSize: { xs: 18, sm: 20 } }}>
+              Email: {reservation.email || "N/A"}
+            </Typography>
+            <Typography sx={{ fontSize: { xs: 18, sm: 20 } }}>
               Phone:{" "}
               {reservation.phoneNumber ? (
                 isMobile ? (
                   <a
                     href={`tel:${reservation.phoneNumber}`}
-                    style={{ color: "#1976d2", textDecoration: "underline" }}
+                    style={{
+                      color: "#1976d2",
+                      textDecoration: "underline",
+                      padding: "8px 0",
+                      display: "inline-block",
+                    }}
                   >
                     {reservation.phoneNumber}
                   </a>
@@ -110,7 +125,7 @@ const ReservationDetail: React.FC = () => {
                 "N/A"
               )}
             </Typography>
-            <Typography>
+            <Typography sx={{ fontSize: { xs: 18, sm: 20 } }}>
               Address:{" "}
               {reservation.address ? (
                 <a
@@ -124,6 +139,7 @@ const ReservationDetail: React.FC = () => {
                     textDecoration: "underline",
                     display: "inline-flex",
                     alignItems: "center",
+                    padding: "8px 0",
                   }}
                 >
                   <LocationOnIcon sx={{ fontSize: 20, mr: 0.5 }} />
@@ -137,28 +153,40 @@ const ReservationDetail: React.FC = () => {
           </Box>
           <Divider sx={{ my: 1 }} />
           <Box sx={{ marginLeft: "25%", width: "75%" }}>
-            <Typography variant="h6">Reservation Info</Typography>
-            <Typography>Date: {reservation.date || "N/A"}</Typography>
-            <Typography>Time: {reservation.time || "N/A"}</Typography>
-            <Typography>Status: {reservation.status || "N/A"}</Typography>
-            <Typography>
+            <Typography variant="h6" sx={{ fontSize: { xs: 20, sm: 24 } }}>
+              Reservation Info
+            </Typography>
+            <Typography sx={{ fontSize: { xs: 18, sm: 20 } }}>
+              Date: {reservation.date || "N/A"}
+            </Typography>
+            <Typography sx={{ fontSize: { xs: 18, sm: 20 } }}>
+              Time: {reservation.time || "N/A"}
+            </Typography>
+            <Typography sx={{ fontSize: { xs: 18, sm: 20 } }}>
+              Status: {reservation.status || "N/A"}
+            </Typography>
+            <Typography sx={{ fontSize: { xs: 18, sm: 20 } }}>
               Price:{" "}
               {reservation.price !== undefined
                 ? `$${reservation.price}`
                 : "N/A"}
             </Typography>
-            <Typography>
+            <Typography sx={{ fontSize: { xs: 18, sm: 20 } }}>
               Adults:{" "}
               {reservation.adult !== undefined ? reservation.adult : "N/A"}
             </Typography>
-            <Typography>
+            <Typography sx={{ fontSize: { xs: 18, sm: 20 } }}>
               Kids: {reservation.kids !== undefined ? reservation.kids : "N/A"}
             </Typography>
-            <Typography>Allergies: {reservation.allergies || "N/A"}</Typography>
-            <Typography>
+            <Typography sx={{ fontSize: { xs: 18, sm: 20 } }}>
+              Allergies: {reservation.allergies || "N/A"}
+            </Typography>
+            <Typography sx={{ fontSize: { xs: 18, sm: 20 } }}>
               Event Type: {reservation.eventType || "N/A"}
             </Typography>
-            <Typography>Notes: {reservation.notes || "N/A"}</Typography>
+            <Typography sx={{ fontSize: { xs: 18, sm: 20 } }}>
+              Notes: {reservation.notes || "N/A"}
+            </Typography>
           </Box>
           <Divider sx={{ my: 1 }} />
         </Paper>
