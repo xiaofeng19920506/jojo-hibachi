@@ -4,7 +4,6 @@ import type {
   Employee,
   ApiReservationData,
   ApiEmployeeData,
-  ReservationStatus,
 } from "../pages/Dashboard/types";
 
 const baseQuery = fetchBaseQuery({
@@ -394,6 +393,30 @@ export const api = createApi({
       }),
       invalidatesTags: ["Customers"],
     }),
+
+    getAssignedReservations: builder.query<any[], void>({
+      query: () => "/reservation/assigned",
+      transformResponse: (response: { status: string; data: any[] }) => {
+        if (response.status === "success") {
+          return (response.data || []).map((item) => ({
+            ...item,
+            customerName: item.customerFullName,
+            date:
+              item.reservationDateString ||
+              (item.reservationDate
+                ? `${item.reservationDate.month}/${item.reservationDate.day}/${item.reservationDate.year}`
+                : ""),
+            id: item._id || item.id,
+            address: item.address || "",
+            city: item.city || "",
+            state: item.state || "",
+            zipCode: item.zipCode || "",
+          }));
+        }
+        return [];
+      },
+      providesTags: ["Reservations"],
+    }),
   }),
 });
 
@@ -403,6 +426,7 @@ export const {
   useVerifyTokenQuery,
   useGetReservationsQuery,
   useGetUserReservationsQuery,
+  useGetAssignedReservationsQuery,
   useUpdateReservationMutation,
   useUpdateReservationAdminMutation,
   useUpdateReservationUserMutation,

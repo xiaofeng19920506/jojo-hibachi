@@ -18,10 +18,10 @@ interface FilterControlsProps {
   statusFilter: ReservationStatus | "all";
   onStatusFilterChange: (value: ReservationStatus | "all") => void;
   activeTable: string;
-  onTableChange: (value: string) => void;
+  onTableChange?: (value: string) => void;
   itemsPerPage: number;
   onItemsPerPageChange: (value: number) => void;
-  availableTables: { value: string; label: string }[];
+  availableTables?: { value: string; label: string }[];
 }
 
 const FilterControls: React.FC<FilterControlsProps> = ({
@@ -41,21 +41,23 @@ const FilterControls: React.FC<FilterControlsProps> = ({
 }) => {
   return (
     <Box mb={2} display="flex" gap={2} flexWrap="wrap" alignItems="center">
-      <FormControl sx={{ minWidth: 160 }}>
-        <InputLabel id="table-select-label">Table</InputLabel>
-        <Select
-          labelId="table-select-label"
-          value={activeTable}
-          label="Table"
-          onChange={(e) => onTableChange(e.target.value)}
-        >
-          {availableTables.map((table) => (
-            <MenuItem key={table.value} value={table.value}>
-              {table.label}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      {onTableChange && availableTables && (
+        <FormControl sx={{ minWidth: 160 }}>
+          <InputLabel id="table-select-label">Table</InputLabel>
+          <Select
+            labelId="table-select-label"
+            value={activeTable}
+            label="Table"
+            onChange={(e) => onTableChange(e.target.value)}
+          >
+            {availableTables.map((table) => (
+              <MenuItem key={table.value} value={table.value}>
+                {table.label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      )}
 
       <TextField
         label="Search"
@@ -124,4 +126,3 @@ const FilterControls: React.FC<FilterControlsProps> = ({
 };
 
 export default FilterControls;
- 

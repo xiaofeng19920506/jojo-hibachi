@@ -92,7 +92,7 @@ const Dashboard: React.FC = () => {
       <GlobalAppBar />
       <Box sx={{ flex: 1, p: 3, overflow: "auto" }}>
         <Typography variant="h4" mb={3}>
-          {getGreeting}
+          {userRole === "admin" ? getGreeting() : "Reservations"}
         </Typography>
 
         <FilterControls
@@ -111,16 +111,20 @@ const Dashboard: React.FC = () => {
             setCurrentPage(1);
           }}
           activeTable={activeTable}
-          onTableChange={(value) => {
-            setActiveTable(value as TableType);
-            setCurrentPage(1);
-          }}
           itemsPerPage={itemsPerPage}
           onItemsPerPageChange={(value) => {
             setItemsPerPage(value);
             setCurrentPage(1);
           }}
-          availableTables={getAvailableTables()} // Call as function
+          {...(userRole === "admin"
+            ? {
+                availableTables: getAvailableTables(),
+                onTableChange: (value: string) => {
+                  setActiveTable(value as TableType);
+                  setCurrentPage(1);
+                },
+              }
+            : {})}
         />
 
         {loading ? (
@@ -156,6 +160,7 @@ const Dashboard: React.FC = () => {
                 }}
                 onActionClick={handleActionClick}
                 availableActions={getAvailableActions}
+                userRole={userRole}
               />
             </Box>
           </Box>

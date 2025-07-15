@@ -27,6 +27,7 @@ interface DataTableProps {
   sortConfig: { key: string; direction: "asc" | "desc" };
   onActionClick: (action: string, item: SortableEntry) => void;
   availableActions?: (item: SortableEntry) => string[];
+  userRole?: string;
 }
 
 const DataTable: React.FC<DataTableProps> = ({
@@ -36,6 +37,7 @@ const DataTable: React.FC<DataTableProps> = ({
   sortConfig,
   onActionClick,
   availableActions,
+  userRole,
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItem, setSelectedItem] = useState<SortableEntry | null>(null);
@@ -83,19 +85,9 @@ const DataTable: React.FC<DataTableProps> = ({
     }
   };
 
+  // Fix columnMap to include all TableType keys
   const columnMap: Record<TableType, string[]> = {
     customers: ["name", "email", "phone", "address"],
-    // For 'orders', use the same columns as 'reservations' to show recent reservations
-    orders: [
-      "id",
-      "customerName",
-      "date",
-      "time",
-      "status",
-      "employeeName",
-      "price",
-      "actions",
-    ],
     employees: [
       "name",
       "email",
@@ -105,19 +97,40 @@ const DataTable: React.FC<DataTableProps> = ({
       "ordersAssigned",
       "actions",
     ],
-    reservations: [
-      "id",
+    reservations:
+      userRole === "employee"
+        ? [
+            "id",
+            "customerName",
+            "address",
+            "date",
+            "time",
+            "status",
+            "price",
+            "notes",
+          ]
+        : [
+            "id",
+            "customerName",
+            "date",
+            "time",
+            "status",
+            "employeeName",
+            "price",
+            "notes",
+            "actions",
+          ],
+    orders: [
       "customerName",
+      "service",
       "date",
-      "time",
       "status",
-      "employeeName",
+      "assignedEmployee",
       "price",
-      "notes",
-      "actions",
     ],
   };
 
+  // Add type guard for address fields in getCellValue
   const getCellValue = (item: SortableEntry, col: string): string => {
     if ("status" in item && col === "status") return item.status;
     if ("name" in item && col === "name") return item.name;
@@ -139,7 +152,29 @@ const DataTable: React.FC<DataTableProps> = ({
     if ("email" in item && col === "email") return item.email || "";
     if ("phone" in item && col === "phone") return item.phone || "";
     if ("role" in item && col === "role") return item.role;
-    if ("address" in item && col === "address") return item.address;
+    if (col === "address") {
+      // Only process if item has address fields
+      if (
+        "address" in item &&
+        "city" in item &&
+        "state" in item &&
+        "zipCode" in item
+      ) {
+        let addr = (item as any).address || "";
+        let city = (item as any).city || "";
+        let state = (item as any).state || "";
+        const zip = (item as any).zipCode || "";
+        addr = addr.charAt(0).toUpperCase() + addr.slice(1);
+        city = city.charAt(0).toUpperCase() + city.slice(1);
+        state = state.toUpperCase();
+        let full = addr;
+        if (city) full += `, ${city}`;
+        if (state) full += `, ${state}`;
+        if (zip) full += ` ${zip}`;
+        return full.trim() || "-";
+      }
+      return "-";
+    }
     if ("customerName" in item && col === "customerName")
       return item.customerName;
     if ("employeeName" in item && col === "employeeName")
