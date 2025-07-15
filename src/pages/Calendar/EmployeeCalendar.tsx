@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay, addDays } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { useAppSelector } from "../../utils/hooks";
 import {
   useGetAllEmployeesQuery,
-  useGetEmployeeWeekReservationsQuery,
+  useGetEmployeeAssignedByDateQuery,
 } from "../../services/api";
 import {
   Box,
@@ -46,6 +46,16 @@ const EmployeeCalendar: React.FC = () => {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const navigate = useNavigate();
 
+  // Debug log for user state
+  console.log(
+    "[EmployeeCalendar] user:",
+    user,
+    "userRole:",
+    userRole,
+    "employeeId:",
+    userRole === "employee" ? user?.id : selectedEmployeeId
+  );
+
   // Fetch all employees for admin filter
   const { data: allEmployees = [] } = useGetAllEmployeesQuery(undefined, {
     skip: userRole !== "admin",
@@ -58,14 +68,17 @@ const EmployeeCalendar: React.FC = () => {
   const weekStartStr = format(weekStart, "yyyy-MM-dd");
   const weekEndStr = format(weekEnd, "yyyy-MM-dd");
 
-  // Determine which employeeId to use
-  const employeeId = userRole === "employee" ? user?.id : selectedEmployeeId;
+  // Only check for authToken before making the API call
+  const hasAuthToken = !!localStorage.getItem("authToken");
+  const shouldFetch = hasAuthToken && !!weekStartStr && !!weekEndStr;
 
-  // Fetch reservations for the selected employee and week
-  const { data: weekReservations = [] } = useGetEmployeeWeekReservationsQuery(
-    employeeId
-      ? { employeeId, weekStart: weekStartStr, weekEnd: weekEndStr }
-      : skipToken
+  // Loading guard: wait for authToken
+  if (!hasAuthToken) {
+    return <div>Loading user info...</div>;
+  }
+
+  const { data: weekReservations = [] } = useGetEmployeeAssignedByDateQuery(
+    shouldFetch ? { startDate: weekStartStr, endDate: weekEndStr } : skipToken
   );
 
   // Map reservations to calendar events

@@ -29,6 +29,16 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
     return () => clearInterval(id);
   }, [token]);
 
+  // On mount, rehydrate user from localStorage if available
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      dispatch(
+        initializeAuth({ user: JSON.parse(storedUser), isAuthenticated: true })
+      );
+    }
+  }, [dispatch]);
+
   const skip = !token;
   const { data, error, isLoading } = useVerifyTokenQuery(undefined, { skip });
 

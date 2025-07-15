@@ -419,25 +419,6 @@ export const api = createApi({
       providesTags: ["Reservations"],
     }),
 
-    // Fetch reservations for an employee for a specific week
-    getEmployeeWeekReservations: builder.query<
-      ReservationEntry[],
-      { employeeId: string; weekStart: string; weekEnd: string }
-    >({
-      query: ({ employeeId, weekStart, weekEnd }) =>
-        `/reservation/employee/${employeeId}/week?weekStart=${weekStart}&weekEnd=${weekEnd}`,
-      transformResponse: (response: {
-        status: string;
-        data: ApiReservationData[];
-      }) => {
-        if (response.status === "success") {
-          return transformApiData(response.data || []);
-        }
-        return [];
-      },
-      providesTags: ["Reservations"],
-    }),
-
     // Fetch a single reservation by ID
     getReservationById: builder.query<ReservationEntry | null, string>({
       query: (id) => `/reservation/${id}`,
@@ -449,6 +430,24 @@ export const api = createApi({
           return transformApiData([response.data])[0];
         }
         return null;
+      },
+      providesTags: ["Reservations"],
+    }),
+
+    getEmployeeAssignedByDate: builder.query<
+      ReservationEntry[],
+      { startDate: string; endDate: string }
+    >({
+      query: ({ startDate, endDate }) =>
+        `/employee/assigned-by-date?startDate=${startDate}&endDate=${endDate}`,
+      transformResponse: (response: {
+        status: string;
+        data: ApiReservationData[];
+      }) => {
+        if (response.status === "success") {
+          return transformApiData(response.data || []);
+        }
+        return [];
       },
       providesTags: ["Reservations"],
     }),
@@ -475,6 +474,6 @@ export const {
   useCreateReservationMutation,
   useUpdateEmployeeMutation,
   useUpdateCustomerMutation,
-  useGetEmployeeWeekReservationsQuery,
   useGetReservationByIdQuery,
+  useGetEmployeeAssignedByDateQuery,
 } = api;
