@@ -1,13 +1,6 @@
-import React, { useMemo, useState, useEffect } from "react";
-import { Calendar, dateFnsLocalizer, Event } from "react-big-calendar";
-import {
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  addDays,
-  isSameWeek,
-} from "date-fns";
+import React, { useState, useEffect } from "react";
+import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import { format, parse, startOfWeek, getDay, addDays } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { useAppSelector } from "../../utils/hooks";
 import {
@@ -69,12 +62,11 @@ const EmployeeCalendar: React.FC = () => {
   const employeeId = userRole === "employee" ? user?.id : selectedEmployeeId;
 
   // Fetch reservations for the selected employee and week
-  const { data: weekReservations = [], isLoading: reservationsLoading } =
-    useGetEmployeeWeekReservationsQuery(
-      employeeId
-        ? { employeeId, weekStart: weekStartStr, weekEnd: weekEndStr }
-        : skipToken
-    );
+  const { data: weekReservations = [] } = useGetEmployeeWeekReservationsQuery(
+    employeeId
+      ? { employeeId, weekStart: weekStartStr, weekEnd: weekEndStr }
+      : skipToken
+  );
 
   // Map reservations to calendar events
   const events: CalendarEvent[] = weekReservations.map((r: any) => {

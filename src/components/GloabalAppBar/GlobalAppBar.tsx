@@ -22,7 +22,6 @@ interface GlobalAppBarProps {
 
 const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   title = "Dashboard",
-  subtitle,
   showLogout = true,
   showNavigation = true,
   actionButtons = [],
@@ -43,13 +42,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
 
   const handleNavigation = (path: string) => {
     navigate(path);
-  };
-
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return "Good morning";
-    if (hour < 17) return "Good afternoon";
-    return "Good evening";
   };
 
   const getNavigationButtons = () => {
