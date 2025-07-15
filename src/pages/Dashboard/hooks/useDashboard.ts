@@ -9,6 +9,7 @@ import {
   useUpdateReservationMutation,
   useUpdateReservationAdminMutation,
   useUpdateReservationUserMutation,
+  useUpdateReservationStatusMutation,
   useAssignEmployeeToReservationMutation,
   useUpdateEmployeeMutation,
   useUpdateCustomerMutation,
@@ -40,9 +41,9 @@ export const useDashboard = () => {
 
   // Dialog state
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<"edit" | "assign" | "status">(
-    "edit"
-  );
+  const [dialogType, setDialogType] = useState<
+    "edit" | "assign" | "status" | "cancel"
+  >("edit");
   const [selectedReservation, setSelectedReservation] = useState<any>(null);
   const [editFormData, setEditFormData] = useState<any>({});
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
@@ -97,6 +98,8 @@ export const useDashboard = () => {
     useUpdateReservationAdminMutation();
   const [updateReservationUser, { isLoading: updateReservationUserLoading }] =
     useUpdateReservationUserMutation();
+  const [updateReservationStatus, { isLoading: updateStatusLoading }] =
+    useUpdateReservationStatusMutation();
 
   const [assignEmployeeToReservation, { isLoading: assignEmployeeLoading }] =
     useAssignEmployeeToReservationMutation();
@@ -118,8 +121,6 @@ export const useDashboard = () => {
         return reservationData;
       case "customers":
         return customersData || [];
-      case "orders":
-        return reservationsData || [];
       case "employees":
         return (employeesData as SortableEntry[]) || [];
       default:
@@ -164,11 +165,14 @@ export const useDashboard = () => {
   };
 
   const handleActionClick = (action: string, item: SortableEntry) => {
+    console.log("[handleActionClick] raw action:", action);
+    const normalizedAction = action.toLowerCase().replace(/\s/g, "");
+    console.log("[handleActionClick] normalizedAction:", normalizedAction);
     if (activeTable === "reservations") {
       const reservation = item as ReservationEntry;
       setSelectedReservation(reservation);
 
-      switch (action) {
+      switch (normalizedAction) {
         case "edit":
           setEditFormData({
             date: reservation.date,
@@ -180,44 +184,23 @@ export const useDashboard = () => {
           setDialogOpen(true);
           break;
         case "assign":
+        case "assignemployee":
           setSelectedEmployeeId(reservation.employeeId || "");
           setDialogType("assign");
           setDialogOpen(true);
           break;
+        case "updatestatus":
         case "status":
-          console.log("Status action clicked for:", reservation.status);
           setSelectedStatus(reservation.status);
           setDialogType("status");
           setDialogOpen(true);
           break;
-        default:
-        // No-op
-      }
-    } else if (activeTable === "orders") {
-      const order = item as any;
-      setSelectedReservation(order as any);
-
-      switch (action) {
-        case "edit":
-          setEditFormData({
-            date: order.date,
-            price: order.price,
-          });
-          setDialogType("edit");
-          setDialogOpen(true);
-          break;
-        case "assign":
-          setSelectedEmployeeId(order.assignedEmployee || "");
-          setDialogType("assign");
-          setDialogOpen(true);
-          break;
-        case "status":
-          setSelectedStatus(order.status as any);
-          setDialogType("status");
+        case "cancel":
+          setDialogType("cancel");
           setDialogOpen(true);
           break;
         default:
-        // No-op
+          break;
       }
     } else if (activeTable === "employees") {
       const employee = item as any;
@@ -238,7 +221,7 @@ export const useDashboard = () => {
           setDialogOpen(true);
           break;
         default:
-        // No-op
+          break;
       }
     } else if (activeTable === "customers") {
       const customer = item as any;
@@ -255,7 +238,7 @@ export const useDashboard = () => {
           setDialogOpen(true);
           break;
         default:
-        // No-op
+          break;
       }
     } else {
       // No-op
@@ -277,7 +260,6 @@ export const useDashboard = () => {
   };
 
   const handleStatusChange = (e: any) => {
-    console.log("Status change triggered:", e.target.value);
     setSelectedStatus(e.target.value);
   };
 
@@ -350,8 +332,6 @@ export const useDashboard = () => {
         }
       } else if (dialogType === "assign") {
         if (activeTable === "orders") {
-          // Order assignment not implemented yet
-          console.log("Order assignment not implemented yet");
         } else {
           // Assign employee to reservation (admin only)
           await assignEmployeeToReservation({
@@ -362,8 +342,6 @@ export const useDashboard = () => {
         }
       } else if (dialogType === "status") {
         if (activeTable === "orders") {
-          // Order status update not implemented yet
-          console.log("Order status updates not implemented yet");
         } else if (activeTable === "employees") {
           if (userRole !== "admin") {
             console.error("Only admins can change employee status");
@@ -375,17 +353,14 @@ export const useDashboard = () => {
           }).unwrap();
           successMessage = "Employee status updated successfully";
         } else {
-          // Update reservation status (admin only)
-          console.log("Updating reservation status to:", selectedStatus);
-          await updateReservationAdmin({
+          await updateReservationStatus({
             id: selectedReservation.id,
-            data: { status: selectedStatus },
+            status: selectedStatus,
           }).unwrap();
           successMessage = "Reservation status updated successfully";
         }
       }
 
-      console.log(successMessage);
       handleDialogClose();
     } catch (error: any) {
       const tableType =
@@ -412,7 +387,6 @@ export const useDashboard = () => {
         return [
           { value: "reservations", label: "All Reservations" },
           { value: "customers", label: "Customers" },
-          { value: "orders", label: "Orders" },
           { value: "employees", label: "Employees" },
         ];
       default:
@@ -430,12 +404,12 @@ export const useDashboard = () => {
         }
         break;
       case "employee":
-        if (activeTable === "reservations" || activeTable === "orders") {
+        if (activeTable === "reservations") {
           actions.push("edit");
         }
         break;
       case "admin":
-        if (activeTable === "reservations" || activeTable === "orders") {
+        if (activeTable === "reservations") {
           actions.push("edit");
           actions.push("assign");
           actions.push("status");
@@ -584,6 +558,7 @@ export const useDashboard = () => {
       updateLoading ||
       updateReservationAdminLoading ||
       updateReservationUserLoading ||
+      updateStatusLoading ||
       assignEmployeeLoading ||
       updateEmployeeLoading ||
       updateCustomerLoading,

@@ -44,8 +44,6 @@ const AuthInitializer: React.FC<AuthInitializerProps> = ({ children }) => {
     } else {
       let userObj = data.user || data.data || data;
       if (userObj.user) userObj = userObj.user; // Unwrap if nested
-      console.log("Auth verification response:", data);
-      console.log("User set in Redux:", userObj);
       dispatch(initializeAuth({ user: userObj as any, isAuthenticated: true }));
     }
   }, [data, error, isLoading, skip, dispatch]);

@@ -236,16 +236,9 @@ export const api = createApi({
         if (data.price !== undefined) transformedData.price = data.price;
         if (data.employeeId) transformedData.assignedChef = data.employeeId;
 
-        console.log(
-          "updateReservationAdmin - URL:",
-          `/admin/reservation/${id}/status`
-        );
-        console.log("updateReservationAdmin - Data:", data);
-        console.log("updateReservationAdmin - Transformed:", transformedData);
-
         return {
-          url: `/admin/reservation/${id}/status`,
-          method: "PATCH",
+          url: `/admin/reservations/${id}`,
+          method: "PUT",
           body: transformedData,
         };
       },
@@ -277,6 +270,21 @@ export const api = createApi({
           return transformedData;
         })(),
       }),
+      invalidatesTags: ["Reservations"],
+    }),
+
+    // Admin-only status updates
+    updateReservationStatus: builder.mutation<
+      any,
+      { id: string; status: string }
+    >({
+      query: ({ id, status }) => {
+        return {
+          url: `/admin/reservations/${id}/status`,
+          method: "PATCH",
+          body: { status },
+        };
+      },
       invalidatesTags: ["Reservations"],
     }),
 
@@ -398,7 +406,7 @@ export const {
   useUpdateReservationMutation,
   useUpdateReservationAdminMutation,
   useUpdateReservationUserMutation,
-
+  useUpdateReservationStatusMutation,
   useAssignEmployeeToReservationMutation,
   useDeleteReservationMutation,
   useGetCustomersQuery,

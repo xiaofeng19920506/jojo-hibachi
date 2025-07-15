@@ -18,7 +18,7 @@ interface EditDialogProps {
   open: boolean;
   onClose: () => void;
   onSave: () => void;
-  dialogType: "edit" | "assign" | "status";
+  dialogType: "edit" | "assign" | "status" | "cancel";
   activeTable: string;
   userRole: string;
   loading: boolean;
@@ -141,39 +141,68 @@ const EditDialog: React.FC<EditDialogProps> = ({
               labelId="status-select-label"
               value={selectedStatus}
               label="Status"
-              onChange={(e) => {
-                console.log("Status dropdown onChange:", e.target.value);
-                onStatusChange(e);
-                // Auto-save and close when status is selected
-                setTimeout(() => {
-                  onSave();
-                }, 100);
-              }}
+              onChange={onStatusChange}
             >
-              {console.log("Current selectedStatus:", selectedStatus)}
-              {activeTable === "orders" ? [
-                <MenuItem key="pending" value="pending">Pending</MenuItem>,
-                <MenuItem key="assigned" value="assigned">Assigned</MenuItem>,
-                <MenuItem key="in-progress" value="in-progress">In Progress</MenuItem>,
-                <MenuItem key="completed" value="completed">Completed</MenuItem>,
-                <MenuItem key="cancelled" value="cancelled">Cancelled</MenuItem>
-              ] : [
-                <MenuItem key="pending" value="pending">Pending</MenuItem>,
-                <MenuItem key="confirmed" value="confirmed">Confirmed</MenuItem>,
-                <MenuItem key="completed" value="completed">Completed</MenuItem>,
-                <MenuItem key="cancelled" value="cancelled">Cancelled</MenuItem>
-              ]}
+              {activeTable === "orders"
+                ? [
+                    <MenuItem key="pending" value="pending">
+                      Pending
+                    </MenuItem>,
+                    <MenuItem key="assigned" value="assigned">
+                      Assigned
+                    </MenuItem>,
+                    <MenuItem key="in-progress" value="in-progress">
+                      In Progress
+                    </MenuItem>,
+                    <MenuItem key="completed" value="completed">
+                      Completed
+                    </MenuItem>,
+                    <MenuItem key="cancelled" value="cancelled">
+                      Cancelled
+                    </MenuItem>,
+                  ]
+                : [
+                    <MenuItem key="pending" value="pending">
+                      Pending
+                    </MenuItem>,
+                    <MenuItem key="confirmed" value="confirmed">
+                      Confirmed
+                    </MenuItem>,
+                    <MenuItem key="completed" value="completed">
+                      Completed
+                    </MenuItem>,
+                    <MenuItem key="cancelled" value="cancelled">
+                      Cancelled
+                    </MenuItem>,
+                  ]}
             </Select>
           </FormControl>
+        )}
+
+        {dialogType === "cancel" && (
+          <Box sx={{ pt: 2 }}>
+            <p>Are you sure you want to cancel this reservation?</p>
+          </Box>
         )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={loading}>
           Cancel
         </Button>
-        <Button variant="contained" onClick={onSave} disabled={loading}>
-          {loading ? <CircularProgress size={20} /> : "Save"}
-        </Button>
+        {dialogType === "cancel" ? (
+          <Button
+            variant="contained"
+            color="error"
+            onClick={onSave}
+            disabled={loading}
+          >
+            Confirm Cancel
+          </Button>
+        ) : (
+          <Button variant="contained" onClick={onSave} disabled={loading}>
+            {loading ? <CircularProgress size={20} /> : "Save"}
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

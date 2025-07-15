@@ -38,7 +38,6 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
 
   const totalGuests = (adult || 0) + (kids || 0);
   const basePrice = (adult || 0) * 50 + (kids || 0) * 25;
-  console.log(transportationFee, price);
 
   const goToHome = () => {
     dispatch(resetReservation());

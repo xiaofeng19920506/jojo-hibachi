@@ -33,7 +33,6 @@ const Dashboard: React.FC = () => {
     loading,
     error,
     userRole,
-    user,
     isInitialized,
     // Computed
     filteredSortedData,
@@ -51,13 +50,8 @@ const Dashboard: React.FC = () => {
     handleDialogSave,
     getAvailableActions,
     getEmployeeDisplayName,
-    // Get employeesData from useDashboard
-    employeesData,
     allEmployeesData,
   } = useDashboard();
-
-  // Add this for debugging
-  console.log("Dashboard error:", error);
 
   // Wait for auth/user to be initialized
   if (!isInitialized) {
@@ -81,6 +75,9 @@ const Dashboard: React.FC = () => {
     userRole.toLowerCase() === "admin"
       ? allEmployeesData
       : undefined;
+
+  // Add this for debugging
+  console.log("EditDialog props:", { dialogType, dialogOpen });
 
   return (
     <Box
