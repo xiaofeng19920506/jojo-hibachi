@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import type { ToolbarProps } from "react-big-calendar";
 import { format, parse, startOfWeek, getDay, addDays } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { useAppSelector } from "../../utils/hooks";
@@ -14,11 +15,19 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
 } from "@mui/material";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "./employee-calendar-custom.css";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useNavigate } from "react-router-dom";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs, { Dayjs } from "dayjs";
 
 const locales = {
   "en-US": enUS,
@@ -45,34 +54,27 @@ const EmployeeCalendar: React.FC = () => {
   const userRole = user?.role || "user";
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const navigate = useNavigate();
+  const [calendarDate, setCalendarDate] = useState<Date>(() => {
 
-  // Debug log for user state
-  console.log(
-    "[EmployeeCalendar] user:",
-    user,
-    "userRole:",
-    userRole,
-    "employeeId:",
-    userRole === "employee" ? user?.id : selectedEmployeeId
-  );
+    return new Date();
+  });
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
 
-  // Fetch all employees for admin filter
+
+
   const { data: allEmployees = [] } = useGetAdminEmployeesQuery(undefined, {
     skip: userRole !== "admin",
   });
 
-  // Compute week start and end (Sunday to Saturday)
   const now = new Date();
-  const weekStart = startOfWeek(now, { weekStartsOn: 0 });
+  const weekStart = startOfWeek(calendarDate, { weekStartsOn: 0 });
   const weekEnd = addDays(weekStart, 6);
   const weekStartStr = format(weekStart, "yyyy-MM-dd");
   const weekEndStr = format(weekEnd, "yyyy-MM-dd");
 
-  // Only check for authToken before making the API call
   const hasAuthToken = !!localStorage.getItem("authToken");
   const shouldFetch = hasAuthToken && !!weekStartStr && !!weekEndStr;
 
-  // Loading guard: wait for authToken
   if (!hasAuthToken) {
     return <div>Loading user info...</div>;
   }
@@ -81,10 +83,8 @@ const EmployeeCalendar: React.FC = () => {
     shouldFetch ? { startDate: weekStartStr, endDate: weekEndStr } : skipToken
   );
 
-  // Map reservations to calendar events
   const events: CalendarEvent[] = weekReservations.map((r: any) => {
     const start = new Date(r.date + "T" + (r.time || "00:00"));
-    // Reservation lasts 90 minutes
     const end = new Date(start.getTime() + 90 * 60000); // 90 minutes in ms
     return {
       id: r.id,
@@ -126,10 +126,56 @@ const EmployeeCalendar: React.FC = () => {
     }
   }, []);
 
+  // Custom toolbar to remove navigation buttons and add left/right arrows and date picker
+  const CustomToolbar = (toolbar: any) => {
+    return (
+      <div
+        className="rbc-toolbar"
+        style={{
+          textAlign: "center",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "row",
+          gap: 0,
+        }}
+      >
+        <ArrowBackIosNewIcon
+          style={{ cursor: "pointer", marginRight: 12 }}
+          onClick={() => {
+            const prev = addDays(weekStart, -7);
+            setCalendarDate(prev);
+            toolbar.onNavigate("PREV");
+          }}
+        />
+        <span
+          className="rbc-toolbar-label"
+          style={{
+            minWidth: 120,
+            fontWeight: 500,
+            fontSize: 18,
+            margin: "0 8px",
+          }}
+        >
+          {toolbar.label}
+        </span>
+        <ArrowForwardIosIcon
+          style={{ cursor: "pointer", marginLeft: 12 }}
+          onClick={() => {
+            const next = addDays(weekStart, 7);
+            setCalendarDate(next);
+            toolbar.onNavigate("NEXT");
+          }}
+        />
+      </div>
+    );
+  };
+
   return (
     <Box
       sx={{
-        p: 0,
+        p: { xs: 0, sm: 2 },
         m: 0,
         width: "100vw",
         height: "100vh",
@@ -138,6 +184,7 @@ const EmployeeCalendar: React.FC = () => {
         overflow: "hidden",
         display: "flex",
         flexDirection: "column",
+        alignItems: "center",
       }}
     >
       <Typography variant="h4" mb={2} sx={{ p: 3 }}>
@@ -165,45 +212,68 @@ const EmployeeCalendar: React.FC = () => {
         sx={{
           flex: 1,
           width: "100%",
+          maxWidth: 900,
           height: "100%",
           minHeight: 0,
           minWidth: 0,
+          mx: "auto",
+          px: { xs: 1, sm: 2 },
         }}
       >
+        <Box sx={{ display: "flex", justifyContent: "flex-start", mb: 1 }}>
+          <DatePicker
+            open={datePickerOpen}
+            onOpen={() => setDatePickerOpen(true)}
+            onClose={() => setDatePickerOpen(false)}
+            value={dayjs(calendarDate)}
+            onChange={(value: any) => {
+              if (value && typeof value.toDate === "function") {
+                // Set calendarDate to the picked date
+                const picked = value.toDate();
+                setCalendarDate(picked);
+                setDatePickerOpen(false);
+              }
+            }}
+            slotProps={{
+              textField: {
+                variant: "outlined",
+                size: "small",
+                sx: {
+                  minWidth: 120,
+                  maxWidth: 140,
+                  background: "#fff",
+                  cursor: "pointer",
+                  "& .MuiInputBase-input": { cursor: "pointer" },
+                },
+                onClick: () => setDatePickerOpen(true),
+              },
+            }}
+          />
+        </Box>
         <Calendar
           localizer={localizer}
           events={events}
           startAccessor="start"
           endAccessor="end"
+          date={startOfWeek(calendarDate, { weekStartsOn: 0 })}
+          onNavigate={(date: any) => setCalendarDate(date)}
           style={{
             height: "100%",
             width: "100%",
+            maxWidth: 900,
             background: "#fff",
             borderRadius: 16,
             boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
             padding: 16,
             minHeight: 0,
             minWidth: 0,
+            margin: "0 auto",
           }}
           views={["week"]}
           defaultView="week"
           toolbar={true}
-          popup
-          onSelectEvent={(event: CalendarEvent) =>
-            navigate(`/reservation/${event.reservationId}`)
-          }
-          eventPropGetter={() => ({
-            style: {
-              backgroundColor: userRole === "admin" ? "#43a047" : "#1976d2",
-              color: "#fff",
-              borderRadius: 8,
-              boxShadow: "0 1px 4px rgba(0,0,0,0.10)",
-              padding: "4px 8px",
-              fontSize: 14,
-              border: "none",
-            },
-          })}
           components={{
+            toolbar: CustomToolbar,
             event: ({ event }: { event: CalendarEvent }) => {
               const reservation = weekReservations.find(
                 (r) => r.id === event.reservationId
@@ -263,6 +333,21 @@ const EmployeeCalendar: React.FC = () => {
               );
             },
           }}
+          popup
+          onSelectEvent={(event: CalendarEvent) =>
+            navigate(`/reservation/${event.reservationId}`)
+          }
+          eventPropGetter={() => ({
+            style: {
+              backgroundColor: userRole === "admin" ? "#43a047" : "#1976d2",
+              color: "#fff",
+              borderRadius: 8,
+              boxShadow: "0 1px 4px rgba(0,0,0,0.10)",
+              padding: "4px 8px",
+              fontSize: 14,
+              border: "none",
+            },
+          })}
         />
       </Box>
     </Box>

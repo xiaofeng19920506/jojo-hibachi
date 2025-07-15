@@ -6,12 +6,16 @@ import theme from "./utils/theme";
 import { store } from "./store";
 import App from "./App";
 import "./index.css";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider theme={theme}>
       <Provider store={store}>
-        <App />
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <App />
+        </LocalizationProvider>
       </Provider>
     </ThemeProvider>
   </StrictMode>
