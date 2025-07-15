@@ -195,12 +195,13 @@ export const useDashboard = () => {
           setDialogType("edit");
           setDialogOpen(true);
           break;
-        case "assign":
+        case "assignchef":
         case "assignemployee":
           setSelectedEmployeeId(reservation.employeeId || "");
           setDialogType("assign");
           setDialogOpen(true);
           break;
+        case "changestatus":
         case "updatestatus":
         case "status":
           setSelectedStatus(reservation.status);
@@ -417,8 +418,8 @@ export const useDashboard = () => {
       case "admin":
         if (activeTable === "reservations") {
           actions.push("edit");
-          actions.push("assign");
-          actions.push("status");
+          actions.push("Assign Chef");
+          actions.push("Change Status");
         } else if (activeTable === "employees") {
           actions.push("edit");
           actions.push("status");

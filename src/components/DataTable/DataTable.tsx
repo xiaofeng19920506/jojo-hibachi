@@ -19,6 +19,7 @@ import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import type { SortableEntry, TableType } from "./types";
 import dayjs from "dayjs";
+import { useTheme } from "@mui/material/styles";
 
 interface DataTableProps {
   tableType: TableType;
@@ -39,6 +40,7 @@ const DataTable: React.FC<DataTableProps> = ({
   availableActions,
   userRole,
 }) => {
+  const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItem, setSelectedItem] = useState<SortableEntry | null>(null);
 
@@ -219,7 +221,7 @@ const DataTable: React.FC<DataTableProps> = ({
   };
 
   return (
-    <>
+    <Box position="relative">
       <TableContainer
         component={Paper}
         sx={{ width: "100%", overflowX: "auto", maxHeight: "100%" }}
@@ -309,6 +311,8 @@ const DataTable: React.FC<DataTableProps> = ({
           </TableBody>
         </Table>
       </TableContainer>
+      {/* Mobile horizontal scroll shadow */}
+      {/* Removed the Box with the gradient background to fix the grey spot */}
 
       <Menu
         anchorEl={anchorEl}
@@ -321,7 +325,7 @@ const DataTable: React.FC<DataTableProps> = ({
           </MenuItem>
         ))}
       </Menu>
-    </>
+    </Box>
   );
 };
 
