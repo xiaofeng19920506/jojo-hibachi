@@ -59,7 +59,7 @@ const SignIn: React.FC = () => {
   return (
     <SignInWrapper>
       <Form onSubmit={handleSubmit} style={{ padding: "16px 0" }}>
-        <Title sx={{ fontSize: { xs: 22, sm: 32 } }}>Sign In</Title>
+        <Title style={{ fontSize: 22 }}>Sign In</Title>
         {error && <ErrorMessage>{error}</ErrorMessage>}
         <Input
           type="email"
@@ -67,7 +67,7 @@ const SignIn: React.FC = () => {
           value={email}
           required
           onChange={(e) => setEmail(e.target.value)}
-          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, mb: 1 }}
+          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
         />
         <Input
           type="password"
@@ -75,12 +75,12 @@ const SignIn: React.FC = () => {
           value={password}
           required
           onChange={(e) => setPassword(e.target.value)}
-          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, mb: 1 }}
+          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
         />
         <Button
           type="submit"
           disabled={isLoading}
-          sx={{ fontSize: { xs: 16, sm: 18 }, minHeight: 44, minWidth: 44 }}
+          style={{ fontSize: 16, minHeight: 44, minWidth: 44 }}
         >
           {isLoading ? "Signing In..." : "Sign In"}
         </Button>
