@@ -9,6 +9,7 @@ import {
   RegisterPrompt,
 } from "./elements";
 import { Link, useNavigate } from "react-router-dom";
+import { useRegisterMutation } from "../../services/api";
 
 const SignUp: React.FC = () => {
   const [firstName, setFirstName] = useState("");
@@ -24,6 +25,7 @@ const SignUp: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const [register, { isLoading }] = useRegisterMutation();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -48,38 +50,17 @@ const SignUp: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-
-      const response = await fetch(
-        `${import.meta.env.VITE_BACKEND_URL}/auth/register`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email,
-            password,
-            role: "user",
-            firstName,
-            lastName,
-            phone: phoneNumber,
-            address: fullAddress,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Registration failed.");
-      }
-
-      localStorage.setItem("authToken", data.token);
+      const result = await register({
+        email,
+        password,
+        username: email,
+      }).unwrap();
+      localStorage.setItem("authToken", result.token);
       // Note: The user will be automatically logged in by AuthInitializer
       // when they navigate to the dashboard
       navigate("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Something went wrong.");
+      setError(err.data?.message || err.message || "Registration failed.");
     } finally {
       setLoading(false);
     }
