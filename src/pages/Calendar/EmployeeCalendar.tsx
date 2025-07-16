@@ -24,6 +24,7 @@ import {
   CalendarTitle,
   CalendarEmployeeSelect,
   CalendarContainer,
+  CalendarControlsRow,
 } from "./elements";
 import DatePicker from "../../components/DatePicker/DatePicker";
 import type { DatePickerRef } from "../../components/DatePicker/DatePicker";
@@ -151,22 +152,24 @@ const EmployeeCalendar: React.FC = () => {
                   ))}
                 </Select>
               </CalendarEmployeeSelect>
-              <ArrowBackIosNewIcon
-                style={{ cursor: "pointer", marginRight: 8, flex: "0 0 auto" }}
-                onClick={() => datePickerRef.current?.goToPrevWeek()}
-              />
-              <DatePicker
-                ref={datePickerRef}
-                value={calendarDate}
-                onChange={(date) => {
-                  setCalendarDate(date);
-                }}
-                showTime={false}
-              />
-              <ArrowForwardIosIcon
-                style={{ cursor: "pointer", marginLeft: 8, flex: "0 0 auto" }}
-                onClick={() => datePickerRef.current?.goToNextWeek()}
-              />
+              <CalendarControlsRow>
+                <ArrowBackIosNewIcon
+                  style={{ cursor: "pointer", flex: "0 0 auto" }}
+                  onClick={() => datePickerRef.current?.goToPrevWeek()}
+                />
+                <DatePicker
+                  ref={datePickerRef}
+                  value={calendarDate}
+                  onChange={(date) => {
+                    setCalendarDate(date);
+                  }}
+                  showTime={false}
+                />
+                <ArrowForwardIosIcon
+                  style={{ cursor: "pointer", flex: "0 0 auto" }}
+                  onClick={() => datePickerRef.current?.goToNextWeek()}
+                />
+              </CalendarControlsRow>
             </>
           )}
         </CalendarTitleRow>

@@ -33,9 +33,26 @@ export const CalendarTitleRow = styled(Box)`
   justify-content: center;
   width: 100%;
   margin-bottom: 24px;
-  gap: 16px;
+  gap: 8px;
+
   @media (min-width: 600px) {
     flex-direction: row;
+    gap: 16px;
+    align-items: center;
+    justify-content: flex-start;
+  }
+`;
+
+// New: Controls row for arrows and date input
+export const CalendarControlsRow = styled(Box)`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  @media (min-width: 600px) {
+    width: auto;
     gap: 16px;
   }
 `;
