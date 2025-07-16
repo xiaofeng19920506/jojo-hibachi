@@ -174,7 +174,6 @@ const EmployeeCalendar: React.FC = () => {
           )}
         </CalendarTitleRow>
         <CalendarContainer>
-          {/* Hidden native date input for calendar icon trigger */}
           <Calendar
             localizer={localizer}
             events={events}
@@ -185,7 +184,7 @@ const EmployeeCalendar: React.FC = () => {
             style={{
               height: "100%",
               width: "100%",
-              maxWidth: 900,
+              maxWidth: 1200, // Increased width
               background: "#fff",
               borderRadius: 16,
               boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
