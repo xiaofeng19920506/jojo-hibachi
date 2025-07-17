@@ -216,7 +216,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
                 value={(editFormData as any).role || "user"}
                 label="Role"
                 name="role"
-                onChange={onEditFormChange}
+                onChange={onEditFormChange as any}
                 sx={{ fontSize: { xs: 16, sm: 18 } }}
               >
                 <MenuItem value="user">User</MenuItem>

@@ -72,7 +72,6 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
   const view = controlledView ?? internalView;
 
   // Calculate number of columns (days)
-  const numDays = view === "week" ? 7 : 1;
   // Use mobile or desktop widths
   const mobile = isMobile();
   const dayColumnWidthRem = mobile
