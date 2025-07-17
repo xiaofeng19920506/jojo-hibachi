@@ -96,14 +96,6 @@ const App: React.FC = () => {
             }
           />
           <Route
-            path="/reset-password/:token"
-            element={
-              <Suspense fallback={<LoadingSpinner />}>
-                <ResetPassword />
-              </Suspense>
-            }
-          />
-          <Route
             path="/reset-password"
             element={
               <Suspense fallback={<LoadingSpinner />}>
