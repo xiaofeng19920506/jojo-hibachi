@@ -101,7 +101,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
         buttons.push({
           label: "Profile",
           variant: "outlined",
-          color: "primary",
+          color: "secondary",
           onClick: () => handleNavigation("/profile"),
         });
       }
