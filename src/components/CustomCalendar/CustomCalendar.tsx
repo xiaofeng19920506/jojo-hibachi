@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import CalendarHeader from "./CalendarHeader";
 import CalendarGrid from "./CalendarGrid";
@@ -78,7 +78,36 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
     ? DAY_COLUMN_WIDTH_REM_MOBILE
     : DAY_COLUMN_WIDTH_REM;
   const timeGutterWidth = mobile ? TIME_GUTTER_WIDTH_MOBILE : TIME_GUTTER_WIDTH;
-  // Calculate max-width: time gutter + columns * column width
+
+  // Current time indicator logic
+  const hours = Array.from({ length: 11 }, (_, i) => 12 + i); // 12pm-10pm
+  const calendarStartHour = hours[0];
+  const calendarEndHour = hours[hours.length - 1] + 1;
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Ref and state for slot height
+  const slotRef = useRef<HTMLDivElement>(null);
+  const [slotHeight, setSlotHeight] = useState<number>(0);
+  useEffect(() => {
+    if (slotRef.current) {
+      setSlotHeight(slotRef.current.offsetHeight);
+    }
+  }, [now, events, dayColumnWidthRem, timeGutterWidth]);
+
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  const isWithinRange = hour >= calendarStartHour && hour < calendarEndHour;
+  let indicatorTop = 0;
+  if (isWithinRange && slotHeight > 0) {
+    const hoursSinceStart = hour - calendarStartHour;
+    indicatorTop = (hoursSinceStart + minute / 60) * slotHeight;
+    if (indicatorTop < 0) indicatorTop = 0;
+    if (indicatorTop > slotHeight * hours.length) indicatorTop = slotHeight * hours.length;
+  }
 
   // Navigation handlers (no longer used internally)
   const handlePrev = () => {
@@ -119,6 +148,9 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
         onEventClick={onEventClick}
         dayColumnWidthRem={dayColumnWidthRem}
         timeGutterWidth={timeGutterWidth}
+        indicatorTop={indicatorTop}
+        showIndicator={isWithinRange && slotHeight > 0}
+        slotRef={slotRef}
       />
     </CalendarContainer>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import styled from "styled-components";
 import type { CalendarView, CalendarEvent } from "./CustomCalendar";
 import EventCard from "./EventCard";
@@ -6,8 +6,9 @@ import CurrentTimeIndicator from "./CurrentTimeIndicator";
 import Tooltip from "@mui/material/Tooltip";
 
 const hours = Array.from({ length: 11 }, (_, i) => 12 + i); // 12pm-10pm
-const HOUR_HEIGHT = 40; // for calculations, in px
-const HOUR_HEIGHT_CSS = "15rem"; // for styled-components
+// Reduce slot height for a more compact grid
+const HOUR_HEIGHT = 32; // px (was 40)
+const HOUR_HEIGHT_CSS = "3.5rem"; // was 15rem
 
 // Accept numDays and columnWidth as props
 interface CalendarGridProps {
@@ -17,44 +18,40 @@ interface CalendarGridProps {
   onEventClick?: (event: CalendarEvent) => void;
   dayColumnWidthRem?: number;
   timeGutterWidth?: number;
+  indicatorTop?: number;
+  showIndicator?: boolean;
+  slotRef?: React.RefObject<HTMLDivElement>;
 }
 
 const CalendarGridContainer = styled.div`
   display: grid;
   width: 100%;
-  height: 80vh;
-  overflow: auto;
+  max-height: 80vh;
+  overflow-y: scroll;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   padding: 8px;
-  scrollbar-width: thin;
-  scrollbar-color: #e0e0e0 #fafafa;
   &::-webkit-scrollbar {
-    height: 8px;
-    background: #fafafa;
+    display: none; /* Chrome/Safari/Webkit */
   }
-  &::-webkit-scrollbar-thumb {
-    background: #e0e0e0;
-    border-radius: 4px;
-  }
-
   @media (max-width: 600px) {
     width: max-content;
     border-radius: 0;
     box-shadow: none;
     padding: 4px;
     overflow-x: auto;
-    overflow-y: auto;
     position: relative;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
   }
 `;
 
-const HeaderCell = styled.div<{ isToday?: boolean }>`
-  background: ${({ isToday }) => (isToday ? "#f5f5f5" : "#f0f0f8")};
-  color: ${({ isToday }) => (isToday ? "#1976d2" : "inherit")};
+const HeaderCell = styled.div<{ $isToday?: boolean }>`
+  background: ${({ $isToday }) => ($isToday ? "#f5f5f5" : "#f0f0f8")};
+  color: ${({ $isToday }) => ($isToday ? "#1976d2" : "inherit")};
   font-weight: 500;
   font-size: 1.1rem;
   text-align: center;
@@ -99,43 +96,42 @@ const TopLeftCell = styled(GutterCell)`
   z-index: 4;
 `;
 
-const BodyCell = styled.div<{ isToday?: boolean }>`
-  background: ${({ isToday }) => (isToday ? "#e3f2fd" : "#fff")};
+const BodyCell = styled.div<{ $isToday?: boolean }>`
+  background: ${({ $isToday }) => ($isToday ? "#e3f2fd" : "#fff")};
   border-right: 1px solid #f0f0f0;
   border-bottom: 1px solid #f0f0f0;
   min-height: ${HOUR_HEIGHT_CSS};
   position: relative;
   font-size: 1rem;
+  height: 100%;
+  padding: 0;
+  margin: 0;
 
   @media (min-width: 601px) {
     min-width: 0;
   }
 `;
 
+const TodayColumnWrapper = styled.div`
+  position: relative;
+  height: 100%;
+`;
+
 const EventWrapper = styled.div<{
-  top: number;
-  height: number;
-  left: number;
-  width: number;
+  $top: number;
+  $height: number;
+  $left: number;
+  $width: number;
 }>`
   position: absolute;
-  top: ${({ top }) => top}px;
-  left: ${({ left }) => left}%;
-  width: ${({ width }) => width}%;
+  top: ${({ $top }) => $top}px;
+  left: ${({ $left }) => $left}%;
+  width: ${({ $width }) => $width}%;
   z-index: 5;
   right: 4px;
 `;
 
-const getWeekDates = (date: Date) => {
-  const start = new Date(date);
-  start.setDate(date.getDate() - date.getDay());
-  return Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-    return d;
-  });
-};
-
+// Fix isSameDay to use local time
 function isSameDay(d1: Date, d2: Date) {
   return (
     d1.getFullYear() === d2.getFullYear() &&
@@ -192,6 +188,19 @@ function getOverlappingMeta(events: CalendarEvent[]) {
   return meta;
 }
 
+// Fix getWeekDates to use local time
+const getWeekDates = (date: Date) => {
+  const start = new Date(date);
+  // Set to local start of week (Sunday)
+  start.setHours(0, 0, 0, 0);
+  start.setDate(date.getDate() - date.getDay());
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    return d;
+  });
+};
+
 const CalendarGrid: React.FC<CalendarGridProps> = ({
   currentDate,
   view,
@@ -199,32 +208,12 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   onEventClick,
   dayColumnWidthRem = 15,
   timeGutterWidth = 60,
+  indicatorTop = 0,
+  showIndicator = false,
+  slotRef,
 }) => {
   const weekDates = getWeekDates(currentDate);
   const days = view === "week" ? weekDates : [currentDate];
-
-  // Current time indicator logic
-  const [now, setNow] = useState(new Date());
-  useEffect(() => {
-    const interval = setInterval(() => setNow(new Date()), 60000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Find today column index
-  const todayIdx = days.findIndex((d) => isSameDay(d, now));
-  const showIndicator = todayIdx !== -1;
-
-  // Calculate top offset for the indicator (in px)
-  let indicatorTop = 0;
-  if (showIndicator) {
-    const hour = now.getHours();
-    const minute = now.getMinutes();
-    if (hour >= hours[0] && hour <= hours[hours.length - 1]) {
-      indicatorTop = (hour - hours[0] + minute / 60) * HOUR_HEIGHT;
-    } else {
-      indicatorTop = hour < hours[0] ? 0 : HOUR_HEIGHT * hours.length;
-    }
-  }
 
   // Grid template - use flexible widths for desktop, fixed for mobile
   const isMobileView = window.innerWidth <= 600;
@@ -244,9 +233,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       <TopLeftCell />
       {/* Date headers */}
       {days.map((d, i) => {
-        const isToday = isSameDay(d, now);
+        const isToday = isSameDay(d, new Date());
         return (
-          <HeaderCell key={i} isToday={isToday}>
+          <HeaderCell key={i} $isToday={isToday}>
             {d.toLocaleDateString(undefined, {
               weekday: "short",
               month: "numeric",
@@ -259,7 +248,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       {hours.map((hour, rowIdx) => [
         <GutterCell key={`gutter-${hour}`}>{hour}:00</GutterCell>,
         ...days.map((day, colIdx) => {
-          const isToday = isSameDay(day, now);
+          const isToday = isSameDay(day, new Date());
           // Find events that start at this day/hour
           const cellEvents = events.filter(
             (ev) => isSameDay(ev.start, day) && isSameHour(ev.start, hour)
@@ -268,11 +257,89 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           const dayEvents = events.filter((ev) => isSameDay(ev.start, day));
           // Overlap meta for this day
           const overlapMeta = getOverlappingMeta(dayEvents);
-          // Render indicator in the first cell of today column
-          const renderIndicator =
-            showIndicator && colIdx === todayIdx && hour === hours[0];
+          // Instead of rendering indicator in the first cell, render a wrapper for each column
+          if (rowIdx === 0) {
+            return (
+              <TodayColumnWrapper
+                key={`col-${colIdx}`}
+                // no ref here
+              >
+                {hours.map((h, hIdx) => {
+                  const cellEvents = events.filter(
+                    (ev) => isSameDay(ev.start, day) && isSameHour(ev.start, h)
+                  );
+                  const dayEvents = events.filter((ev) =>
+                    isSameDay(ev.start, day)
+                  );
+                  const overlapMeta = getOverlappingMeta(dayEvents);
+                  return (
+                    <BodyCell
+                      key={`cell-${hIdx}-${colIdx}`}
+                      $isToday={isToday}
+                      ref={
+                        hIdx === 0 && colIdx === 0 && slotRef
+                          ? slotRef
+                          : undefined
+                      }
+                    >
+                      {cellEvents.map((ev) => {
+                        const span = getEventSpan(ev);
+                        const top = (ev.start.getMinutes() / 60) * HOUR_HEIGHT;
+                        const height = span * HOUR_HEIGHT;
+                        const meta = overlapMeta[ev.id] || { col: 0, total: 1 };
+                        const width = 100 / meta.total;
+                        const left = meta.col * width;
+                        const startStr = ev.start.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        });
+                        const endStr = ev.end.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        });
+                        const tooltip = (
+                          <div>
+                            <div>
+                              <strong>{ev.title}</strong>
+                            </div>
+                            <div>
+                              {startStr} - {endStr}
+                            </div>
+                            {ev.notes && (
+                              <div style={{ marginTop: 4 }}>{ev.notes}</div>
+                            )}
+                          </div>
+                        );
+                        return (
+                          <EventWrapper
+                            key={ev.id}
+                            $top={top}
+                            $height={height}
+                            $left={left}
+                            $width={width}
+                          >
+                            <Tooltip title={tooltip} arrow placement="top">
+                              <span>
+                                <EventCard
+                                  event={ev}
+                                  onClick={() => onEventClick?.(ev)}
+                                />
+                              </span>
+                            </Tooltip>
+                          </EventWrapper>
+                        );
+                      })}
+                    </BodyCell>
+                  );
+                })}
+                {/* Render the time indicator absolutely in every column */}
+                {showIndicator && <CurrentTimeIndicator top={indicatorTop} />}
+              </TodayColumnWrapper>
+            );
+          }
+          // For non-first rows, render as before
           return (
-            <BodyCell key={`cell-${rowIdx}-${colIdx}`} isToday={isToday}>
+            <BodyCell key={`cell-${rowIdx}-${colIdx}`} $isToday={isToday}>
               {cellEvents.map((ev) => {
                 const span = getEventSpan(ev);
                 const top = (ev.start.getMinutes() / 60) * HOUR_HEIGHT;
@@ -302,10 +369,10 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                 return (
                   <EventWrapper
                     key={ev.id}
-                    top={top}
-                    height={height}
-                    left={left}
-                    width={width}
+                    $top={top}
+                    $height={height}
+                    $left={left}
+                    $width={width}
                   >
                     <Tooltip title={tooltip} arrow placement="top">
                       <span>
@@ -318,7 +385,6 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                   </EventWrapper>
                 );
               })}
-              {renderIndicator && <CurrentTimeIndicator top={indicatorTop} />}
             </BodyCell>
           );
         }),
