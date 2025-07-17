@@ -37,8 +37,7 @@ const SignIn: React.FC = () => {
         email,
         password,
       }).unwrap();
-
-      const { token, user } = result;
+      const { token, user } = result as { token: string; user: any };
 
       if (!token) {
         throw new Error("No token received from server");

@@ -15,8 +15,6 @@ import {
 } from "../../services/api";
 
 const Profile: React.FC = () => {
-  const navigate = useNavigate();
-  const { user } = useAppSelector((state) => state.user);
   const { data: profile, isLoading } = useGetUserProfileQuery();
   const [updateUserProfile, { isLoading: isSaving }] =
     useUpdateUserProfileMutation();

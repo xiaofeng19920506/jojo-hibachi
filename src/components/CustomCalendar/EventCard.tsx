@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { CalendarEvent } from "./CustomCalendar";
+import type { CalendarEvent } from "./CustomCalendar";
 
 const Card = styled.div`
   background: #9c27b0;

@@ -1,10 +1,13 @@
-// src/services/publicApi.ts
-export const publicApiEndpoints = (builder: any) => ({
+import type { EndpointBuilder, BaseQueryFn } from "@reduxjs/toolkit/query";
+
+export const publicApiEndpoints = (
+  builder: EndpointBuilder<BaseQueryFn, string, string>
+) => ({
   login: builder.mutation<
     { token: string; user: any },
     { email: string; password: string }
   >({
-    query: (credentials) => ({
+    query: (credentials: { email: string; password: string }) => ({
       url: "/auth/login",
       method: "POST",
       body: credentials,
@@ -41,7 +44,18 @@ export const publicApiEndpoints = (builder: any) => ({
       zipCode: string;
     }
   >({
-    query: (credentials) => ({
+    query: (credentials: {
+      email: string;
+      password: string;
+      role: string;
+      firstName: string;
+      lastName: string;
+      phone: string;
+      address: string;
+      city: string;
+      state: string;
+      zipCode: string;
+    }) => ({
       url: "/auth/register",
       method: "POST",
       body: credentials,

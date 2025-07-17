@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { CalendarView, CalendarEvent } from "./CustomCalendar";
+import type { CalendarView, CalendarEvent } from "./CustomCalendar";
 import EventCard from "./EventCard";
 import CurrentTimeIndicator from "./CurrentTimeIndicator";
 import Tooltip from "@mui/material/Tooltip";

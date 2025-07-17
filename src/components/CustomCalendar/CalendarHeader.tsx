@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { CalendarView } from "./CustomCalendar";
+import type { CalendarView } from "./CustomCalendar";
 
 interface CalendarHeaderProps {
   currentDate: Date;

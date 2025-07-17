@@ -60,7 +60,7 @@ const SignUp: React.FC = () => {
         state,
         zipCode,
       }).unwrap();
-      localStorage.setItem("authToken", result.token);
+      localStorage.setItem("authToken", (result as { token: string }).token);
       // Note: The user will be automatically logged in by AuthInitializer
       // when they navigate to the dashboard
       navigate("/dashboard");

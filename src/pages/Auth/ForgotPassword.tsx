@@ -58,7 +58,6 @@ const ForgotPassword: React.FC = () => {
         </Button>
         <Button
           type="button"
-          variant="outlined"
           style={{ fontSize: 16, minHeight: 44, minWidth: 44, marginTop: 8 }}
           onClick={() => navigate("/signin")}
         >
