@@ -18,6 +18,9 @@ const ReservationDetail = lazy(
 const Profile = lazy(() => import("./pages/Auth/Profile"));
 const ForgotPassword = lazy(() => import("./pages/Auth/ForgotPassword"));
 const ResetPassword = lazy(() => import("./pages/Auth/ResetPassword"));
+const ResetPasswordResult = lazy(
+  () => import("./pages/Auth/ResetPasswordResult")
+);
 
 const App: React.FC = () => {
   return (
@@ -100,6 +103,14 @@ const App: React.FC = () => {
             element={
               <Suspense fallback={<LoadingSpinner />}>
                 <ResetPassword />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/reset-password-result"
+            element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <ResetPasswordResult />
               </Suspense>
             }
           />

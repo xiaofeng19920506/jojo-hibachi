@@ -45,9 +45,12 @@ const ResetPassword: React.FC = () => {
     }
     try {
       await resetPassword({ token, password, email }).unwrap();
-      setSuccess("Password reset successful. You can now sign in.");
+      navigate("/reset-password-result?status=success");
     } catch (err: any) {
-      setError(err.data?.message || err.message || "Failed to reset password.");
+      const msg = encodeURIComponent(
+        err.data?.message || err.message || "Failed to reset password."
+      );
+      navigate(`/reset-password-result?status=fail&message=${msg}`);
     }
   };
 

@@ -108,7 +108,7 @@ export const publicApiEndpoints = (
       method: "POST",
       body: {
         token: credentials.token,
-        password: credentials.password,
+        newPassword: credentials.password,
         email: credentials.email,
       },
     }),
