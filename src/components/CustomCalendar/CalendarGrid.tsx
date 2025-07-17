@@ -20,7 +20,7 @@ interface CalendarGridProps {
   timeGutterWidth?: number;
   indicatorTop?: number;
   showIndicator?: boolean;
-  slotRef?: React.RefObject<HTMLDivElement>;
+  slotRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 const CalendarGridContainer = styled.div`

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, RefObject } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import CalendarHeader from "./CalendarHeader";
 import CalendarGrid from "./CalendarGrid";
@@ -93,7 +93,7 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
   }, []);
 
   // Ref and state for slot height
-  const slotRef: RefObject<HTMLDivElement> = useRef(null);
+  const slotRef = useRef<HTMLDivElement>(null);
   const [slotHeight, setSlotHeight] = useState<number>(0);
   useEffect(() => {
     if (slotRef.current) {
