@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, RefObject } from "react";
 import styled from "styled-components";
 import CalendarHeader from "./CalendarHeader";
 import CalendarGrid from "./CalendarGrid";
@@ -34,6 +34,9 @@ const CalendarContainer = styled.div`
   margin-bottom: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   overflow: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 
   @media (max-width: 600px) {
     width: 100%;
@@ -90,7 +93,7 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
   }, []);
 
   // Ref and state for slot height
-  const slotRef = useRef<HTMLDivElement>(null);
+  const slotRef: RefObject<HTMLDivElement> = useRef(null);
   const [slotHeight, setSlotHeight] = useState<number>(0);
   useEffect(() => {
     if (slotRef.current) {
@@ -106,7 +109,8 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
     const hoursSinceStart = hour - calendarStartHour;
     indicatorTop = (hoursSinceStart + minute / 60) * slotHeight;
     if (indicatorTop < 0) indicatorTop = 0;
-    if (indicatorTop > slotHeight * hours.length) indicatorTop = slotHeight * hours.length;
+    if (indicatorTop > slotHeight * hours.length)
+      indicatorTop = slotHeight * hours.length;
   }
 
   // Navigation handlers (no longer used internally)

@@ -23,7 +23,8 @@ export const CalendarContent = styled(Box)`
   align-items: center;
   width: 100%;
   margin-top: 16px;
-  overflow: auto;
+  overflow: hidden;
+  height: 100%;
   @media (min-width: 600px) {
     margin-top: 32px;
   }
@@ -81,12 +82,14 @@ export const CalendarEmployeeSelect = styled(FormControl)`
 
 export const CalendarContainer = styled(Box)`
   width: 100%;
-  height: 90vh;
+  height: 100%;
   min-width: 0;
   margin-left: auto;
   margin-right: auto;
   padding: 16px;
-  overflow: auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   @media (min-width: 600px) {
     padding: 24px;
   }

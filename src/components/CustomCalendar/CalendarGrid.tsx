@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React from "react";
 import styled from "styled-components";
 import type { CalendarView, CalendarEvent } from "./CustomCalendar";
 import EventCard from "./EventCard";
@@ -7,8 +7,8 @@ import Tooltip from "@mui/material/Tooltip";
 
 const hours = Array.from({ length: 11 }, (_, i) => 12 + i); // 12pm-10pm
 // Reduce slot height for a more compact grid
-const HOUR_HEIGHT = 32; // px (was 40)
-const HOUR_HEIGHT_CSS = "3.5rem"; // was 15rem
+const HOUR_HEIGHT = 80; // px (5rem)
+const HOUR_HEIGHT_CSS = "5rem";
 
 // Accept numDays and columnWidth as props
 interface CalendarGridProps {
@@ -26,8 +26,8 @@ interface CalendarGridProps {
 const CalendarGridContainer = styled.div`
   display: grid;
   width: 100%;
-  height: auto;
-  overflow-y: visible;
+  height: calc(100vh - 250px); /* More space for header, title, and padding */
+  overflow-y: auto;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE 10+ */
   background: #fff;
@@ -39,6 +39,7 @@ const CalendarGridContainer = styled.div`
   }
   @media (max-width: 600px) {
     width: max-content;
+    height: calc(100vh - 220px); /* More space on mobile */
     border-radius: 0;
     box-shadow: none;
     padding: 4px 4px 0 4px;
