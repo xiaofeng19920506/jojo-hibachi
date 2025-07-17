@@ -82,7 +82,7 @@ export interface Employee {
 
 export interface DialogState {
   open: boolean;
-  type: "edit" | "assign" | "status";
+  type: "edit" | "assign" | "status" | "role";
   selectedReservation: ReservationEntry | null;
   editFormData: Partial<ReservationEntry>;
   selectedEmployeeId: string;

@@ -177,7 +177,7 @@ const Dashboard: React.FC = () => {
               >
                 <DataTable
                   tableType={activeTable as TableType}
-                  data={paginatedData}
+                  data={paginatedData || []}
                   onSort={handleSort}
                   sortConfig={{
                     key: "date",

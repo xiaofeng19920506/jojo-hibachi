@@ -32,7 +32,7 @@ interface DataTableProps {
 
 const DataTable: React.FC<DataTableProps> = ({
   tableType,
-  data,
+  data = [], // Default to empty array
   onSort,
   sortConfig,
   onActionClick,
@@ -87,7 +87,7 @@ const DataTable: React.FC<DataTableProps> = ({
 
   // Fix columnMap to include all TableType keys
   const columnMap: Record<TableType, string[]> = {
-    customers: ["name", "email", "phone", "address"],
+    customers: ["name", "email", "phone", "address", "actions"],
     employees: [
       "name",
       "email",
@@ -153,25 +153,9 @@ const DataTable: React.FC<DataTableProps> = ({
     if ("phone" in item && col === "phone") return item.phone || "";
     if ("role" in item && col === "role") return item.role;
     if (col === "address") {
-      // Only process if item has address fields
-      if (
-        "address" in item &&
-        "city" in item &&
-        "state" in item &&
-        "zipCode" in item
-      ) {
-        let addr = (item as any).address || "";
-        let city = (item as any).city || "";
-        let state = (item as any).state || "";
-        const zip = (item as any).zipCode || "";
-        addr = addr.charAt(0).toUpperCase() + addr.slice(1);
-        city = city.charAt(0).toUpperCase() + city.slice(1);
-        state = state.toUpperCase();
-        let full = addr;
-        if (city) full += `, ${city}`;
-        if (state) full += `, ${state}`;
-        if (zip) full += ` ${zip}`;
-        return full.trim() || "-";
+      // Just return the address string if present
+      if ("address" in item && item.address) {
+        return item.address;
       }
       return "-";
     }

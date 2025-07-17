@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import CustomCalendar from "../../components/CustomCalendar/CustomCalendar";
 import { format, parse, startOfWeek, getDay, addDays } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { useAppSelector } from "../../utils/hooks";
@@ -8,8 +8,6 @@ import {
   useGetEmployeeAssignedByDateQuery,
 } from "../../services/api";
 import { MenuItem, Select, InputLabel } from "@mui/material";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-import "./employee-calendar-custom.css";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
@@ -28,17 +26,8 @@ import {
 } from "./elements";
 import DatePicker from "../../components/DatePicker/DatePicker";
 import type { DatePickerRef } from "../../components/DatePicker/DatePicker";
-
-const locales = {
-  "en-US": enUS,
-};
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 0 }),
-  getDay,
-  locales,
-});
+import EventCard from "./EventCard";
+import { createPortal } from "react-dom";
 
 interface CalendarEvent {
   id: string;
@@ -57,6 +46,7 @@ const EmployeeCalendar: React.FC = () => {
   const [calendarDate, setCalendarDate] = useState<Date>(() => {
     return new Date();
   });
+  const [currentTimeTop, setCurrentTimeTop] = useState<number | null>(null);
 
   const { data: allEmployees = [] } = useGetAdminEmployeesQuery(undefined, {
     skip: userRole !== "admin",
@@ -91,7 +81,6 @@ const EmployeeCalendar: React.FC = () => {
     };
   });
 
-  // Auto-select the first employee for admin if none is selected
   useEffect(() => {
     if (
       userRole === "admin" &&
@@ -102,7 +91,6 @@ const EmployeeCalendar: React.FC = () => {
     }
   }, [userRole, allEmployees, selectedEmployeeId]);
 
-  // Force all day columns to have blue background using JS override
   useEffect(() => {
     const setBg = () => {
       document.querySelectorAll(".rbc-day-bg").forEach((el) => {
@@ -112,7 +100,6 @@ const EmployeeCalendar: React.FC = () => {
       });
     };
     setBg();
-    // Re-apply after navigation or updates
     const calendar = document.querySelector(".rbc-time-view");
     if (calendar) {
       const observer = new MutationObserver(setBg);
@@ -120,6 +107,131 @@ const EmployeeCalendar: React.FC = () => {
       return () => observer.disconnect();
     }
   }, []);
+
+  useEffect(() => {
+    setTimeout(() => {
+      const todayBg = document.querySelector(
+        ".rbc-day-bg.rbc-today"
+      ) as HTMLElement;
+      const timeContent = document.querySelector(
+        ".rbc-time-content"
+      ) as HTMLElement;
+      if (todayBg && timeContent) {
+        const todayRect = todayBg.getBoundingClientRect();
+        const contentRect = timeContent.getBoundingClientRect(); // Scroll so that today column is centered in the visible area
+        const scrollLeft =
+          todayBg.offsetLeft - contentRect.width / 2 + todayRect.width / 2;
+        timeContent.scrollTo({ left: scrollLeft, behavior: "smooth" });
+      }
+    }, 100);
+  }, [calendarDate]);
+
+  useEffect(() => {
+    // Auto-scroll to closest current time slot on mount
+    setTimeout(() => {
+      const now = new Date();
+      const timeSlots = Array.from(
+        document.querySelectorAll(".rbc-time-slot")
+      ) as HTMLElement[];
+      let closestSlot: HTMLElement | null = null;
+      let minDiff = Infinity;
+      for (const slot of timeSlots) {
+        if (slot.innerText) {
+          // slot.innerText is like "2:00 PM"
+          const slotTime = new Date(now);
+          const [time, ampm] = slot.innerText.trim().split(" ");
+          if (!time || !ampm) continue;
+          let [hour, minute] = time.split(":").map(Number);
+          if (ampm === "PM" && hour !== 12) hour += 12;
+          if (ampm === "AM" && hour === 12) hour = 0;
+          slotTime.setHours(hour, minute || 0, 0, 0);
+          const diff = Math.abs(now.getTime() - slotTime.getTime());
+          if (diff < minDiff) {
+            minDiff = diff;
+            closestSlot = slot;
+          }
+        }
+      }
+      const timeContent = document.querySelector(
+        ".rbc-time-content"
+      ) as HTMLElement;
+      if (closestSlot && timeContent) {
+        const slotRect = closestSlot.getBoundingClientRect();
+        const contentRect = timeContent.getBoundingClientRect();
+        const scrollTop =
+          closestSlot.offsetTop - contentRect.height / 2 + slotRect.height / 2;
+        timeContent.scrollTo({ top: scrollTop, behavior: "smooth" });
+      }
+    }, 400);
+  }, []);
+
+  useEffect(() => {
+    const updateLine = () => {
+      const timeContent = document.querySelector(
+        ".rbc-time-content"
+      ) as HTMLElement;
+      const gutterSlots = Array.from(
+        document.querySelectorAll(".rbc-time-gutter .rbc-time-slot")
+      ) as HTMLElement[];
+      if (!timeContent || gutterSlots.length === 0) return;
+
+      // Only show the line if today is in the current week
+      const today = new Date();
+      const weekStart = startOfWeek(calendarDate, { weekStartsOn: 0 });
+      const weekEnd = addDays(weekStart, 6);
+      if (today < weekStart || today > weekEnd) {
+        setCurrentTimeTop(null);
+        return;
+      }
+
+      // Get the start time from the first gutter slot
+      const firstSlotText = gutterSlots[0].innerText.trim();
+      const [time, ampm] = firstSlotText.split(" ");
+      let [startHour, startMinute] = time.split(":").map(Number);
+      if (ampm === "PM" && startHour !== 12) startHour += 12;
+      if (ampm === "AM" && startHour === 12) startHour = 0;
+      const calendarStartMinutes = startHour * 60 + (startMinute || 0);
+
+      // Get slot step in minutes
+      let slotStep = 30; // default
+      if (gutterSlots.length > 1) {
+        const secondSlotText = gutterSlots[1].innerText.trim();
+        const [time2, ampm2] = secondSlotText.split(" ");
+        let [hour2, minute2] = time2.split(":").map(Number);
+        if (ampm2 === "PM" && hour2 !== 12) hour2 += 12;
+        if (ampm2 === "AM" && hour2 === 12) hour2 = 0;
+        const slot2Minutes = hour2 * 60 + (minute2 || 0);
+        slotStep = Math.abs(slot2Minutes - calendarStartMinutes);
+      }
+
+      // Get slot height in px
+      const slotHeight = gutterSlots[0].offsetHeight;
+
+      // Calculate offset for current time (device local time)
+      const now = new Date();
+      const nowMinutes = now.getHours() * 60 + now.getMinutes();
+      const minutesSinceStart = nowMinutes - calendarStartMinutes;
+      let top = (minutesSinceStart / slotStep) * slotHeight;
+      // Clamp the line position to the visible area
+      if (top < 0) top = 0;
+      const maxTop = gutterSlots.length * slotHeight;
+      if (top > maxTop) top = maxTop;
+
+      setCurrentTimeTop(top);
+
+      // Scroll to the current time (if desired)
+      if (timeContent && top > 0) {
+        timeContent.scrollTo({
+          top: top - timeContent.clientHeight / 2,
+          behavior: "smooth",
+        });
+      }
+    };
+
+    updateLine();
+    const interval = setInterval(updateLine, 60000);
+    return () => clearInterval(interval);
+  }, [calendarDate]);
 
   const datePickerRef = useRef<DatePickerRef>(null);
 
@@ -133,144 +245,52 @@ const EmployeeCalendar: React.FC = () => {
         <CalendarTitleRow>
           <CalendarTitle variant="h4">Weekly Calendar</CalendarTitle>
           {userRole === "admin" && (
-            <>
-              <CalendarEmployeeSelect>
-                <InputLabel id="employee-select-label">
-                  Select Employee
-                </InputLabel>
-                <Select
-                  labelId="employee-select-label"
-                  value={selectedEmployeeId}
-                  label="Select Employee"
-                  onChange={(e) => setSelectedEmployeeId(e.target.value)}
-                >
-                  <MenuItem value="">-- Select --</MenuItem>
-                  {allEmployees.map((emp: any) => (
-                    <MenuItem key={emp.id} value={emp.id}>
-                      {emp.name || emp.email}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </CalendarEmployeeSelect>
-              <CalendarControlsRow>
-                <ArrowBackIosNewIcon
-                  style={{ cursor: "pointer", flex: "0 0 auto" }}
-                  onClick={() => datePickerRef.current?.goToPrevWeek()}
-                />
-                <DatePicker
-                  ref={datePickerRef}
-                  value={calendarDate}
-                  onChange={(date) => {
-                    setCalendarDate(date);
-                  }}
-                  showTime={false}
-                />
-                <ArrowForwardIosIcon
-                  style={{ cursor: "pointer", flex: "0 0 auto" }}
-                  onClick={() => datePickerRef.current?.goToNextWeek()}
-                />
-              </CalendarControlsRow>
-            </>
+            <CalendarEmployeeSelect>
+              <InputLabel id="employee-select-label">
+                Select Employee
+              </InputLabel>
+              <Select
+                labelId="employee-select-label"
+                value={selectedEmployeeId}
+                onChange={(e) => setSelectedEmployeeId(e.target.value)}
+                label="Select Employee"
+                sx={{ minWidth: 200 }}
+              >
+                {allEmployees.map((emp: any) => (
+                  <MenuItem key={emp.id} value={emp.id}>
+                    {emp.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </CalendarEmployeeSelect>
           )}
+          <CalendarControlsRow>
+            <ArrowBackIosNewIcon
+              style={{ cursor: "pointer", flex: "0 0 auto" }}
+              onClick={() => datePickerRef.current?.goToPrevWeek()}
+            />
+            <DatePicker
+              ref={datePickerRef}
+              value={calendarDate}
+              onChange={(date) => {
+                setCalendarDate(date);
+              }}
+              showTime={false}
+            />
+            <ArrowForwardIosIcon
+              style={{ cursor: "pointer", flex: "0 0 auto" }}
+              onClick={() => datePickerRef.current?.goToNextWeek()}
+            />
+          </CalendarControlsRow>
         </CalendarTitleRow>
-        <CalendarContainer>
-          <Calendar
-            localizer={localizer}
+        <CalendarContainer style={{ position: "relative" }}>
+          <CustomCalendar
             events={events}
-            startAccessor="start"
-            endAccessor="end"
-            date={startOfWeek(calendarDate, { weekStartsOn: 0 })}
-            onNavigate={(date: any) => setCalendarDate(date)}
-            style={{
-              height: "100%",
-              width: "100%",
-              maxWidth: 1200, // Increased width
-              background: "#fff",
-              borderRadius: 16,
-              boxShadow: "0 2px 12px rgba(0,0,0,0.08)",
-              padding: 16,
-              minHeight: 0,
-              minWidth: 0,
-              margin: "0 auto",
-            }}
-            views={["week"]}
-            defaultView="week"
-            toolbar={false}
-            components={{
-              event: ({ event }: { event: CalendarEvent }) => {
-                const reservation = weekReservations.find(
-                  (r) => r.id === event.reservationId
-                );
-                return (
-                  <div
-                    style={{
-                      background: "#fff",
-                      border: "1px solid #1976d2",
-                      borderRadius: 8,
-                      boxShadow: "0 2px 8px rgba(25, 118, 210, 0.08)",
-                      color: "#1976d2",
-                      padding: "8px 12px",
-                      fontWeight: 500,
-                      fontSize: 15,
-                      minWidth: 120,
-                      maxWidth: 260,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "normal",
-                      wordBreak: "break-word",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 4,
-                    }}
-                  >
-                    <div style={{ fontWeight: 700 }}>{event.title}</div>
-                    <div style={{ fontSize: 14 }}>
-                      <strong>Time:</strong>{" "}
-                      {event.start
-                        ? event.start.toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : ""}
-                    </div>
-                    {reservation && (
-                      <>
-                        <div style={{ fontSize: 14 }}>
-                          <strong>Address:</strong> {reservation.address},{" "}
-                          {reservation.city}, {reservation.state}{" "}
-                          {reservation.zipCode}
-                        </div>
-                        <div style={{ fontSize: 14 }}>
-                          <strong>Phone:</strong> {reservation.phoneNumber}
-                        </div>
-                        <div style={{ fontSize: 14 }}>
-                          <strong>Adults:</strong> {reservation.adult} &nbsp;{" "}
-                          <strong>Kids:</strong> {reservation.kids}
-                        </div>
-                      </>
-                    )}
-                    {event.notes && (
-                      <div style={{ fontSize: 13 }}>{event.notes}</div>
-                    )}
-                  </div>
-                );
-              },
-            }}
-            popup
-            onSelectEvent={(event: CalendarEvent) =>
+            onEventClick={(event) =>
               navigate(`/reservation/${event.reservationId}`)
             }
-            eventPropGetter={() => ({
-              style: {
-                backgroundColor: userRole === "admin" ? "#43a047" : "#1976d2",
-                color: "#fff",
-                borderRadius: 8,
-                boxShadow: "0 1px 4px rgba(0,0,0,0.10)",
-                padding: "4px 8px",
-                fontSize: 14,
-                border: "none",
-              },
-            })}
+            currentDate={calendarDate}
+            onDateChange={setCalendarDate}
           />
         </CalendarContainer>
       </CalendarContent>

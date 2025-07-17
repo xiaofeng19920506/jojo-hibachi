@@ -34,7 +34,7 @@ const SignIn: React.FC = () => {
 
     try {
       const result = await loginMutation({
-        username: email,
+        email,
         password,
       }).unwrap();
 
@@ -88,6 +88,14 @@ const SignIn: React.FC = () => {
         >
           {isLoading ? "Signing In..." : "Sign In"}
         </Button>
+        <div style={{ textAlign: "center", marginTop: 8 }}>
+          <Link
+            to="/forgot-password"
+            style={{ fontSize: 16, color: "#0077cc", textDecoration: "none" }}
+          >
+            Forgot Password?
+          </Link>
+        </div>
 
         <RegisterPrompt style={{ fontSize: "16px", marginTop: 8 }}>
           Don't have an account? <Link to="/signup">Register</Link>

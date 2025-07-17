@@ -96,6 +96,15 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
           onClick: () => handleNavigation("/booknow"),
         });
       }
+      // Add Profile button for authenticated users
+      if (currentPath !== "/profile") {
+        buttons.push({
+          label: "Profile",
+          variant: "outlined",
+          color: "primary",
+          onClick: () => handleNavigation("/profile"),
+        });
+      }
     }
 
     return buttons;

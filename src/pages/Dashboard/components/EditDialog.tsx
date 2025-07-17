@@ -67,6 +67,8 @@ const EditDialog: React.FC<EditDialogProps> = ({
           ? `Edit ${activeTable === "orders" ? "Order" : "Reservation"}`
           : dialogType === "assign"
           ? `Assign ${activeTable === "orders" ? "Employee" : "Chef"}`
+          : dialogType === "role" && activeTable === "customers"
+          ? "Change User Role"
           : "Update Status"}
       </DialogTitle>
       <DialogContent>
@@ -160,7 +162,16 @@ const EditDialog: React.FC<EditDialogProps> = ({
               onChange={onStatusChange}
               sx={{ fontSize: { xs: 16, sm: 18 } }}
             >
-              {activeTable === "orders"
+              {activeTable === "employees"
+                ? [
+                    <MenuItem key="active" value="active">
+                      Active
+                    </MenuItem>,
+                    <MenuItem key="inactive" value="inactive">
+                      Inactive
+                    </MenuItem>,
+                  ]
+                : activeTable === "orders"
                 ? [
                     <MenuItem key="pending" value="pending">
                       Pending
@@ -195,6 +206,25 @@ const EditDialog: React.FC<EditDialogProps> = ({
             </Select>
           </FormControl>
         )}
+
+        {dialogType === "role" &&
+          (activeTable === "customers" || activeTable === "employees") && (
+            <FormControl fullWidth sx={{ mt: 2, fontSize: { xs: 16, sm: 18 } }}>
+              <InputLabel id="role-select-label">Role</InputLabel>
+              <Select
+                labelId="role-select-label"
+                value={editFormData.role || "user"}
+                label="Role"
+                name="role"
+                onChange={onEditFormChange}
+                sx={{ fontSize: { xs: 16, sm: 18 } }}
+              >
+                <MenuItem value="user">User</MenuItem>
+                <MenuItem value="employee">Employee</MenuItem>
+                <MenuItem value="admin">Admin</MenuItem>
+              </Select>
+            </FormControl>
+          )}
 
         {dialogType === "cancel" && (
           <Box sx={{ pt: 2 }}>

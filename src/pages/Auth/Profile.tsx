@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   SignInWrapper,
   Form,
@@ -6,76 +7,77 @@ import {
   Button,
   Title,
   ErrorMessage,
-  RegisterPrompt,
 } from "./elements";
-import { Link, useNavigate } from "react-router-dom";
-import { useRegisterMutation } from "../../services/api";
+import { useAppSelector } from "../../utils/hooks";
+import {
+  useGetUserProfileQuery,
+  useUpdateUserProfileMutation,
+} from "../../services/api";
 
-const SignUp: React.FC = () => {
+const Profile: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAppSelector((state) => state.user);
+  const { data: profile, isLoading } = useGetUserProfileQuery();
+  const [updateUserProfile, { isLoading: isSaving }] =
+    useUpdateUserProfileMutation();
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
-  const [streetAddress, setStreetAddress] = useState("");
+  const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [zipCode, setZipCode] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const navigate = useNavigate();
-  const [register] = useRegisterMutation();
+  useEffect(() => {
+    if (profile) {
+      setFirstName(profile.firstName || "");
+      setLastName(profile.lastName || "");
+      setPhone(profile.phone || profile.phoneNumber || "");
+      setEmail(profile.email || "");
+      setAddress(profile.address || "");
+      setCity(profile.city || "");
+      setState(profile.state || "");
+      setZipCode(profile.zipCode || "");
+    }
+  }, [profile]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    if (
-      !firstName ||
-      !lastName ||
-      !phoneNumber ||
-      !email ||
-      !streetAddress ||
-      !city ||
-      !state ||
-      !zipCode ||
-      !password
-    ) {
-      setError("Please fill in all fields.");
-      return;
-    }
-
+    setError(null);
+    setSuccess(null);
     try {
-      setLoading(true);
-      setError(null);
-      const result = await register({
-        email,
-        password,
-        role: "user",
+      await updateUserProfile({
         firstName,
         lastName,
-        phone: phoneNumber,
-        address: streetAddress,
+        phone,
+        email,
+        address,
         city,
         state,
         zipCode,
       }).unwrap();
-      localStorage.setItem("authToken", result.token);
-      // Note: The user will be automatically logged in by AuthInitializer
-      // when they navigate to the dashboard
-      navigate("/dashboard");
+      setSuccess("Profile updated successfully.");
     } catch (err: any) {
-      setError(err.data?.message || err.message || "Registration failed.");
-    } finally {
-      setLoading(false);
+      setError(err.data?.message || err.message || "Update failed.");
     }
   };
+
+  if (isLoading) {
+    return <SignInWrapper>Loading...</SignInWrapper>;
+  }
 
   return (
     <SignInWrapper>
       <Form onSubmit={handleSubmit}>
-        <Title style={{ fontSize: 22 }}>Sign Up</Title>
+        <Title style={{ fontSize: 22 }}>My Profile</Title>
         {error && <ErrorMessage>{error}</ErrorMessage>}
+        {success && (
+          <div style={{ color: "green", marginBottom: 8 }}>{success}</div>
+        )}
         <Input
           type="text"
           placeholder="First Name"
@@ -95,9 +97,9 @@ const SignUp: React.FC = () => {
         <Input
           type="tel"
           placeholder="Phone Number"
-          value={phoneNumber}
+          value={phone}
           required
-          onChange={(e) => setPhoneNumber(e.target.value)}
+          onChange={(e) => setPhone(e.target.value)}
           style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
         />
         <Input
@@ -110,10 +112,10 @@ const SignUp: React.FC = () => {
         />
         <Input
           type="text"
-          placeholder="Street Address"
-          value={streetAddress}
+          placeholder="Address"
+          value={address}
           required
-          onChange={(e) => setStreetAddress(e.target.value)}
+          onChange={(e) => setAddress(e.target.value)}
           style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
         />
         <Input
@@ -140,28 +142,16 @@ const SignUp: React.FC = () => {
           onChange={(e) => setZipCode(e.target.value)}
           style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
         />
-        <Input
-          type="password"
-          placeholder="Password"
-          value={password}
-          required
-          onChange={(e) => setPassword(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-        />
         <Button
           type="submit"
-          disabled={loading}
+          disabled={isSaving}
           style={{ fontSize: 16, minHeight: 44, minWidth: 44 }}
         >
-          {loading ? "Signing Up..." : "Sign Up"}
+          {isSaving ? "Saving..." : "Save"}
         </Button>
-
-        <RegisterPrompt style={{ fontSize: "16px", marginTop: 8 }}>
-          Already have an account? <Link to="/signin">Sign In</Link>
-        </RegisterPrompt>
       </Form>
     </SignInWrapper>
   );
 };
 
-export default SignUp;
+export default Profile;

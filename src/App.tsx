@@ -15,6 +15,9 @@ const EmployeeCalendar = lazy(() => import("./pages/Calendar"));
 const ReservationDetail = lazy(
   () => import("./pages/Reservation/ReservationDetail")
 );
+const Profile = lazy(() => import("./pages/Auth/Profile"));
+const ForgotPassword = lazy(() => import("./pages/Auth/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/Auth/ResetPassword"));
 
 const App: React.FC = () => {
   return (
@@ -71,6 +74,40 @@ const App: React.FC = () => {
             element={
               <Suspense fallback={<LoadingSpinner />}>
                 <ReservationDetail />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<LoadingSpinner />}>
+                  <Profile />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <ForgotPassword />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/reset-password/:token"
+            element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <ResetPassword />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/reset-password"
+            element={
+              <Suspense fallback={<LoadingSpinner />}>
+                <ResetPassword />
               </Suspense>
             }
           />

@@ -43,12 +43,14 @@
 
 /* Event styling */
 .rbc-event {
+  background: #e3f2fd !important;
+  color: #1976d2 !important;
+  border: 1px solid #1976d2 !important;
   border-radius: 8px !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  padding: 4px 8px;
-  font-size: 14px;
-  border: none;
-  margin-bottom: 2px;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08) !important;
+  padding: 4px 8px !important;
+  font-size: 14px !important;
+  margin: 0 auto !important;
 }
 
 /* Selected event */
@@ -98,6 +100,9 @@
 .rbc-time-gutter {
   border-right: 1px solid #e0e0e0;
   background: #fafafa;
+  width: 4rem;
+  min-width: 4rem;
+  max-width: 4rem;
 }
 
 .rbc-header,
@@ -232,34 +237,25 @@
 /* Show only 2 days at a time (out of 5) */
 .rbc-time-header,
 .rbc-time-content {
-  min-width: 60vw; /* 2 days * 30vw */
-  width: 150vw; /* 5 days * 30vw */
-  max-width: none;
+  min-width: unset !important;
+  width: unset !important;
+  max-width: unset !important;
 }
 
-/* Each day column: set to 30% of visible area (so 2 days = 60%) */
+/* Each day column: set to max 18rem, use rem units for width */
 .rbc-header,
 .rbc-day-bg,
 .rbc-day-slot {
-  min-width: 30vw;
-  width: 30vw;
-  max-width: 30vw;
-  box-sizing: border-box;
+  min-width: 18rem !important;
+  width: 18rem !important;
+  max-width: 18rem !important;
+  box-sizing: border-box !important;
 }
 
-/* Prevent columns from being scrollable */
-.rbc-header,
-.rbc-day-bg,
-.rbc-day-slot {
-  overflow-x: visible !important;
-  overflow-y: visible !important;
-}
-
-/* Only the main grid is scrollable */
+/* Center the calendar grid horizontally if screen is wider */
 .rbc-time-view {
-  overflow-x: auto !important;
-  overflow-y: visible !important;
-  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Prevent columns and their content from being scrollable */
@@ -286,4 +282,75 @@
 .rbc-day-bg:last-child,
 .rbc-header:last-child {
   border-right: none;
+}
+
+/* Sticky date header row for vertical scroll */
+.rbc-time-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #f5f5f5 !important;
+}
+
+/* Sticky time gutter for horizontal scroll */
+.rbc-time-gutter {
+  position: sticky;
+  left: 0;
+  z-index: 11;
+  background: #fafafa !important;
+}
+
+.rbc-time-header-gutter, .rbc-time-gutter {
+  width: 5rem !important;
+  min-width: 5rem !important;
+  max-width: 5rem !important;
+  box-sizing: border-box !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.rbc-time-view, .rbc-time-content {
+  overflow-x: auto;
+  overflow-y: overlay;
+}
+
+/* Hide horizontal scrollbar if not needed */
+.rbc-time-view::-webkit-scrollbar,
+.rbc-time-content::-webkit-scrollbar {
+  height: 0 !important;
+}
+.rbc-time-view {
+  scrollbar-width: none; /* Firefox */
+}
+.rbc-time-content {
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Hide vertical scrollbar */
+.rbc-time-view::-webkit-scrollbar-vertical,
+.rbc-time-content::-webkit-scrollbar-vertical {
+  width: 0 !important;
+  background: transparent !important;
+}
+.rbc-time-view {
+  max-width: calc(5rem + 7 * 18rem);
+}
+
+.rbc-time-view {
+  background: #e3f2fd !important;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: calc(5rem + 7 * 18rem);
+  width: 100%;
+}
+
+.rbc-day-bg,
+.rbc-day-slot,
+.rbc-day-bg.rbc-today,
+.rbc-day-slot.rbc-today {
+  background: transparent !important;
 }

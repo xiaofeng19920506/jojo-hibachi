@@ -3,9 +3,11 @@ import { Box, Typography, FormControl } from "@mui/material";
 
 export const CalendarRoot = styled(Box)`
   height: 100vh;
-  width: 100vw;
+  width: 100%;
+  min-width: 100vw;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 `;
 
 export const CalendarAppBarWrapper = styled(Box)`
@@ -14,13 +16,14 @@ export const CalendarAppBarWrapper = styled(Box)`
 `;
 
 export const CalendarContent = styled(Box)`
-  flex: 1 1 90vh;
+  flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
   margin-top: 16px;
+  overflow: auto;
   @media (min-width: 600px) {
     margin-top: 32px;
   }
@@ -39,7 +42,7 @@ export const CalendarTitleRow = styled(Box)`
     flex-direction: row;
     gap: 16px;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
   }
 `;
 
@@ -77,21 +80,15 @@ export const CalendarEmployeeSelect = styled(FormControl)`
 `;
 
 export const CalendarContainer = styled(Box)`
-  flex: 1;
   width: 100%;
-  max-width: 900px;
-  min-height: 0;
+  height: 90vh;
   min-width: 0;
   margin-left: auto;
   margin-right: auto;
-  padding-left: 8px;
-  padding-right: 8px;
+  padding: 16px;
   overflow: auto;
-  height: 100%;
-  max-height: 100%;
   @media (min-width: 600px) {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding: 24px;
   }
 `;
 
@@ -103,4 +100,48 @@ export const CalendarHiddenDateInput = styled.input`
   margin: 0;
   padding: 0;
   border: none;
+`;
+
+export const CalendarEventCard = styled.div`
+  background: #9c27b0;
+  color: #fff;
+  border: 1px solid #9c27b0;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  padding: 8px 12px;
+  font-weight: 500;
+  font-size: 15px;
+  min-width: 120px;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+  word-break: break-word;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 auto;
+`;
+
+export const CalendarEventCardTitle = styled.div`
+  font-weight: 700;
+  font-size: 1.1em;
+`;
+
+export const CalendarEventCardInfo = styled.div`
+  font-size: 14px;
+`;
+
+export const CalendarEventCardNotes = styled.div`
+  font-size: 13px;
+`;
+
+export const CurrentTimeIndicator = styled.div`
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #ff1744;
+  z-index: 10;
+  pointer-events: none;
 `;
