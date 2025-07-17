@@ -47,6 +47,15 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
+  const isBookNow = location.pathname === "/booknow";
+  const appBarColor = isBookNow ? "transparent" : color;
+  const appBarSx = isBookNow
+    ? {
+        backgroundColor: "#fff",
+        color: "#222",
+        boxShadow: 1,
+      }
+    : {};
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -118,7 +127,12 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     : actionButtons;
 
   return (
-    <AppBar position="fixed" color={color} elevation={elevation}>
+    <AppBar
+      position="fixed"
+      color={appBarColor}
+      elevation={elevation}
+      sx={appBarSx}
+    >
       <Toolbar
         sx={{
           justifyContent: "space-between",
