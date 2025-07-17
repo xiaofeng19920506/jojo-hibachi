@@ -26,14 +26,14 @@ interface CalendarGridProps {
 const CalendarGridContainer = styled.div`
   display: grid;
   width: 100%;
-  max-height: 80vh;
-  overflow-y: scroll;
+  height: auto;
+  overflow-y: visible;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE 10+ */
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-  padding: 8px;
+  padding: 8px 8px 0 8px;
   &::-webkit-scrollbar {
     display: none; /* Chrome/Safari/Webkit */
   }
@@ -41,7 +41,7 @@ const CalendarGridContainer = styled.div`
     width: max-content;
     border-radius: 0;
     box-shadow: none;
-    padding: 4px;
+    padding: 4px 4px 0 4px;
     overflow-x: auto;
     position: relative;
     -webkit-overflow-scrolling: touch;
@@ -220,7 +220,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   const gridTemplateColumns = isMobileView
     ? `minmax(${timeGutterWidth}px, ${timeGutterWidth}px) repeat(${days.length}, minmax(${dayColumnWidthRem}rem, ${dayColumnWidthRem}rem))`
     : `minmax(${timeGutterWidth}px, ${timeGutterWidth}px) repeat(${days.length}, minmax(0, 1fr))`;
-  const gridTemplateRows = `minmax(2.5rem, auto) repeat(${hours.length}, minmax(${HOUR_HEIGHT_CSS}, 1fr))`;
+  const gridTemplateRows = `minmax(2.5rem, auto) repeat(${hours.length}, ${HOUR_HEIGHT_CSS})`;
 
   return (
     <CalendarGridContainer
