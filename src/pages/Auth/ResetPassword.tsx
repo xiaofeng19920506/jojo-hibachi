@@ -15,7 +15,10 @@ const ResetPassword: React.FC = () => {
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const tokenFromQuery = params.get("token");
+  const emailParam = params.get("email");
   const token = tokenFromPath || tokenFromQuery;
+  // Decode email (convert %40 to @ and other encoded chars)
+  const email = emailParam ? decodeURIComponent(emailParam) : undefined;
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -41,7 +44,7 @@ const ResetPassword: React.FC = () => {
       return;
     }
     try {
-      await resetPassword({ token, password }).unwrap();
+      await resetPassword({ token, password, email }).unwrap();
       setSuccess("Password reset successful. You can now sign in.");
     } catch (err: any) {
       setError(err.data?.message || err.message || "Failed to reset password.");
