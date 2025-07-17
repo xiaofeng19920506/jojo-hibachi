@@ -1,13 +1,8 @@
 import { useState, useMemo } from "react";
 import { useAppSelector } from "../../../utils/hooks";
 import {
-  useGetUserReservationsQuery,
-  useGetAdminCustomersQuery,
-  useGetAdminEmployeesQuery,
   useUpdateReservationStatusMutation,
-  useAssignChefToReservationMutation,
   useChangeUserRoleMutation,
-  useGetAdminReservationsQuery,
   useChangeEmployeeStatusMutation,
 } from "../../../services/api";
 import type { ReservationEntry, Employee, ReservationStatus } from "../types";
@@ -29,7 +24,6 @@ export const useDashboard = () => {
     itemsPerPage,
     setItemsPerPage,
     sortConfig,
-    setSortConfig,
     handleSort,
   } = useDashboardTableNavigation();
 
@@ -94,8 +88,6 @@ export const useDashboard = () => {
   // Update mutation
   const [updateReservationStatus, { isLoading: updateStatusLoading }] =
     useUpdateReservationStatusMutation();
-  const [assignEmployeeToReservation, { isLoading: assignEmployeeLoading }] =
-    useAssignChefToReservationMutation();
   const [changeUserRole, { isLoading: changeRoleLoading }] =
     useChangeUserRoleMutation();
   const [changeEmployeeStatus, { isLoading: changeEmployeeStatusLoading }] =
@@ -435,7 +427,6 @@ export const useDashboard = () => {
     loading:
       getLoadingState() ||
       updateStatusLoading ||
-      assignEmployeeLoading ||
       changeRoleLoading ||
       changeEmployeeStatusLoading,
     error: getErrorState(),

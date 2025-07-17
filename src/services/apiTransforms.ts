@@ -2,7 +2,6 @@
 import type {
   ApiReservationData,
   ReservationEntry,
-  Employee,
 } from "../pages/Dashboard/types";
 
 export const transformApiData = (

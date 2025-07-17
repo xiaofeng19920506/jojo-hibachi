@@ -80,7 +80,6 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
     : DAY_COLUMN_WIDTH_REM;
   const timeGutterWidth = mobile ? TIME_GUTTER_WIDTH_MOBILE : TIME_GUTTER_WIDTH;
   // Calculate max-width: time gutter + columns * column width
-  const maxWidth = `calc(${timeGutterWidth}px + ${numDays} * ${dayColumnWidthRem}rem)`;
 
   // Navigation handlers (no longer used internally)
   const handlePrev = () => {

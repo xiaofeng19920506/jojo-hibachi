@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CustomCalendar from "../../components/CustomCalendar/CustomCalendar";
-import { format, parse, startOfWeek, getDay, addDays } from "date-fns";
-import { enUS } from "date-fns/locale";
+import { format, startOfWeek, addDays } from "date-fns";
 import { useAppSelector } from "../../utils/hooks";
 import {
   useGetAdminEmployeesQuery,
@@ -26,8 +25,6 @@ import {
 } from "./elements";
 import DatePicker from "../../components/DatePicker/DatePicker";
 import type { DatePickerRef } from "../../components/DatePicker/DatePicker";
-import EventCard from "./EventCard";
-import { createPortal } from "react-dom";
 
 interface CalendarEvent {
   id: string;
@@ -46,7 +43,6 @@ const EmployeeCalendar: React.FC = () => {
   const [calendarDate, setCalendarDate] = useState<Date>(() => {
     return new Date();
   });
-  const [currentTimeTop, setCurrentTimeTop] = useState<number | null>(null);
 
   const { data: allEmployees = [] } = useGetAdminEmployeesQuery(undefined, {
     skip: userRole !== "admin",
@@ -180,7 +176,6 @@ const EmployeeCalendar: React.FC = () => {
       const weekStart = startOfWeek(calendarDate, { weekStartsOn: 0 });
       const weekEnd = addDays(weekStart, 6);
       if (today < weekStart || today > weekEnd) {
-        setCurrentTimeTop(null);
         return;
       }
 
@@ -216,8 +211,6 @@ const EmployeeCalendar: React.FC = () => {
       if (top < 0) top = 0;
       const maxTop = gutterSlots.length * slotHeight;
       if (top > maxTop) top = maxTop;
-
-      setCurrentTimeTop(top);
 
       // Scroll to the current time (if desired)
       if (timeContent && top > 0) {

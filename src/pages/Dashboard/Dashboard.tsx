@@ -120,7 +120,7 @@ const Dashboard: React.FC = () => {
           onStartDateChange={setStartDate}
           endDate={endDate}
           onEndDateChange={setEndDate}
-          statusFilter={statusFilter}
+          statusFilter={statusFilter as string}
           onStatusFilterChange={(value) => {
             setStatusFilter(value);
             setCurrentPage(1);
@@ -205,7 +205,7 @@ const Dashboard: React.FC = () => {
         open={dialogOpen}
         onClose={handleDialogClose}
         onSave={handleDialogSave}
-        dialogType={dialogType}
+        dialogType={dialogType as any}
         activeTable={activeTable}
         userRole={userRole}
         loading={loading}
@@ -213,7 +213,7 @@ const Dashboard: React.FC = () => {
         onEditFormChange={handleEditFormChange}
         selectedEmployeeId={selectedEmployeeId}
         onAssignEmployeeChange={handleAssignEmployeeChange}
-        selectedStatus={selectedStatus}
+        selectedStatus={selectedStatus as string}
         onStatusChange={handleStatusChange}
         getEmployeeDisplayName={getEmployeeDisplayName}
         availableEmployees={availableEmployees}

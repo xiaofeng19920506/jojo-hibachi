@@ -18,7 +18,7 @@ interface EditDialogProps {
   open: boolean;
   onClose: () => void;
   onSave: () => void;
-  dialogType: "edit" | "assign" | "status" | "cancel";
+  dialogType: "edit" | "assign" | "status" | "cancel" | "role";
   activeTable: string;
   userRole: string;
   loading: boolean;
@@ -28,7 +28,7 @@ interface EditDialogProps {
   ) => void;
   selectedEmployeeId: string;
   onAssignEmployeeChange: (e: any) => void;
-  selectedStatus: ReservationStatus;
+  selectedStatus: string;
   onStatusChange: (e: any) => void;
   availableEmployees?: Employee[];
   getEmployeeDisplayName: (employee: Employee) => string;
@@ -213,7 +213,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
               <InputLabel id="role-select-label">Role</InputLabel>
               <Select
                 labelId="role-select-label"
-                value={editFormData.role || "user"}
+                value={(editFormData as any).role || "user"}
                 label="Role"
                 name="role"
                 onChange={onEditFormChange}

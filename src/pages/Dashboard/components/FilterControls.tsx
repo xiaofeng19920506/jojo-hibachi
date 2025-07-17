@@ -19,7 +19,7 @@ interface FilterControlsProps {
   onStartDateChange: (value: string) => void;
   endDate: string;
   onEndDateChange: (value: string) => void;
-  statusFilter: ReservationStatus | "all";
+  statusFilter: string;
   onStatusFilterChange: (value: ReservationStatus | "all") => void;
   activeTable: string;
   onTableChange?: (value: string) => void;

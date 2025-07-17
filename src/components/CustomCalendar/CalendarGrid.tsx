@@ -5,16 +5,10 @@ import EventCard from "./EventCard";
 import CurrentTimeIndicator from "./CurrentTimeIndicator";
 import Tooltip from "@mui/material/Tooltip";
 
-const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-// Change hours to 12pm (12) to 10pm (22)
 const hours = Array.from({ length: 11 }, (_, i) => 12 + i); // 12pm-10pm
 const HOUR_HEIGHT = 40; // for calculations, in px
 const HOUR_HEIGHT_CSS = "15rem"; // for styled-components
-const HOUR_HEIGHT_CSS_MOBILE = "6rem";
 const DAY_COLUMN_WIDTH_REM = 15;
-const DAY_COLUMN_WIDTH_REM_MOBILE = 8;
-const TIME_GUTTER_WIDTH = 60;
-const TIME_GUTTER_WIDTH_MOBILE = 40;
 
 // Accept numDays and columnWidth as props
 interface CalendarGridProps {
@@ -22,7 +16,6 @@ interface CalendarGridProps {
   view: CalendarView;
   events: CalendarEvent[];
   onEventClick?: (event: CalendarEvent) => void;
-  numDays?: number;
   dayColumnWidthRem?: number;
   timeGutterWidth?: number;
 }
@@ -205,7 +198,6 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   view,
   events,
   onEventClick,
-  numDays = view === "week" ? 7 : 1,
   dayColumnWidthRem = 15,
   timeGutterWidth = 60,
 }) => {
