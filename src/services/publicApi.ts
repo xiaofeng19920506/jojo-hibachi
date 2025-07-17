@@ -95,11 +95,22 @@ export const publicApiEndpoints = (
       body: { email: credentials.email },
     }),
   }),
-  resetPassword: builder.mutation<any, { token: string; password: string }>({
-    query: (credentials: { token: string; password: string }) => ({
+  resetPassword: builder.mutation<
+    any,
+    { token: string; password: string; email?: string }
+  >({
+    query: (credentials: {
+      token: string;
+      password: string;
+      email?: string;
+    }) => ({
       url: "/auth/reset-password",
       method: "POST",
-      body: { token: credentials.token, password: credentials.password },
+      body: {
+        token: credentials.token,
+        password: credentials.password,
+        email: credentials.email,
+      },
     }),
   }),
 });
