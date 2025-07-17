@@ -118,7 +118,6 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
         view={view}
         events={events}
         onEventClick={onEventClick}
-        numDays={numDays}
         dayColumnWidthRem={dayColumnWidthRem}
         timeGutterWidth={timeGutterWidth}
       />

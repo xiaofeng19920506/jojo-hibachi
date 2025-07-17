@@ -8,7 +8,6 @@ import Tooltip from "@mui/material/Tooltip";
 const hours = Array.from({ length: 11 }, (_, i) => 12 + i); // 12pm-10pm
 const HOUR_HEIGHT = 40; // for calculations, in px
 const HOUR_HEIGHT_CSS = "15rem"; // for styled-components
-const DAY_COLUMN_WIDTH_REM = 15;
 
 // Accept numDays and columnWidth as props
 interface CalendarGridProps {

@@ -6,7 +6,7 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
-import { useGetReservationByIdQuery } from "../../services/api";
+import { useGetUserReservationByIdQuery } from "../../services/api";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import GlobalAppBar from "../../components/GloabalAppBar/GlobalAppBar";
 
@@ -23,7 +23,7 @@ const ReservationDetail: React.FC = () => {
     data: reservation,
     isLoading,
     error,
-  } = useGetReservationByIdQuery(id || "");
+  } = useGetUserReservationByIdQuery(id || "");
 
   if (isLoading) {
     return (

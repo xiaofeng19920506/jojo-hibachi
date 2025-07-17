@@ -12,7 +12,7 @@ import {
   CircularProgress,
   Box,
 } from "@mui/material";
-import type { ReservationEntry, Employee, ReservationStatus } from "../types";
+import type { ReservationEntry, Employee } from "../types";
 
 interface EditDialogProps {
   open: boolean;
