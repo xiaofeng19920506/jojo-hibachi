@@ -199,12 +199,19 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
     const [popupPosition, setPopupPosition] = useState<"bottom" | "top">(
       "bottom"
     );
-    const [popupTopPosition, setPopupTopPosition] = useState<string>("50%");
     const [popupLeftPosition, setPopupLeftPosition] = useState<string>("50%");
     const [popupTransform, setPopupTransform] = useState<string>(
       "translate(-50%, -50%)"
     );
     const wrapperRef = useRef<HTMLDivElement>(null);
+
+    // Add force re-render on orientation/resize
+    const [, forceUpdate] = useState(0);
+    useEffect(() => {
+      const handleResize = () => forceUpdate((n) => n + 1);
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     useImperativeHandle(
       ref,
@@ -264,90 +271,40 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
         return { top: "50%", left: "50%", transform: "translate(-50%, -50%)" };
 
       const rect = wrapperRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
       const viewportWidth = window.innerWidth;
-      const isMobile = window.innerWidth <= 600;
       const isLandscape = window.innerWidth > window.innerHeight;
-      
-      // Use smaller popup dimensions for mobile landscape
-      const popupHeight = isMobile && isLandscape ? 200 : 300;
-      const popupWidth = isMobile && isLandscape ? 200 : 280;
 
-      if (isMobile) {
-        if (isLandscape) {
-          // Landscape mode - always position below the input
-          let top = rect.bottom + 4; // Smaller gap for landscape
-          
-          // Position at bottom left of the input
-          let left = rect.left; // Align with left edge of the input
-          
-          // Move left to avoid right edge cutoff
-          left = left - 30; // Additional left offset for landscape
-          
-          // Ensure popup doesn't go off the left edge
-          if (left < 5) {
-            left = 5; // Very small margin for landscape
-          }
-          
-          // Check if popup would be cut off on the right
-          if (left + popupWidth > viewportWidth) {
-            left = viewportWidth - popupWidth - 5;
-          }
-          
-          return {
-            top: `${top}px`,
-            left: `${left}px`,
-            transform: "none",
-          };
-        } else {
-          // Portrait mode - use standard mobile positioning
-          let top = rect.bottom + 8; // 8px gap below the button
+      // Use compact popup dimensions for mobile landscape
+      const popupWidth = isLandscape ? Math.min(200, viewportWidth * 0.9) : 280;
 
-          // Check if popup would be cut off at the bottom
-          if (top + popupHeight > viewportHeight) {
-            // Position above the button instead
-            top = rect.top - popupHeight - 8;
-          }
-
-          // For mobile portrait, center horizontally but ensure it doesn't go off screen
-          let left = Math.max(
-            20,
-            Math.min(
-              viewportWidth - popupWidth - 20,
-              rect.left - (popupWidth - rect.width) / 2
-            )
-          );
-
-          return {
-            top: `${top}px`,
-            left: `${left}px`,
-            transform: "none",
-          };
-        }
-      } else {
-        // Desktop positioning - position under the button
-        let top = rect.bottom + 8; // 8px gap below the button
-
-        // Check if popup would be cut off at the bottom
-        if (top + popupHeight > viewportHeight) {
-          // Position above the button instead
-          top = rect.top - popupHeight - 8;
-        }
-
-        // Position horizontally - start from button's left edge but move left to avoid cutoff
+      if (isLandscape) {
+        // Landscape mode - stick popup to the top of the viewport
+        let top = 0; // Stick to top
         let left = rect.left;
 
-        // Check if popup would be cut off on the right
-        if (left + popupWidth > viewportWidth) {
-          // Move left to fit within viewport
-          left = viewportWidth - popupWidth - 20; // 20px margin from right edge
+        // If the popup would be cut off on the right, move it left
+        if (left + popupWidth > viewportWidth - 5) {
+          left = viewportWidth - popupWidth - 5;
         }
+        // Never go off the left edge
+        if (left < 5) left = 5;
 
-        // Ensure popup doesn't go off the left edge
-        if (left < 20) {
-          left = 20; // 20px margin from left edge
-        }
-
+        return {
+          top: `${top}px`,
+          left: `${left}px`,
+          transform: "none",
+        };
+      } else {
+        // Portrait mode - always position below and center/edge protect
+        const GAP = 8;
+        let top = rect.bottom + GAP;
+        let left = Math.max(
+          20,
+          Math.min(
+            viewportWidth - popupWidth - 20,
+            rect.left - (popupWidth - rect.width) / 2
+          )
+        );
         return {
           top: `${top}px`,
           left: `${left}px`,
@@ -505,6 +462,17 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
     const currentYear = new Date().getFullYear();
     const YEARS = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
 
+    // 1. In the component, determine if we're in mobile landscape mode
+    const isLandscape = window.innerWidth > window.innerHeight;
+
+    // 2. When calculating popup position, keep the logic as is
+    const popupPos = getPopupPosition();
+    // 3. For landscape mode, always set topPosition to '0px'
+    const topPosition = isLandscape ? "0px" : popupPos.top;
+
+    // Debug log
+    console.log("isLandscape:", isLandscape, "topPosition:", topPosition);
+
     return (
       <PickerWrapper ref={wrapperRef}>
         <DateInputButton
@@ -519,7 +487,6 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
             if (newOpen) {
               setPopupPosition(calculatePopupPosition());
               const position = getPopupPosition();
-              setPopupTopPosition(position.top);
               setPopupLeftPosition(position.left);
               setPopupTransform(position.transform);
             }
@@ -546,7 +513,7 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
         <CalendarPopup
           open={open}
           position={popupPosition}
-          topPosition={popupTopPosition}
+          topPosition={topPosition}
           leftPosition={popupLeftPosition}
           transformValue={popupTransform}
           role="dialog"
