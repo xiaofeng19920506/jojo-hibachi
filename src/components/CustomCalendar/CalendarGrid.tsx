@@ -289,9 +289,6 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     : HOUR_HEIGHT_CSS;
   const gridTemplateRows = `minmax(2.5rem, auto) repeat(${hours.length}, ${hourHeightCSS})`;
 
-  // In the event rendering logic, set top to 0 and height to a fixed value (e.g., 150px)
-  const FIXED_EVENT_HEIGHT = 150;
-
   return (
     <CalendarGridContainer
       style={{

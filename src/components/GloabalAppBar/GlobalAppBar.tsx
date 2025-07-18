@@ -59,6 +59,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
     dispatch(logout());
     navigate("/signin");
   };
