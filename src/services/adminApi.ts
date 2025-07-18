@@ -55,6 +55,20 @@ export const adminApiEndpoints = (
     },
     providesTags: ["Reservations"],
   }),
+  getAdminEmployeeAssignedReservations: builder.query<
+    any[],
+    { employeeId: string; startDate: string; endDate: string }
+  >({
+    query: ({ employeeId, startDate, endDate }) =>
+      `/admin/employee-assigned-reservations?employeeId=${employeeId}&startDate=${startDate}&endDate=${endDate}`,
+    transformResponse: (response: { status: string; data: any[] }) => {
+      if (response.status === "success") {
+        return transformApiData(response.data || []);
+      }
+      return [];
+    },
+    providesTags: ["Reservations"],
+  }),
   changeUserRole: builder.mutation<any, { userId: string; role: string }>({
     query: ({ userId, role }: { userId: string; role: string }) => ({
       url: `/admin/users/${userId}/role`,

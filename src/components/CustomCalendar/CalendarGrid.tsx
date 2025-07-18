@@ -5,7 +5,7 @@ import EventCard from "./EventCard";
 import CurrentTimeIndicator from "./CurrentTimeIndicator";
 import Tooltip from "@mui/material/Tooltip";
 
-const hours = Array.from({ length: 11 }, (_, i) => 12 + i); // 12pm-10pm
+const hours = Array.from({ length: 24 }, (_, i) => i); // 0-23 (midnight to 11pm)
 // Increase hour height for more dramatic scaling
 const HOUR_HEIGHT = 100; // px (was 80)
 const HOUR_HEIGHT_CSS = "6.25rem"; // 100px in rem

@@ -58,7 +58,7 @@ const CalendarContainer = styled.div`
     min-height: 100%;
     flex: 1;
   }
-  
+
   @media (max-width: 600px) and (orientation: landscape) {
     width: 100%;
     max-width: none;
@@ -72,7 +72,7 @@ const CalendarContainer = styled.div`
     min-height: 100%;
     flex: 1;
   }
-  
+
   @media (max-width: 600px) and (orientation: portrait) {
     width: 100%;
     max-width: none;
@@ -121,9 +121,9 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
   const timeGutterWidth = mobile ? TIME_GUTTER_WIDTH_MOBILE : TIME_GUTTER_WIDTH;
 
   // Current time indicator logic
-  const hours = Array.from({ length: 11 }, (_, i) => 12 + i); // 12pm-10pm
-  const calendarStartHour = hours[0];
-  const calendarEndHour = hours[hours.length - 1] + 1;
+  const hours = Array.from({ length: 24 }, (_, i) => i); // 0-23 (midnight to 11pm)
+  const calendarStartHour = 0;
+  const calendarEndHour = 24;
   const [now, setNow] = useState(new Date());
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 60000);

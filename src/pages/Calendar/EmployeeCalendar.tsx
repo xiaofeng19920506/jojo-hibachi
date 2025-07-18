@@ -5,6 +5,7 @@ import { useAppSelector } from "../../utils/hooks";
 import {
   useGetAdminEmployeesQuery,
   useGetEmployeeAssignedByDateQuery,
+  useGetAdminEmployeeAssignedReservationsQuery,
 } from "../../services/api";
 import { MenuItem, Select, InputLabel } from "@mui/material";
 import { skipToken } from "@reduxjs/toolkit/query";
@@ -60,9 +61,26 @@ const EmployeeCalendar: React.FC = () => {
     return <div>Loading user info...</div>;
   }
 
-  const { data: weekReservations = [] } = useGetEmployeeAssignedByDateQuery(
-    shouldFetch ? { startDate: weekStartStr, endDate: weekEndStr } : skipToken
-  );
+  // For admin, use the admin endpoint; for others, use the employee endpoint
+  const { data: weekReservations = [] } =
+    userRole === "admin"
+      ? useGetAdminEmployeeAssignedReservationsQuery(
+          shouldFetch && selectedEmployeeId
+            ? {
+                employeeId: selectedEmployeeId,
+                startDate: weekStartStr,
+                endDate: weekEndStr,
+              }
+            : skipToken
+        )
+      : useGetEmployeeAssignedByDateQuery(
+          shouldFetch
+            ? {
+                startDate: weekStartStr,
+                endDate: weekEndStr,
+              }
+            : skipToken
+        );
 
   const events: CalendarEvent[] = weekReservations.map((r: any) => {
     const start = new Date(r.date + "T" + (r.time || "00:00"));

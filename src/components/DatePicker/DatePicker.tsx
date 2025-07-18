@@ -6,6 +6,7 @@ import React, {
   useImperativeHandle,
 } from "react";
 import styled, { keyframes } from "styled-components";
+import ReactDOM from "react-dom";
 
 // --- Animations ---
 const fadeIn = keyframes`
@@ -21,16 +22,8 @@ const PickerWrapper = styled.div`
 
 const CalendarPopup = styled.div<{
   open: boolean;
-  position: "bottom" | "top";
-  topPosition: string;
-  leftPosition: string;
-  transformValue: string;
 }>`
   display: ${({ open }) => (open ? "block" : "none")};
-  position: fixed;
-  top: ${({ topPosition }) => topPosition};
-  left: ${({ leftPosition }) => leftPosition};
-  transform: ${({ transformValue }) => transformValue};
   z-index: 9999;
   background: #fff;
   border: 1px solid #ccc;
@@ -196,14 +189,9 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
     const [selectedMinute, setSelectedMinute] = useState<number>(
       value ? value.getMinutes() : 0
     );
-    const [popupPosition, setPopupPosition] = useState<"bottom" | "top">(
-      "bottom"
-    );
-    const [popupLeftPosition, setPopupLeftPosition] = useState<string>("50%");
-    const [popupTransform, setPopupTransform] = useState<string>(
-      "translate(-50%, -50%)"
-    );
     const wrapperRef = useRef<HTMLDivElement>(null);
+    const popupRef = useRef<HTMLDivElement>(null);
+    const [popupCoords, setPopupCoords] = useState({ top: 0, left: 0 });
 
     // Add force re-render on orientation/resize
     const [, forceUpdate] = useState(0);
@@ -247,25 +235,6 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
     );
 
     // --- Calculate popup position ---
-    const calculatePopupPosition = () => {
-      if (!wrapperRef.current) return "bottom";
-
-      const rect = wrapperRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const popupHeight = 300; // Approximate height of the popup
-
-      // Check if there's enough space below
-      const spaceBelow = viewportHeight - rect.bottom;
-      const spaceAbove = rect.top;
-
-      if (spaceBelow >= popupHeight || spaceBelow > spaceAbove) {
-        return "bottom";
-      } else {
-        return "top";
-      }
-    };
-
-    // --- Calculate popup position relative to the button ---
     const getPopupPosition = () => {
       if (!wrapperRef.current)
         return { top: "50%", left: "50%", transform: "translate(-50%, -50%)" };
@@ -320,6 +289,31 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         );
         focusable?.[0]?.focus();
+      }
+    }, [open]);
+
+    // --- Calculate and set popup position on open ---
+    useEffect(() => {
+      if (open && wrapperRef.current && popupRef.current) {
+        const inputRect = wrapperRef.current.getBoundingClientRect();
+        const popupRect = popupRef.current.getBoundingClientRect();
+        let top = inputRect.bottom + 8; // 8px gap
+        let left = inputRect.left;
+
+        // Prevent right overflow
+        if (left + popupRect.width > window.innerWidth - 8) {
+          left = window.innerWidth - popupRect.width - 8;
+        }
+        // Prevent left overflow
+        if (left < 8) left = 8;
+
+        // Prevent bottom overflow
+        if (top + popupRect.height > window.innerHeight - 8) {
+          top = inputRect.top - popupRect.height - 8;
+          if (top < 8) top = 8;
+        }
+
+        setPopupCoords({ top, left });
       }
     }, [open]);
 
@@ -484,12 +478,6 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
           }
           onClick={() => {
             const newOpen = !open;
-            if (newOpen) {
-              setPopupPosition(calculatePopupPosition());
-              const position = getPopupPosition();
-              setPopupLeftPosition(position.left);
-              setPopupTransform(position.transform);
-            }
             setOpen(newOpen);
           }}
         >
@@ -499,8 +487,7 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
                 ? selectedDate.toLocaleDateString() +
                   " " +
                   selectedHour.toString().padStart(2, "0") +
-                  ":" + +
-                  
+                  ":" +
                   selectedMinute.toString().padStart(2, "0")
                 : selectedDate.toLocaleDateString()
               : showTime
@@ -511,118 +498,138 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
             📅
           </CalendarIcon>
         </DateInputButton>
-        <CalendarPopup
-          open={open}
-          position={popupPosition}
-          topPosition={topPosition}
-          leftPosition={popupLeftPosition}
-          transformValue={popupTransform}
-          role="dialog"
-          aria-modal="true"
-          tabIndex={-1}
-          onKeyDown={handleKeyDown}
-        >
-          <CalendarHeader>
-            <NavButton onClick={handlePrevMonth} aria-label="Previous month">
-              &lt;
-            </NavButton>
-            <HeaderSelect
-              value={viewMonth}
-              onChange={(e) => setViewMonth(Number(e.target.value))}
-              aria-label="Select month"
+        {open &&
+          ReactDOM.createPortal(
+            <CalendarPopup
+              ref={popupRef}
+              open={open}
+              style={{
+                position: "absolute",
+                top: popupCoords.top,
+                left: popupCoords.left,
+                zIndex: 9999,
+                minWidth: 260,
+                maxWidth: "90vw",
+                maxHeight: "80vh",
+                overflowY: "auto",
+                background: "#fff",
+                border: "1px solid #ccc",
+                borderRadius: 8,
+                boxShadow: "0 4px 16px rgba(0, 0, 0, 0.15)",
+                padding: 16,
+                // animation: `${fadeIn} 0.18s ease`, // Removed to fix styled-components keyframes error
+              }}
+              role="dialog"
+              aria-modal="true"
+              tabIndex={-1}
+              onKeyDown={handleKeyDown}
             >
-              {MONTHS.map((m, i) => (
-                <option key={m} value={i}>
-                  {m}
-                </option>
-              ))}
-            </HeaderSelect>
-            <HeaderSelect
-              value={viewYear}
-              onChange={(e) => setViewYear(Number(e.target.value))}
-              aria-label="Select year"
-            >
-              {YEARS.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </HeaderSelect>
-            <NavButton onClick={handleNextMonth} aria-label="Next month">
-              &gt;
-            </NavButton>
-          </CalendarHeader>
-          <DaysGrid>
-            {WEEKDAYS.map((wd) => (
-              <WeekdayLabel key={wd}>{wd}</WeekdayLabel>
-            ))}
-            {days.map((day, idx) => {
-              if (!day) return <div key={idx} />;
-              const thisDate = new Date(viewYear, viewMonth, day);
-              const disabled =
-                (minDate && thisDate < minDate) ||
-                (maxDate && thisDate > maxDate);
-              return (
-                <DayCell
-                  key={idx}
-                  selected={
-                    !!(
-                      selectedDate &&
-                      isSameDay(thisDate, selectedDate) &&
-                      thisDate.getMonth() === viewMonth
-                    )
-                  }
-                  disabled={disabled}
-                  tabIndex={disabled ? -1 : 0}
-                  aria-selected={
-                    !!(
-                      selectedDate &&
-                      isSameDay(thisDate, selectedDate) &&
-                      thisDate.getMonth() === viewMonth
-                    )
-                  }
-                  aria-disabled={disabled}
-                  onClick={() => handleDayClick(day)}
+              <CalendarHeader>
+                <NavButton
+                  onClick={handlePrevMonth}
+                  aria-label="Previous month"
                 >
-                  {day}
-                </DayCell>
-              );
-            })}
-          </DaysGrid>
-          {/* Time selection (optional) */}
-          {showTime && (
-            <TimeSelectRow>
-              <label htmlFor="hour-select">Hour:</label>
-              <TimeSelect
-                id="hour-select"
-                value={selectedHour}
-                onChange={(e) =>
-                  handleTimeChange(Number(e.target.value), selectedMinute)
-                }
-              >
-                {hours.map((h) => (
-                  <option key={h} value={h}>
-                    {h.toString().padStart(2, "0")}
-                  </option>
+                  &lt;
+                </NavButton>
+                <HeaderSelect
+                  value={viewMonth}
+                  onChange={(e) => setViewMonth(Number(e.target.value))}
+                  aria-label="Select month"
+                >
+                  {MONTHS.map((m, i) => (
+                    <option key={m} value={i}>
+                      {m}
+                    </option>
+                  ))}
+                </HeaderSelect>
+                <HeaderSelect
+                  value={viewYear}
+                  onChange={(e) => setViewYear(Number(e.target.value))}
+                  aria-label="Select year"
+                >
+                  {YEARS.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </HeaderSelect>
+                <NavButton onClick={handleNextMonth} aria-label="Next month">
+                  &gt;
+                </NavButton>
+              </CalendarHeader>
+              <DaysGrid>
+                {WEEKDAYS.map((wd) => (
+                  <WeekdayLabel key={wd}>{wd}</WeekdayLabel>
                 ))}
-              </TimeSelect>
-              <label htmlFor="minute-select">Minute:</label>
-              <TimeSelect
-                id="minute-select"
-                value={selectedMinute}
-                onChange={(e) =>
-                  handleTimeChange(selectedHour, Number(e.target.value))
-                }
-              >
-                {minutes.map((m) => (
-                  <option key={m} value={m}>
-                    {m.toString().padStart(2, "0")}
-                  </option>
-                ))}
-              </TimeSelect>
-            </TimeSelectRow>
+                {days.map((day, idx) => {
+                  if (!day) return <div key={idx} />;
+                  const thisDate = new Date(viewYear, viewMonth, day);
+                  const disabled =
+                    (minDate && thisDate < minDate) ||
+                    (maxDate && thisDate > maxDate);
+                  return (
+                    <DayCell
+                      key={idx}
+                      selected={
+                        !!(
+                          selectedDate &&
+                          isSameDay(thisDate, selectedDate) &&
+                          thisDate.getMonth() === viewMonth
+                        )
+                      }
+                      disabled={disabled}
+                      tabIndex={disabled ? -1 : 0}
+                      aria-selected={
+                        !!(
+                          selectedDate &&
+                          isSameDay(thisDate, selectedDate) &&
+                          thisDate.getMonth() === viewMonth
+                        )
+                      }
+                      aria-disabled={disabled}
+                      onClick={() => handleDayClick(day)}
+                    >
+                      {day}
+                    </DayCell>
+                  );
+                })}
+              </DaysGrid>
+              {/* Time selection (optional) */}
+              {showTime && (
+                <TimeSelectRow>
+                  <label htmlFor="hour-select">Hour:</label>
+                  <TimeSelect
+                    id="hour-select"
+                    value={selectedHour}
+                    onChange={(e) =>
+                      handleTimeChange(Number(e.target.value), selectedMinute)
+                    }
+                  >
+                    {hours.map((h) => (
+                      <option key={h} value={h}>
+                        {h.toString().padStart(2, "0")}
+                      </option>
+                    ))}
+                  </TimeSelect>
+                  <label htmlFor="minute-select">Minute:</label>
+                  <TimeSelect
+                    id="minute-select"
+                    value={selectedMinute}
+                    onChange={(e) =>
+                      handleTimeChange(selectedHour, Number(e.target.value))
+                    }
+                  >
+                    {minutes.map((m) => (
+                      <option key={m} value={m}>
+                        {m.toString().padStart(2, "0")}
+                      </option>
+                    ))}
+                  </TimeSelect>
+                </TimeSelectRow>
+              )}
+            </CalendarPopup>,
+            document.body
           )}
-        </CalendarPopup>
       </PickerWrapper>
     );
   }

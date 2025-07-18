@@ -31,10 +31,13 @@ export const employeeApiEndpoints = (
   }),
   getEmployeeAssignedByDate: builder.query<
     any[],
-    { startDate: string; endDate: string }
+    { startDate: string; endDate: string; employeeId?: string }
   >({
-    query: ({ startDate, endDate }: { startDate: string; endDate: string }) =>
-      `/employee/assigned-by-date?startDate=${startDate}&endDate=${endDate}`,
+    query: ({ startDate, endDate, employeeId }) => {
+      let url = `/employee/assigned-by-date?startDate=${startDate}&endDate=${endDate}`;
+      if (employeeId) url += `&employeeId=${employeeId}`;
+      return url;
+    },
     transformResponse: (response: { status: string; data: any[] }) => {
       if (response.status === "success") {
         return transformApiData(response.data || []);

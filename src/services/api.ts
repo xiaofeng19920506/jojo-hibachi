@@ -52,4 +52,5 @@ export const {
   useChangeEmployeeStatusMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
+  useGetAdminEmployeeAssignedReservationsQuery,
 } = api;
