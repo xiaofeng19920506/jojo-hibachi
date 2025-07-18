@@ -28,7 +28,7 @@ export const userApiEndpoints = (
     providesTags: ["Reservations"],
   }),
   getUserReservationById: builder.query<any, string>({
-    query: (id: string) => `/user/reservation/${id}`,
+    query: (id: string) => `/reservation/${id}`,
     transformResponse: (response: { status: string; data: any }) => {
       if (response.status === "success" && response.data) {
         return transformApiData([response.data])[0];

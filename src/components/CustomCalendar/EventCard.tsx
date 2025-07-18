@@ -15,6 +15,12 @@ const Card = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   transition: box-shadow 0.15s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
   &:hover {
     box-shadow: 0 2px 8px rgba(156, 39, 176, 0.18);
     opacity: 0.95;
@@ -39,7 +45,32 @@ const EventCard: React.FC<{ event: CalendarEvent; onClick?: () => void }> = ({
   event,
   onClick,
 }) => {
-  return <Card onClick={onClick}>{event.title}</Card>;
+  const startStr = event.start
+    ? event.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : "";
+  const endStr = event.end
+    ? event.end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    : "";
+  return (
+    <Card onClick={onClick}>
+      <div style={{ fontSize: "0.9em", opacity: 0.85 }}>
+        {startStr} - {endStr}
+      </div>
+      <div style={{ fontWeight: 600, fontSize: "1em" }}>{event.title}</div>
+      {event.notes && (
+        <div
+          style={{
+            fontSize: "0.85em",
+            fontStyle: "italic",
+            opacity: 0.8,
+            whiteSpace: "pre-line",
+          }}
+        >
+          {event.notes}
+        </div>
+      )}
+    </Card>
+  );
 };
 
 export default EventCard;

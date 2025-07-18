@@ -499,7 +499,8 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
                 ? selectedDate.toLocaleDateString() +
                   " " +
                   selectedHour.toString().padStart(2, "0") +
-                  ":" +
+                  ":" + +
+                  
                   selectedMinute.toString().padStart(2, "0")
                 : selectedDate.toLocaleDateString()
               : showTime

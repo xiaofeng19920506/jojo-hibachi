@@ -6,9 +6,9 @@ import CurrentTimeIndicator from "./CurrentTimeIndicator";
 import Tooltip from "@mui/material/Tooltip";
 
 const hours = Array.from({ length: 11 }, (_, i) => 12 + i); // 12pm-10pm
-// Reduce slot height for a more compact grid
-const HOUR_HEIGHT = 80; // px (5rem)
-const HOUR_HEIGHT_CSS = "5rem";
+// Increase hour height for more dramatic scaling
+const HOUR_HEIGHT = 100; // px (was 80)
+const HOUR_HEIGHT_CSS = "6.25rem"; // 100px in rem
 
 // Accept numDays and columnWidth as props
 interface CalendarGridProps {
@@ -186,6 +186,7 @@ const EventWrapper = styled.div<{
   top: ${({ $top }) => $top}px;
   left: ${({ $left }) => $left}%;
   width: ${({ $width }) => $width}%;
+  height: ${({ $height }) => $height}px;
   z-index: 5;
   right: 4px;
 `;
@@ -209,7 +210,7 @@ function getEventSpan(event: CalendarEvent) {
   const startMin = event.start.getMinutes();
   const endMin = event.end.getMinutes();
   let span = endHour - startHour + (endMin - startMin) / 60;
-  if (span < 0.5) span = 0.5; // minimum height for very short events
+  if (span < 0.25) span = 0.25; // minimum height for very short events
   return span;
 }
 
@@ -288,6 +289,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
     : HOUR_HEIGHT_CSS;
   const gridTemplateRows = `minmax(2.5rem, auto) repeat(${hours.length}, ${hourHeightCSS})`;
 
+  // In the event rendering logic, set top to 0 and height to a fixed value (e.g., 150px)
+  const FIXED_EVENT_HEIGHT = 150;
+
   return (
     <CalendarGridContainer
       style={{
@@ -350,7 +354,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                     >
                       {cellEvents.map((ev) => {
                         const span = getEventSpan(ev);
-                        const top = (ev.start.getMinutes() / 60) * HOUR_HEIGHT;
+                        const top = 0;
                         const height = span * HOUR_HEIGHT;
                         const meta = overlapMeta[ev.id] || { col: 0, total: 1 };
                         const width = 100 / meta.total;
@@ -408,7 +412,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
             <BodyCell key={`cell-${rowIdx}-${colIdx}`} $isToday={isToday}>
               {cellEvents.map((ev) => {
                 const span = getEventSpan(ev);
-                const top = (ev.start.getMinutes() / 60) * HOUR_HEIGHT;
+                const top = 0;
                 const height = span * HOUR_HEIGHT;
                 const meta = overlapMeta[ev.id] || { col: 0, total: 1 };
                 const width = 100 / meta.total;
