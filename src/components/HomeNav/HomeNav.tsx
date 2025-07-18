@@ -5,7 +5,9 @@ import { useAppSelector } from "../../utils/hooks";
 
 const HomeNav: React.FC = () => {
   const navigate = useNavigate();
-  const { isAuthenticated, user, isInitialized } = useAppSelector((state) => state.user);
+  const { isAuthenticated, user, isInitialized } = useAppSelector(
+    (state) => state.user
+  );
 
   useEffect(() => {
     const handleNavigation = () => {
@@ -14,7 +16,7 @@ const HomeNav: React.FC = () => {
       }
 
       if (!isAuthenticated) {
-        navigate("/signin");
+        navigate("/booknow");
         return;
       }
 
@@ -30,11 +32,11 @@ const HomeNav: React.FC = () => {
             navigate("/dashboard");
             break;
           default:
-            navigate("/signin");
+            navigate("/booknow");
             break;
         }
       } else {
-        navigate("/signin");
+        navigate("/booknow");
       }
     };
 

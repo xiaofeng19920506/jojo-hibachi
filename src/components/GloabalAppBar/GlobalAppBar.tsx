@@ -2,6 +2,7 @@ import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import { logout } from "../../features/userSlice";
+import { api } from "../../services/api";
 import MenuIcon from "@mui/icons-material/Menu";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
@@ -61,6 +62,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
     dispatch(logout());
+    dispatch(api.util.resetApiState());
     navigate("/signin");
   };
 
