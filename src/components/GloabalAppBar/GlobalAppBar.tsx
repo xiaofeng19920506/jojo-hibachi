@@ -30,7 +30,6 @@ interface GlobalAppBarProps {
   showLogout?: boolean;
   showNavigation?: boolean;
   elevation?: number;
-  color?: "default" | "primary" | "secondary" | "transparent" | "inherit";
   themeMode?: string;
   setThemeMode?: (mode: string) => void;
 }
@@ -40,7 +39,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   showLogout = true,
   showNavigation = true,
   elevation = 1,
-  color = "default",
   themeMode = "light",
   setThemeMode,
 }) => {
@@ -52,15 +50,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
-  const isBookNow = location.pathname === "/booknow";
-  const appBarColor = isBookNow ? "transparent" : color;
-  const appBarSx = isBookNow
-    ? {
-        backgroundColor: "#fff",
-        color: "#222",
-        boxShadow: 1,
-      }
-    : {};
+  // Remove isBookNow, appBarColor, and appBarSx logic. Always use color='primary' and no special sx for /booknow.
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -78,10 +68,20 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     const buttons: ActionButton[] = [];
     const currentPath = location.pathname;
 
+    // Always add Book Now button first
+    if (currentPath !== "/booknow") {
+      buttons.push({
+        label: "Book Now",
+        variant: "contained",
+        color: "secondary",
+        onClick: () => handleNavigation("/booknow"),
+      });
+    }
+    // Then add the rest of the navigation logic for authenticated/unauthenticated users
     if (!isAuthenticated) {
       if (currentPath !== "/signin") {
         buttons.push({
-          label: "Sign In",
+          label: "Login",
           variant: "outlined",
           color: "secondary",
           onClick: () => handleNavigation("/signin"),
@@ -96,15 +96,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
         });
       }
     } else {
-      // Order: Book Now, Weekly Calendar, Profile
-      if (currentPath !== "/booknow") {
-        buttons.push({
-          label: "Book Now",
-          variant: "contained",
-          color: "secondary",
-          onClick: () => handleNavigation("/booknow"),
-        });
-      }
       if (currentPath !== "/calendar") {
         buttons.push({
           label: "Weekly Calendar",
@@ -132,12 +123,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const allActionButtons = showNavigation ? [...getNavigationButtons()] : [];
 
   return (
-    <AppBar
-      position="fixed"
-      color={appBarColor}
-      elevation={elevation}
-      sx={appBarSx}
-    >
+    <AppBar position="fixed" color="primary" elevation={elevation}>
       <Toolbar
         sx={{
           justifyContent: "space-between",
@@ -226,21 +212,41 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
               justifyContent: { xs: "flex-end", sm: "flex-end" },
             }}
           >
-            {allActionButtons.map((button, index) => (
-              <Button
-                key={index}
-                variant={button.variant || "outlined"}
-                color={button.color || "primary"}
-                onClick={button.onClick}
-                disabled={button.disabled}
-                sx={{
-                  textTransform: "none",
-                  width: { xs: "100%", sm: "auto" },
-                }}
-              >
-                {button.label}
-              </Button>
-            ))}
+            {allActionButtons.map((button, index) => {
+              const isSpecial = [
+                "Weekly Calendar",
+                "Book Now",
+                "Profile",
+                "Logout",
+                "Login",
+              ].includes(button.label);
+              return (
+                <Button
+                  key={index}
+                  variant={button.variant || "outlined"}
+                  color={button.color || "primary"}
+                  onClick={button.onClick}
+                  disabled={button.disabled}
+                  sx={{
+                    textTransform: "none",
+                    width: { xs: "100%", sm: "auto" },
+                    borderColor: "#fff",
+                    color: "#fff",
+                    ...(isSpecial && {
+                      border: "2px solid #fff",
+                      backgroundColor: "transparent",
+                      "&:hover": {
+                        backgroundColor: theme.palette.secondary.main,
+                        borderColor: theme.palette.secondary.main,
+                        color: "#fff",
+                      },
+                    }),
+                  }}
+                >
+                  {button.label}
+                </Button>
+              );
+            })}
 
             {showLogout && isAuthenticated && (
               <Button
@@ -250,6 +256,14 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                 sx={{
                   textTransform: "none",
                   width: { xs: "100%", sm: "auto" },
+                  border: "2px solid #fff",
+                  color: "#fff",
+                  backgroundColor: "transparent",
+                  "&:hover": {
+                    backgroundColor: theme.palette.secondary.main,
+                    borderColor: theme.palette.secondary.main,
+                    color: "#fff",
+                  },
                 }}
               >
                 Logout

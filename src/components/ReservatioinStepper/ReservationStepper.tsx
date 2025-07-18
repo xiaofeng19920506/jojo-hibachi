@@ -60,7 +60,6 @@ const ReservationStepper = () => {
         showNavigation={true}
         showLogout={true}
         elevation={4}
-        color="primary"
       />
 
       <Container
