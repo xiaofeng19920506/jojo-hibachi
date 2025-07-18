@@ -18,12 +18,54 @@ const HeaderBar = styled.div`
   padding: 12px 16px;
   background: #f5f5f5;
   border-bottom: 1px solid #eee;
+
+  @media (max-width: 600px) {
+    padding: 8px 12px;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  @media (max-width: 600px) and (orientation: landscape) {
+    padding: 4px 8px;
+    flex-direction: row;
+    gap: 4px;
+  }
 `;
-const Nav = styled.div``;
-const ViewToggle = styled.div``;
+const Nav = styled.div`
+  @media (max-width: 600px) {
+    width: 100%;
+    text-align: center;
+  }
+
+  @media (max-width: 600px) and (orientation: landscape) {
+    width: auto;
+    text-align: left;
+  }
+`;
+const ViewToggle = styled.div`
+  @media (max-width: 600px) {
+    display: flex;
+    gap: 4px;
+  }
+
+  @media (max-width: 600px) and (orientation: landscape) {
+    display: flex;
+    gap: 2px;
+  }
+`;
 const HeaderDate = styled.span`
   font-weight: bold;
   margin-left: 16px;
+
+  @media (max-width: 600px) {
+    margin-left: 0;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 600px) and (orientation: landscape) {
+    margin-left: 8px;
+    font-size: 0.8rem;
+  }
 `;
 const ToggleButton = styled.button<{ active?: boolean }>`
   margin-right: 8px;
@@ -33,6 +75,18 @@ const ToggleButton = styled.button<{ active?: boolean }>`
   color: ${({ active }) => (active ? "#fff" : "inherit")};
   border-radius: 4px;
   cursor: pointer;
+
+  @media (max-width: 600px) {
+    margin-right: 0;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 600px) and (orientation: landscape) {
+    margin-right: 2px;
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
 `;
 
 const formatDate = (date: Date, view: CalendarView) => {

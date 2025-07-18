@@ -26,7 +26,7 @@ interface CalendarGridProps {
 const CalendarGridContainer = styled.div`
   display: grid;
   width: 100%;
-  height: calc(100vh - 250px); /* More space for header, title, and padding */
+  height: 100%;
   overflow-y: auto;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE 10+ */
@@ -37,16 +37,52 @@ const CalendarGridContainer = styled.div`
   &::-webkit-scrollbar {
     display: none; /* Chrome/Safari/Webkit */
   }
+  @media (min-width: 600px) {
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    padding: 0px 0px 0 0px;
+  }
   @media (max-width: 600px) {
     width: max-content;
-    height: calc(100vh - 220px); /* More space on mobile */
+    height: 100%;
     border-radius: 0;
     box-shadow: none;
-    padding: 4px 4px 0 4px;
+    padding: 0px 0px 0 0px;
     overflow-x: auto;
+    overflow-y: auto;
     position: relative;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
+    min-height: 100%;
+    flex: 1;
+  }
+  @media (max-width: 600px) and (orientation: landscape) {
+    width: max-content;
+    height: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0px 0px 0 0px;
+    overflow-x: auto;
+    overflow-y: auto;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    min-height: 100%;
+    flex: 1;
+  }
+  @media (max-width: 600px) and (orientation: portrait) {
+    width: max-content;
+    height: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0px 0px 0 0px;
+    overflow-x: auto;
+    overflow-y: auto;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    min-height: 100%;
+    flex: 1;
   }
 `;
 
@@ -67,6 +103,11 @@ const HeaderCell = styled.div<{ $isToday?: boolean }>`
     position: sticky;
     top: 0;
     z-index: 2;
+  }
+
+  @media (max-width: 600px) and (orientation: landscape) {
+    font-size: 0.8rem;
+    padding: 4px 0;
   }
 `;
 
@@ -90,6 +131,11 @@ const GutterCell = styled.div`
     z-index: 3;
     background: #fafafa;
   }
+
+  @media (max-width: 600px) and (orientation: landscape) {
+    font-size: 0.8rem;
+    padding-right: 4px;
+  }
 `;
 
 const TopLeftCell = styled(GutterCell)`
@@ -110,6 +156,18 @@ const BodyCell = styled.div<{ $isToday?: boolean }>`
 
   @media (min-width: 601px) {
     min-width: 0;
+  }
+
+  @media (max-width: 600px) {
+    min-height: 3.5rem;
+  }
+
+  @media (max-width: 600px) and (orientation: landscape) {
+    min-height: 2.5rem;
+  }
+
+  @media (max-width: 600px) and (orientation: portrait) {
+    min-height: 3.5rem;
   }
 `;
 
@@ -221,7 +279,14 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   const gridTemplateColumns = isMobileView
     ? `minmax(${timeGutterWidth}px, ${timeGutterWidth}px) repeat(${days.length}, minmax(${dayColumnWidthRem}rem, ${dayColumnWidthRem}rem))`
     : `minmax(${timeGutterWidth}px, ${timeGutterWidth}px) repeat(${days.length}, minmax(0, 1fr))`;
-  const gridTemplateRows = `minmax(2.5rem, auto) repeat(${hours.length}, ${HOUR_HEIGHT_CSS})`;
+
+  // Use responsive height for grid rows
+  const hourHeightCSS = isMobileView
+    ? window.matchMedia("(orientation: landscape)").matches
+      ? "2.5rem"
+      : "3.5rem"
+    : HOUR_HEIGHT_CSS;
+  const gridTemplateRows = `minmax(2.5rem, auto) repeat(${hours.length}, ${hourHeightCSS})`;
 
   return (
     <CalendarGridContainer

@@ -19,6 +19,20 @@ const Card = styled.div`
     box-shadow: 0 2px 8px rgba(156, 39, 176, 0.18);
     opacity: 0.95;
   }
+
+  @media (max-width: 600px) {
+    padding: 4px 6px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    margin: 1px 0;
+  }
+
+  @media (max-width: 600px) and (orientation: landscape) {
+    padding: 2px 4px;
+    font-size: 0.7rem;
+    border-radius: 3px;
+    margin: 1px 0;
+  }
 `;
 
 const EventCard: React.FC<{ event: CalendarEvent; onClick?: () => void }> = ({

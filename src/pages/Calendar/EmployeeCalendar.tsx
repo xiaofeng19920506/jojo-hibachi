@@ -247,7 +247,16 @@ const EmployeeCalendar: React.FC = () => {
                 value={selectedEmployeeId}
                 onChange={(e) => setSelectedEmployeeId(e.target.value)}
                 label="Select Employee"
-                sx={{ minWidth: 200 }}
+                sx={{
+                  minWidth: 200,
+                  "@media (max-width: 600px)": {
+                    minWidth: 150,
+                  },
+                  "@media (max-width: 600px) and (orientation: landscape)": {
+                    minWidth: 120,
+                    fontSize: "0.8rem",
+                  },
+                }}
               >
                 {allEmployees.map((emp: any) => (
                   <MenuItem key={emp.id} value={emp.id}>
@@ -259,7 +268,11 @@ const EmployeeCalendar: React.FC = () => {
           )}
           <CalendarControlsRow>
             <ArrowBackIosNewIcon
-              style={{ cursor: "pointer", flex: "0 0 auto" }}
+              style={{
+                cursor: "pointer",
+                flex: "0 0 auto",
+                fontSize: window.innerWidth <= 600 ? "1.2rem" : "1.5rem",
+              }}
               onClick={() => datePickerRef.current?.goToPrevWeek()}
             />
             <DatePicker
@@ -271,12 +284,18 @@ const EmployeeCalendar: React.FC = () => {
               showTime={false}
             />
             <ArrowForwardIosIcon
-              style={{ cursor: "pointer", flex: "0 0 auto" }}
+              style={{
+                cursor: "pointer",
+                flex: "0 0 auto",
+                fontSize: window.innerWidth <= 600 ? "1.2rem" : "1.5rem",
+              }}
               onClick={() => datePickerRef.current?.goToNextWeek()}
             />
           </CalendarControlsRow>
         </CalendarTitleRow>
-        <CalendarContainer style={{ position: "relative" }}>
+        <CalendarContainer
+          style={{ position: "relative", height: "100%", overflow: "auto" }}
+        >
           <CustomCalendar
             events={events}
             onEventClick={(event) =>

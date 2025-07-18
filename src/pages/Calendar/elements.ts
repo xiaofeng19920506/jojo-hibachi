@@ -3,16 +3,46 @@ import { Box, Typography, FormControl } from "@mui/material";
 
 export const CalendarRoot = styled(Box)`
   height: 100vh;
-  width: 100%;
+  width: 100vw;
   min-width: 100vw;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  @media (min-width: 600px) {
+    height: calc(100vh - 64px);
+    top: 64px;
+  }
+  @media (max-width: 600px) {
+    height: calc(100vh - 56px);
+    top: 56px;
+  }
+  @media (max-width: 600px) and (orientation: landscape) {
+    height: calc(100vh - 48px);
+    top: 48px;
+  }
+  @media (max-width: 600px) and (orientation: portrait) {
+    height: calc(100vh - 56px);
+    top: 56px;
+  }
 `;
 
 export const CalendarAppBarWrapper = styled(Box)`
-  flex: 0 0 10vh;
+  flex: 0 0 auto;
   min-height: 0;
+
+  @media (max-width: 600px) and (orientation: landscape) {
+    flex: 0 0 auto;
+  }
+
+  @media (max-width: 600px) and (orientation: portrait) {
+    flex: 0 0 auto;
+  }
 `;
 
 export const CalendarContent = styled(Box)`
@@ -22,11 +52,27 @@ export const CalendarContent = styled(Box)`
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-top: 16px;
   overflow: hidden;
   height: 100%;
+
   @media (min-width: 600px) {
-    margin-top: 32px;
+    margin-top: 0px;
+    padding-top: 8px;
+  }
+  @media (max-width: 600px) {
+    margin-top: 0px;
+    height: 100%;
+    overflow: auto;
+  }
+  @media (max-width: 600px) and (orientation: landscape) {
+    margin-top: 0px;
+    height: 100%;
+    overflow: auto;
+  }
+  @media (max-width: 600px) and (orientation: portrait) {
+    margin-top: 0px;
+    height: 100%;
+    overflow: auto;
   }
 `;
 
@@ -36,12 +82,34 @@ export const CalendarTitleRow = styled(Box)`
   align-items: center;
   justify-content: center;
   width: 100%;
-  margin-bottom: 24px;
-  gap: 8px;
+  margin-bottom: 8px;
+  gap: 4px;
+  flex-shrink: 0;
 
   @media (min-width: 600px) {
     flex-direction: row;
     gap: 16px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 24px 0 24px;
+    margin-bottom: 4px;
+    min-height: 48px;
+  }
+  @media (max-width: 600px) {
+    margin-bottom: 4px;
+    gap: 2px;
+  }
+  @media (max-width: 600px) and (orientation: landscape) {
+    margin-bottom: 2px;
+    gap: 1px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+  }
+  @media (max-width: 600px) and (orientation: portrait) {
+    margin-bottom: 2px;
+    gap: 1px;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
   }
@@ -58,14 +126,41 @@ export const CalendarControlsRow = styled(Box)`
   @media (min-width: 600px) {
     width: auto;
     gap: 16px;
+    flex-shrink: 0;
+  }
+  @media (max-width: 600px) {
+    gap: 2px;
+  }
+  @media (max-width: 600px) and (orientation: landscape) {
+    gap: 1px;
+  }
+  @media (max-width: 600px) and (orientation: portrait) {
+    gap: 1px;
   }
 `;
 
 export const CalendarTitle = styled(Typography)`
   text-align: center;
   width: 100%;
-  padding: 8px;
+  padding: 4px;
   @media (min-width: 600px) {
+    width: auto;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  @media (max-width: 600px) {
+    padding: 2px;
+    font-size: 1.2rem;
+  }
+  @media (max-width: 600px) and (orientation: landscape) {
+    padding: 1px;
+    font-size: 1.1rem;
+    width: auto;
+  }
+  @media (max-width: 600px) and (orientation: portrait) {
+    padding: 1px;
+    font-size: 1rem;
     width: auto;
   }
 `;
@@ -78,6 +173,15 @@ export const CalendarEmployeeSelect = styled(FormControl)`
     margin-left: 24px;
     margin-right: 24px;
   }
+  @media (max-width: 600px) {
+    min-width: 120px;
+  }
+  @media (max-width: 600px) and (orientation: landscape) {
+    min-width: 100px;
+  }
+  @media (max-width: 600px) and (orientation: portrait) {
+    min-width: 80px;
+  }
 `;
 
 export const CalendarContainer = styled(Box)`
@@ -86,12 +190,29 @@ export const CalendarContainer = styled(Box)`
   min-width: 0;
   margin-left: auto;
   margin-right: auto;
-  padding: 16px;
+  padding: 0px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  flex: 1;
+
   @media (min-width: 600px) {
-    padding: 24px;
+    padding: 4px 24px 4px 24px;
+  }
+  @media (max-width: 600px) {
+    padding: 0px;
+    height: 100%;
+    overflow: auto;
+  }
+  @media (max-width: 600px) and (orientation: landscape) {
+    padding: 0px;
+    height: 100%;
+    overflow: auto;
+  }
+  @media (max-width: 600px) and (orientation: portrait) {
+    padding: 0px;
+    height: 100%;
+    overflow: auto;
   }
 `;
 

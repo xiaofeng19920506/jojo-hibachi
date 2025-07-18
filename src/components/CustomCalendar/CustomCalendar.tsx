@@ -38,6 +38,13 @@ const CalendarContainer = styled.div`
   display: flex;
   flex-direction: column;
 
+  @media (min-width: 600px) {
+    width: 100%;
+    margin: 0;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  }
+
   @media (max-width: 600px) {
     width: 100%;
     max-width: none;
@@ -47,6 +54,37 @@ const CalendarContainer = styled.div`
     padding: 0;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
+    height: 100%;
+    min-height: 100%;
+    flex: 1;
+  }
+  
+  @media (max-width: 600px) and (orientation: landscape) {
+    width: 100%;
+    max-width: none;
+    border-radius: 0;
+    margin: 0;
+    box-shadow: none;
+    padding: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+    min-height: 100%;
+    flex: 1;
+  }
+  
+  @media (max-width: 600px) and (orientation: portrait) {
+    width: 100%;
+    max-width: none;
+    border-radius: 0;
+    margin: 0;
+    box-shadow: none;
+    padding: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    height: 100%;
+    min-height: 100%;
+    flex: 1;
   }
 `;
 

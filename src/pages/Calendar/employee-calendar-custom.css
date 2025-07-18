@@ -4,15 +4,90 @@
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   padding: 8px;
+  height: 100%;
+  min-height: 100%;
+}
+
+@media (min-width: 600px) {
+  .rbc-calendar {
+    padding: 8px;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .rbc-calendar {
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0px;
+    height: 100%;
+    min-height: 100%;
+    overflow: auto;
+  }
+}
+
+@media (max-width: 600px) and (orientation: landscape) {
+  .rbc-calendar {
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0px;
+    height: 100%;
+    min-height: 100%;
+    overflow: auto;
+  }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .rbc-calendar {
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0px;
+    height: 100%;
+    min-height: 100%;
+    overflow: auto;
+  }
 }
 
 /* Toolbar */
 .rbc-toolbar {
   background: #f5f5f5;
   border-radius: 12px;
-  margin-bottom: 16px;
-  padding: 8px 16px;
-  font-size: 1.1rem;
+  margin-bottom: 8px;
+  padding: 4px 8px;
+  font-size: 1rem;
+}
+
+@media (min-width: 600px) {
+  .rbc-toolbar {
+    margin-bottom: 4px;
+    padding: 2px 6px;
+    font-size: 0.9rem;
+    min-height: 36px;
+  }
+}
+
+@media (max-width: 600px) {
+  .rbc-toolbar {
+    margin-bottom: 2px;
+    padding: 1px 3px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 600px) and (orientation: landscape) {
+  .rbc-toolbar {
+    margin-bottom: 1px;
+    padding: 1px 2px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .rbc-toolbar {
+    margin-bottom: 1px;
+    padding: 1px 2px;
+    font-size: 0.8rem;
+  }
 }
 
 /* Weekday headers */
@@ -22,6 +97,36 @@
   font-weight: 600;
   font-size: 1rem;
   border-bottom: 1px solid #e0e0e0;
+}
+
+@media (min-width: 600px) {
+  .rbc-header {
+    font-size: 0.9rem;
+    padding: 4px 2px;
+    min-height: 32px;
+    line-height: 1.2;
+  }
+}
+
+@media (max-width: 600px) {
+  .rbc-header {
+    font-size: 0.8rem;
+    padding: 2px 1px;
+  }
+}
+
+@media (max-width: 600px) and (orientation: landscape) {
+  .rbc-header {
+    font-size: 0.75rem;
+    padding: 1px 1px;
+  }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .rbc-header {
+    font-size: 0.75rem;
+    padding: 1px 1px;
+  }
 }
 
 /* Ensure date header border aligns with time slot grid */
@@ -41,6 +146,27 @@
   font-size: 0.95rem;
 }
 
+@media (max-width: 600px) {
+  .rbc-time-gutter {
+    font-size: 0.75rem;
+    padding-right: 2px;
+  }
+}
+
+@media (max-width: 600px) and (orientation: landscape) {
+  .rbc-time-gutter {
+    font-size: 0.7rem;
+    padding-right: 1px;
+  }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .rbc-time-gutter {
+    font-size: 0.7rem;
+    padding-right: 1px;
+  }
+}
+
 /* Event styling */
 .rbc-event {
   background: #e3f2fd !important;
@@ -51,6 +177,30 @@
   padding: 4px 8px !important;
   font-size: 14px !important;
   margin: 0 auto !important;
+}
+
+@media (max-width: 600px) {
+  .rbc-event {
+    padding: 1px 3px !important;
+    font-size: 10px !important;
+    border-radius: 3px !important;
+  }
+}
+
+@media (max-width: 600px) and (orientation: landscape) {
+  .rbc-event {
+    padding: 1px 2px !important;
+    font-size: 9px !important;
+    border-radius: 2px !important;
+  }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .rbc-event {
+    padding: 1px 2px !important;
+    font-size: 9px !important;
+    border-radius: 2px !important;
+  }
 }
 
 /* Selected event */
@@ -72,7 +222,25 @@
 /* Make time slots fill available space, with a minimum height of the viewport */
 .rbc-time-content > .rbc-timeslot-group {
   height: 100%;
-  min-height: 100vh;
+  min-height: 100%;
+}
+
+@media (max-width: 600px) {
+  .rbc-time-content > .rbc-timeslot-group {
+    min-height: 100%;
+  }
+}
+
+@media (max-width: 600px) and (orientation: landscape) {
+  .rbc-time-content > .rbc-timeslot-group {
+    min-height: 100%;
+  }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .rbc-time-content > .rbc-timeslot-group {
+    min-height: 100%;
+  }
 }
 
 /* Make event text larger and more readable */
@@ -83,9 +251,54 @@
   word-break: break-word;
 }
 
+@media (max-width: 600px) {
+  .rbc-event-content {
+    font-size: 0.8rem;
+    line-height: 1.1;
+  }
+}
+
+@media (max-width: 600px) and (orientation: landscape) {
+  .rbc-event-content {
+    font-size: 0.75rem;
+    line-height: 1.1;
+  }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .rbc-event-content {
+    font-size: 0.75rem;
+    line-height: 1.1;
+  }
+}
+
 /* Make each individual time slot taller for better readability */
 .rbc-time-slot {
   min-height: 3.5rem;
+}
+
+@media (min-width: 600px) {
+  .rbc-time-slot {
+    min-height: 2.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .rbc-time-slot {
+    min-height: 3rem;
+  }
+}
+
+@media (max-width: 600px) and (orientation: landscape) {
+  .rbc-time-slot {
+    min-height: 2rem;
+  }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .rbc-time-slot {
+    min-height: 2.5rem;
+  }
 }
 
 /* Comprehensive fix for vertical border alignment */
@@ -103,6 +316,30 @@
   width: 4rem;
   min-width: 4rem;
   max-width: 4rem;
+}
+
+@media (max-width: 600px) {
+  .rbc-time-gutter {
+    width: 2.5rem;
+    min-width: 2.5rem;
+    max-width: 2.5rem;
+  }
+}
+
+@media (max-width: 600px) and (orientation: landscape) {
+  .rbc-time-gutter {
+    width: 2rem;
+    min-width: 2rem;
+    max-width: 2rem;
+  }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .rbc-time-gutter {
+    width: 2.5rem;
+    min-width: 2.5rem;
+    max-width: 2.5rem;
+  }
 }
 
 .rbc-header,
@@ -148,6 +385,33 @@
 }
 .rbc-time-content::-webkit-scrollbar {
   display: none; /* Chrome/Safari/Webkit */
+}
+
+@media (max-width: 600px) {
+  .rbc-time-content {
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: 100%;
+  }
+}
+
+@media (max-width: 600px) and (orientation: landscape) {
+  .rbc-time-content {
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: 100%;
+  }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .rbc-time-content {
+    overflow-x: auto;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: 100%;
+  }
 }
 
 /* Force all day columns to have the blue background, including today, with maximum specificity */
@@ -353,4 +617,91 @@
 .rbc-day-bg.rbc-today,
 .rbc-day-slot.rbc-today {
   background: transparent !important;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 600px) {
+  .rbc-time-view {
+    height: 100%;
+    min-height: 100%;
+    overflow: auto;
+    max-height: 100%;
+  }
+  
+  .rbc-time-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #fff;
+  }
+  
+  .rbc-time-gutter {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    background: #fafafa;
+  }
+  
+  .rbc-time-content {
+    min-height: 100%;
+    max-height: 100%;
+  }
+}
+
+/* Landscape-specific improvements */
+@media (max-width: 600px) and (orientation: landscape) {
+  .rbc-time-view {
+    height: 100%;
+    min-height: 100%;
+    overflow: auto;
+    max-height: 100%;
+  }
+  
+  .rbc-time-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #fff;
+  }
+  
+  .rbc-time-gutter {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    background: #fafafa;
+  }
+  
+  .rbc-time-content {
+    min-height: 100%;
+    max-height: 100%;
+  }
+}
+
+/* Portrait-specific improvements */
+@media (max-width: 600px) and (orientation: portrait) {
+  .rbc-time-view {
+    height: 100%;
+    min-height: 100%;
+    overflow: auto;
+    max-height: 100%;
+  }
+  
+  .rbc-time-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #fff;
+  }
+  
+  .rbc-time-gutter {
+    position: sticky;
+    left: 0;
+    z-index: 5;
+    background: #fafafa;
+  }
+  
+  .rbc-time-content {
+    min-height: 100%;
+    max-height: 100%;
+  }
 }
