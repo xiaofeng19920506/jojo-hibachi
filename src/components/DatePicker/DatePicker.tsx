@@ -19,19 +19,36 @@ const PickerWrapper = styled.div`
   display: inline-block;
 `;
 
-const CalendarPopup = styled.div<{ open: boolean }>`
+const CalendarPopup = styled.div<{
+  open: boolean;
+  position: "bottom" | "top";
+  topPosition: string;
+  leftPosition: string;
+  transformValue: string;
+}>`
   display: ${({ open }) => (open ? "block" : "none")};
-  position: absolute;
-  top: 40px;
-  left: 0;
-  z-index: 1000;
+  position: fixed;
+  top: ${({ topPosition }) => topPosition};
+  left: ${({ leftPosition }) => leftPosition};
+  transform: ${({ transformValue }) => transformValue};
+  z-index: 9999;
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   padding: 16px;
   min-width: 260px;
   animation: ${fadeIn} 0.18s ease;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow-y: auto;
+
+  @media (max-width: 600px) and (orientation: landscape) {
+    min-width: 200px;
+    max-width: 85vw;
+    padding: 12px;
+    font-size: 0.9rem;
+  }
 `;
 
 const CalendarHeader = styled.div`
@@ -179,6 +196,14 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
     const [selectedMinute, setSelectedMinute] = useState<number>(
       value ? value.getMinutes() : 0
     );
+    const [popupPosition, setPopupPosition] = useState<"bottom" | "top">(
+      "bottom"
+    );
+    const [popupTopPosition, setPopupTopPosition] = useState<string>("50%");
+    const [popupLeftPosition, setPopupLeftPosition] = useState<string>("50%");
+    const [popupTransform, setPopupTransform] = useState<string>(
+      "translate(-50%, -50%)"
+    );
     const wrapperRef = useRef<HTMLDivElement>(null);
 
     useImperativeHandle(
@@ -213,6 +238,123 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
       }),
       [viewYear, viewMonth, selectedDate, onChange]
     );
+
+    // --- Calculate popup position ---
+    const calculatePopupPosition = () => {
+      if (!wrapperRef.current) return "bottom";
+
+      const rect = wrapperRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const popupHeight = 300; // Approximate height of the popup
+
+      // Check if there's enough space below
+      const spaceBelow = viewportHeight - rect.bottom;
+      const spaceAbove = rect.top;
+
+      if (spaceBelow >= popupHeight || spaceBelow > spaceAbove) {
+        return "bottom";
+      } else {
+        return "top";
+      }
+    };
+
+    // --- Calculate popup position relative to the button ---
+    const getPopupPosition = () => {
+      if (!wrapperRef.current)
+        return { top: "50%", left: "50%", transform: "translate(-50%, -50%)" };
+
+      const rect = wrapperRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const viewportWidth = window.innerWidth;
+      const isMobile = window.innerWidth <= 600;
+      const isLandscape = window.innerWidth > window.innerHeight;
+      
+      // Use smaller popup dimensions for mobile landscape
+      const popupHeight = isMobile && isLandscape ? 200 : 300;
+      const popupWidth = isMobile && isLandscape ? 200 : 280;
+
+      if (isMobile) {
+        if (isLandscape) {
+          // Landscape mode - always position below the input
+          let top = rect.bottom + 4; // Smaller gap for landscape
+          
+          // Position at bottom left of the input
+          let left = rect.left; // Align with left edge of the input
+          
+          // Move left to avoid right edge cutoff
+          left = left - 30; // Additional left offset for landscape
+          
+          // Ensure popup doesn't go off the left edge
+          if (left < 5) {
+            left = 5; // Very small margin for landscape
+          }
+          
+          // Check if popup would be cut off on the right
+          if (left + popupWidth > viewportWidth) {
+            left = viewportWidth - popupWidth - 5;
+          }
+          
+          return {
+            top: `${top}px`,
+            left: `${left}px`,
+            transform: "none",
+          };
+        } else {
+          // Portrait mode - use standard mobile positioning
+          let top = rect.bottom + 8; // 8px gap below the button
+
+          // Check if popup would be cut off at the bottom
+          if (top + popupHeight > viewportHeight) {
+            // Position above the button instead
+            top = rect.top - popupHeight - 8;
+          }
+
+          // For mobile portrait, center horizontally but ensure it doesn't go off screen
+          let left = Math.max(
+            20,
+            Math.min(
+              viewportWidth - popupWidth - 20,
+              rect.left - (popupWidth - rect.width) / 2
+            )
+          );
+
+          return {
+            top: `${top}px`,
+            left: `${left}px`,
+            transform: "none",
+          };
+        }
+      } else {
+        // Desktop positioning - position under the button
+        let top = rect.bottom + 8; // 8px gap below the button
+
+        // Check if popup would be cut off at the bottom
+        if (top + popupHeight > viewportHeight) {
+          // Position above the button instead
+          top = rect.top - popupHeight - 8;
+        }
+
+        // Position horizontally - start from button's left edge but move left to avoid cutoff
+        let left = rect.left;
+
+        // Check if popup would be cut off on the right
+        if (left + popupWidth > viewportWidth) {
+          // Move left to fit within viewport
+          left = viewportWidth - popupWidth - 20; // 20px margin from right edge
+        }
+
+        // Ensure popup doesn't go off the left edge
+        if (left < 20) {
+          left = 20; // 20px margin from left edge
+        }
+
+        return {
+          top: `${top}px`,
+          left: `${left}px`,
+          transform: "none",
+        };
+      }
+    };
 
     // --- Accessibility: Focus trap in popup ---
     useEffect(() => {
@@ -372,7 +514,17 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
           aria-label={
             selectedDate ? selectedDate.toLocaleString() : "Select date"
           }
-          onClick={() => setOpen((o) => !o)}
+          onClick={() => {
+            const newOpen = !open;
+            if (newOpen) {
+              setPopupPosition(calculatePopupPosition());
+              const position = getPopupPosition();
+              setPopupTopPosition(position.top);
+              setPopupLeftPosition(position.left);
+              setPopupTransform(position.transform);
+            }
+            setOpen(newOpen);
+          }}
         >
           <span>
             {selectedDate
@@ -393,6 +545,10 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
         </DateInputButton>
         <CalendarPopup
           open={open}
+          position={popupPosition}
+          topPosition={popupTopPosition}
+          leftPosition={popupLeftPosition}
+          transformValue={popupTransform}
           role="dialog"
           aria-modal="true"
           tabIndex={-1}

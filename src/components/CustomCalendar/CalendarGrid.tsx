@@ -43,7 +43,7 @@ const CalendarGridContainer = styled.div`
     padding: 0px 0px 0 0px;
   }
   @media (max-width: 600px) {
-    width: max-content;
+    width: 100%;
     height: 100%;
     border-radius: 0;
     box-shadow: none;
@@ -57,7 +57,7 @@ const CalendarGridContainer = styled.div`
     flex: 1;
   }
   @media (max-width: 600px) and (orientation: landscape) {
-    width: max-content;
+    width: 100%;
     height: 100%;
     border-radius: 0;
     box-shadow: none;
@@ -71,7 +71,7 @@ const CalendarGridContainer = styled.div`
     flex: 1;
   }
   @media (max-width: 600px) and (orientation: portrait) {
-    width: max-content;
+    width: 100%;
     height: 100%;
     border-radius: 0;
     box-shadow: none;

@@ -98,6 +98,7 @@ export const CalendarTitleRow = styled(Box)`
   @media (max-width: 600px) {
     margin-bottom: 4px;
     gap: 2px;
+    padding: 0 8px;
   }
   @media (max-width: 600px) and (orientation: landscape) {
     margin-bottom: 2px;
@@ -105,6 +106,7 @@ export const CalendarTitleRow = styled(Box)`
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    padding: 0 4px;
   }
   @media (max-width: 600px) and (orientation: portrait) {
     margin-bottom: 2px;
@@ -112,6 +114,7 @@ export const CalendarTitleRow = styled(Box)`
     flex-direction: row;
     align-items: center;
     justify-content: center;
+    padding: 0 8px;
   }
 `;
 
@@ -200,17 +203,17 @@ export const CalendarContainer = styled(Box)`
     padding: 4px 24px 4px 24px;
   }
   @media (max-width: 600px) {
-    padding: 0px;
+    padding: 0px 8px;
     height: 100%;
     overflow: auto;
   }
   @media (max-width: 600px) and (orientation: landscape) {
-    padding: 0px;
+    padding: 0px 4px;
     height: 100%;
     overflow: auto;
   }
   @media (max-width: 600px) and (orientation: portrait) {
-    padding: 0px;
+    padding: 0px 8px;
     height: 100%;
     overflow: auto;
   }

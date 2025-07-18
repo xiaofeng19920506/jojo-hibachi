@@ -110,22 +110,28 @@
 
 @media (max-width: 600px) {
   .rbc-header {
-    font-size: 0.8rem;
-    padding: 2px 1px;
+    font-size: 0.75rem;
+    padding: 1px 1px;
+    min-height: 24px;
+    line-height: 1.1;
   }
 }
 
 @media (max-width: 600px) and (orientation: landscape) {
   .rbc-header {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     padding: 1px 1px;
+    min-height: 20px;
+    line-height: 1.0;
   }
 }
 
 @media (max-width: 600px) and (orientation: portrait) {
   .rbc-header {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     padding: 1px 1px;
+    min-height: 24px;
+    line-height: 1.1;
   }
 }
 
