@@ -14,7 +14,13 @@ import {
 import GlobalAppBar from "../../components/GloabalAppBar/GlobalAppBar";
 
 const Profile: React.FC = () => {
-  const { data: profile, isLoading } = useGetUserProfileQuery();
+  const {
+    data: profile,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useGetUserProfileQuery();
   const [updateUserProfile, { isLoading: isSaving }] =
     useUpdateUserProfileMutation();
 
@@ -26,45 +32,128 @@ const Profile: React.FC = () => {
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
   const [zipCode, setZipCode] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // Prefill form when profile data arrives
   useEffect(() => {
-    if (profile) {
-      setFirstName(profile.firstName || "");
-      setLastName(profile.lastName || "");
-      setPhone(profile.phone || profile.phoneNumber || "");
-      setEmail(profile.email || "");
-      setAddress(profile.address || "");
-      setCity(profile.city || "");
-      setState(profile.state || "");
-      setZipCode(profile.zipCode || "");
+    const user = profile?.data?.user;
+    if (user) {
+      setFirstName(user.firstName || "");
+      setLastName(user.lastName || "");
+      setPhone(user.phone || user.phoneNumber || "");
+      setEmail(user.email || "");
+
+      // Parse address: "street address, city, state, zipcode"
+      if (user.address) {
+        const parts = user.address.split(",");
+        setAddress(parts[0]?.trim() || "");
+        setCity(parts[1]?.trim() || "");
+        setState(parts[2]?.trim() || "");
+        setZipCode(parts[3]?.trim() || "");
+      } else {
+        setAddress("");
+        setCity("");
+        setState("");
+        setZipCode("");
+      }
     }
   }, [profile]);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
+    setFormError(null);
     setSuccess(null);
     try {
+      // Capitalize first letter of each word in address and city, handle special cases
+      const toSmartTitleCase = (str: string) => {
+        const smallWords = [
+          "van",
+          "de",
+          "of",
+          "and",
+          "the",
+          "in",
+          "on",
+          "at",
+          "by",
+          "for",
+          "with",
+          "a",
+          "an",
+        ];
+        return str
+          .toLowerCase()
+          .split(" ")
+          .map((word, i) => {
+            if (word.startsWith("mc") && word.length > 2) {
+              return "Mc" + word.charAt(2).toUpperCase() + word.slice(3);
+            }
+            if (word.startsWith("mac") && word.length > 3) {
+              return "Mac" + word.charAt(3).toUpperCase() + word.slice(4);
+            }
+            if (word.includes("'")) {
+              return word
+                .split("'")
+                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                .join("'");
+            }
+            if (i !== 0 && smallWords.includes(word)) {
+              return word;
+            }
+            return word.charAt(0).toUpperCase() + word.slice(1);
+          })
+          .join(" ");
+      };
+      const formattedAddress = toSmartTitleCase(address.trim());
+      const formattedCity = toSmartTitleCase(city.trim());
+      const formattedState = state.trim().slice(0, 2).toUpperCase();
+      const formattedZip = zipCode.trim();
+      const fullAddress =
+        `${formattedAddress}, ${formattedCity}, ${formattedState}, ${formattedZip}`
+          .replace(/\s+/g, " ")
+          .trim();
       await updateUserProfile({
         firstName,
         lastName,
         phone,
         email,
-        address,
-        city,
-        state,
-        zipCode,
+        address: fullAddress,
+        city: formattedCity,
+        state: formattedState,
+        zipCode: formattedZip,
       }).unwrap();
       setSuccess("Profile updated successfully.");
+      refetch(); // Optionally refresh profile after update
     } catch (err: any) {
-      setError(err.data?.message || err.message || "Update failed.");
+      setFormError(err.data?.message || err.message || "Update failed.");
     }
   };
 
   if (isLoading) {
-    return <SignInWrapper>Loading...</SignInWrapper>;
+    return (
+      <>
+        <GlobalAppBar />
+        <SignInWrapper>Loading...</SignInWrapper>
+      </>
+    );
+  }
+
+  if (isError) {
+    return (
+      <>
+        <GlobalAppBar />
+        <SignInWrapper>
+          <ErrorMessage>
+            Failed to load profile:{" "}
+            {(error as any)?.data?.message ||
+              (error as any)?.message ||
+              "Unknown error"}
+          </ErrorMessage>
+          <Button onClick={() => refetch()}>Retry</Button>
+        </SignInWrapper>
+      </>
+    );
   }
 
   return (
@@ -73,7 +162,7 @@ const Profile: React.FC = () => {
       <SignInWrapper>
         <Form onSubmit={handleSubmit}>
           <Title style={{ fontSize: 22 }}>My Profile</Title>
-          {error && <ErrorMessage>{error}</ErrorMessage>}
+          {formError && <ErrorMessage>{formError}</ErrorMessage>}
           {success && (
             <div style={{ color: "green", marginBottom: 8 }}>{success}</div>
           )}
@@ -147,6 +236,13 @@ const Profile: React.FC = () => {
             style={{ fontSize: 16, minHeight: 44, minWidth: 44 }}
           >
             {isSaving ? "Saving..." : "Save"}
+          </Button>
+          <Button
+            type="button"
+            onClick={() => refetch()}
+            style={{ fontSize: 14, minHeight: 36, minWidth: 44, marginTop: 8 }}
+          >
+            Refresh Profile
           </Button>
         </Form>
       </SignInWrapper>

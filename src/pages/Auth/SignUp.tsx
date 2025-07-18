@@ -48,6 +48,57 @@ const SignUp: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+
+      // Format address fields with smart title case
+      const toSmartTitleCase = (str: string) => {
+        const smallWords = [
+          "van",
+          "de",
+          "of",
+          "and",
+          "the",
+          "in",
+          "on",
+          "at",
+          "by",
+          "for",
+          "with",
+          "a",
+          "an",
+        ];
+        return str
+          .toLowerCase()
+          .split(" ")
+          .map((word, i) => {
+            if (word.startsWith("mc") && word.length > 2) {
+              return "Mc" + word.charAt(2).toUpperCase() + word.slice(3);
+            }
+            if (word.startsWith("mac") && word.length > 3) {
+              return "Mac" + word.charAt(3).toUpperCase() + word.slice(4);
+            }
+            if (word.includes("'")) {
+              return word
+                .split("'")
+                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+                .join("'");
+            }
+            if (i !== 0 && smallWords.includes(word)) {
+              return word;
+            }
+            return word.charAt(0).toUpperCase() + word.slice(1);
+          })
+          .join(" ");
+      };
+
+      const formattedAddress = toSmartTitleCase(streetAddress.trim());
+      const formattedCity = toSmartTitleCase(city.trim());
+      const formattedState = state.trim().slice(0, 2).toUpperCase();
+      const formattedZip = zipCode.trim();
+      const fullAddress =
+        `${formattedAddress}, ${formattedCity}, ${formattedState}, ${formattedZip}`
+          .replace(/\s+/g, " ")
+          .trim();
+
       const result = await register({
         email,
         password,
@@ -55,10 +106,10 @@ const SignUp: React.FC = () => {
         firstName,
         lastName,
         phone: phoneNumber,
-        address: streetAddress,
-        city,
-        state,
-        zipCode,
+        address: fullAddress,
+        city: formattedCity,
+        state: formattedState,
+        zipCode: formattedZip,
       }).unwrap();
       localStorage.setItem("authToken", (result as { token: string }).token);
       // Note: The user will be automatically logged in by AuthInitializer
