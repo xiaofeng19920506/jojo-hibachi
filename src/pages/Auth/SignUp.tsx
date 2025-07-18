@@ -103,8 +103,10 @@ const SignUp: React.FC = () => {
         email,
         password,
         role: "user",
-        firstName,
-        lastName,
+        firstName:
+          firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase(),
+        lastName:
+          lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase(),
         phone: phoneNumber,
         address: fullAddress,
         city: formattedCity,

@@ -114,8 +114,10 @@ const Profile: React.FC = () => {
           .replace(/\s+/g, " ")
           .trim();
       await updateUserProfile({
-        firstName,
-        lastName,
+        firstName:
+          firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase(),
+        lastName:
+          lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase(),
         phone,
         email,
         address: fullAddress,
