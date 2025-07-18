@@ -11,6 +11,7 @@ import {
   useGetUserProfileQuery,
   useUpdateUserProfileMutation,
 } from "../../services/api";
+import GlobalAppBar from "../../components/GloabalAppBar/GlobalAppBar";
 
 const Profile: React.FC = () => {
   const { data: profile, isLoading } = useGetUserProfileQuery();
@@ -67,86 +68,89 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <SignInWrapper>
-      <Form onSubmit={handleSubmit}>
-        <Title style={{ fontSize: 22 }}>My Profile</Title>
-        {error && <ErrorMessage>{error}</ErrorMessage>}
-        {success && (
-          <div style={{ color: "green", marginBottom: 8 }}>{success}</div>
-        )}
-        <Input
-          type="text"
-          placeholder="First Name"
-          value={firstName}
-          required
-          onChange={(e) => setFirstName(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-        />
-        <Input
-          type="text"
-          placeholder="Last Name"
-          value={lastName}
-          required
-          onChange={(e) => setLastName(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-        />
-        <Input
-          type="tel"
-          placeholder="Phone Number"
-          value={phone}
-          required
-          onChange={(e) => setPhone(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-        />
-        <Input
-          type="email"
-          placeholder="Email"
-          value={email}
-          required
-          onChange={(e) => setEmail(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-        />
-        <Input
-          type="text"
-          placeholder="Address"
-          value={address}
-          required
-          onChange={(e) => setAddress(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-        />
-        <Input
-          type="text"
-          placeholder="City"
-          value={city}
-          required
-          onChange={(e) => setCity(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-        />
-        <Input
-          type="text"
-          placeholder="State"
-          value={state}
-          required
-          onChange={(e) => setState(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-        />
-        <Input
-          type="text"
-          placeholder="Zip Code"
-          value={zipCode}
-          required
-          onChange={(e) => setZipCode(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-        />
-        <Button
-          type="submit"
-          disabled={isSaving}
-          style={{ fontSize: 16, minHeight: 44, minWidth: 44 }}
-        >
-          {isSaving ? "Saving..." : "Save"}
-        </Button>
-      </Form>
-    </SignInWrapper>
+    <>
+      <GlobalAppBar />
+      <SignInWrapper>
+        <Form onSubmit={handleSubmit}>
+          <Title style={{ fontSize: 22 }}>My Profile</Title>
+          {error && <ErrorMessage>{error}</ErrorMessage>}
+          {success && (
+            <div style={{ color: "green", marginBottom: 8 }}>{success}</div>
+          )}
+          <Input
+            type="text"
+            placeholder="First Name"
+            value={firstName}
+            required
+            onChange={(e) => setFirstName(e.target.value)}
+            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          />
+          <Input
+            type="text"
+            placeholder="Last Name"
+            value={lastName}
+            required
+            onChange={(e) => setLastName(e.target.value)}
+            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          />
+          <Input
+            type="tel"
+            placeholder="Phone Number"
+            value={phone}
+            required
+            onChange={(e) => setPhone(e.target.value)}
+            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          />
+          <Input
+            type="email"
+            placeholder="Email"
+            value={email}
+            required
+            onChange={(e) => setEmail(e.target.value)}
+            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          />
+          <Input
+            type="text"
+            placeholder="Address"
+            value={address}
+            required
+            onChange={(e) => setAddress(e.target.value)}
+            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          />
+          <Input
+            type="text"
+            placeholder="City"
+            value={city}
+            required
+            onChange={(e) => setCity(e.target.value)}
+            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          />
+          <Input
+            type="text"
+            placeholder="State"
+            value={state}
+            required
+            onChange={(e) => setState(e.target.value)}
+            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          />
+          <Input
+            type="text"
+            placeholder="Zip Code"
+            value={zipCode}
+            required
+            onChange={(e) => setZipCode(e.target.value)}
+            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          />
+          <Button
+            type="submit"
+            disabled={isSaving}
+            style={{ fontSize: 16, minHeight: 44, minWidth: 44 }}
+          >
+            {isSaving ? "Saving..." : "Save"}
+          </Button>
+        </Form>
+      </SignInWrapper>
+    </>
   );
 };
 
