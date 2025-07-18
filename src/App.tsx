@@ -1,9 +1,10 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import HomeNav from "./components/HomeNav/HomeNav";
 import AuthInitializer from "./components/AuthInitializer/AuthInitializer";
 import LoadingSpinner from "./components/LoadingSpinner";
+import GlobalAppBar from "./components/GloabalAppBar/GlobalAppBar";
 
 const SignIn = lazy(() => import("./pages/Auth/SignIn"));
 const SignUp = lazy(() => import("./pages/Auth/SignUp"));
@@ -22,100 +23,104 @@ const ResetPasswordResult = lazy(
   () => import("./pages/Auth/ResetPasswordResult")
 );
 
-const App: React.FC = () => {
+interface AppProps {
+  themeMode?: string;
+  setThemeMode?: (mode: string) => void;
+}
+
+const App: React.FC<AppProps> = ({ themeMode, setThemeMode }) => {
   return (
     <AuthInitializer>
-      <Router>
-        <Routes>
-          <Route
-            path="/signin"
-            element={
+      <GlobalAppBar themeMode={themeMode} setThemeMode={setThemeMode} />
+      <Routes>
+        <Route
+          path="/signin"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <SignIn />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/signup"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <SignUp />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/booknow"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <ReservationStepper />
+            </Suspense>
+          }
+        />
+        <Route path="/" element={<HomeNav />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
               <Suspense fallback={<LoadingSpinner />}>
-                <SignIn />
+                <Dashboard />
               </Suspense>
-            }
-          />
-          <Route
-            path="/signup"
-            element={
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/calendar"
+          element={
+            <ProtectedRoute>
               <Suspense fallback={<LoadingSpinner />}>
-                <SignUp />
+                <EmployeeCalendar />
               </Suspense>
-            }
-          />
-          <Route
-            path="/booknow"
-            element={
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reservation/:id"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <ReservationDetail />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
               <Suspense fallback={<LoadingSpinner />}>
-                <ReservationStepper />
+                <Profile />
               </Suspense>
-            }
-          />
-          <Route path="/" element={<HomeNav />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<LoadingSpinner />}>
-                  <Dashboard />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/calendar"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<LoadingSpinner />}>
-                  <EmployeeCalendar />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/reservation/:id"
-            element={
-              <Suspense fallback={<LoadingSpinner />}>
-                <ReservationDetail />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <Suspense fallback={<LoadingSpinner />}>
-                  <Profile />
-                </Suspense>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/forgot-password"
-            element={
-              <Suspense fallback={<LoadingSpinner />}>
-                <ForgotPassword />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/reset-password"
-            element={
-              <Suspense fallback={<LoadingSpinner />}>
-                <ResetPassword />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/reset-password-result"
-            element={
-              <Suspense fallback={<LoadingSpinner />}>
-                <ResetPasswordResult />
-              </Suspense>
-            }
-          />
-        </Routes>
-      </Router>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <ForgotPassword />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/reset-password"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <ResetPassword />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/reset-password-result"
+          element={
+            <Suspense fallback={<LoadingSpinner />}>
+              <ResetPasswordResult />
+            </Suspense>
+          }
+        />
+      </Routes>
     </AuthInitializer>
   );
 };

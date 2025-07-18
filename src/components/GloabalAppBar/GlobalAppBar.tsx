@@ -13,6 +13,8 @@ import ListItemText from "@mui/material/ListItemText";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
+import Brightness4Icon from "@mui/icons-material/Brightness4";
+import Brightness7Icon from "@mui/icons-material/Brightness7";
 
 interface ActionButton {
   label: string;
@@ -27,18 +29,20 @@ interface GlobalAppBarProps {
   subtitle?: string;
   showLogout?: boolean;
   showNavigation?: boolean;
-  actionButtons?: ActionButton[];
   elevation?: number;
   color?: "default" | "primary" | "secondary" | "transparent" | "inherit";
+  themeMode?: string;
+  setThemeMode?: (mode: string) => void;
 }
 
 const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   title = "Dashboard",
   showLogout = true,
   showNavigation = true,
-  actionButtons = [],
   elevation = 1,
   color = "default",
+  themeMode = "light",
+  setThemeMode,
 }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -92,14 +96,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
         });
       }
     } else {
-      if (currentPath !== "/dashboard") {
-        buttons.push({
-          label: "Dashboard",
-          variant: "outlined",
-          color: "secondary",
-          onClick: () => handleNavigation("/dashboard"),
-        });
-      }
+      // Order: Book Now, Weekly Calendar, Profile
       if (currentPath !== "/booknow") {
         buttons.push({
           label: "Book Now",
@@ -108,7 +105,14 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
           onClick: () => handleNavigation("/booknow"),
         });
       }
-      // Add Profile button for authenticated users
+      if (currentPath !== "/calendar") {
+        buttons.push({
+          label: "Weekly Calendar",
+          variant: "contained",
+          color: "primary",
+          onClick: () => handleNavigation("/calendar"),
+        });
+      }
       if (currentPath !== "/profile") {
         buttons.push({
           label: "Profile",
@@ -125,9 +129,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const handleDrawerOpen = () => setDrawerOpen(true);
   const handleDrawerClose = () => setDrawerOpen(false);
 
-  const allActionButtons = showNavigation
-    ? [...getNavigationButtons(), ...actionButtons]
-    : actionButtons;
+  const allActionButtons = showNavigation ? [...getNavigationButtons()] : [];
 
   return (
     <AppBar
@@ -152,7 +154,20 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
             {title}
           </Typography>
         </Box>
-
+        <Box display="flex" alignItems="center" gap={2}>
+          {setThemeMode && (
+            <IconButton
+              color="inherit"
+              onClick={() =>
+                setThemeMode(themeMode === "dark" ? "light" : "dark")
+              }
+              sx={{ ml: 1 }}
+              aria-label="toggle dark mode"
+            >
+              {themeMode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
+            </IconButton>
+          )}
+        </Box>
         {isMobile ? (
           <>
             <IconButton

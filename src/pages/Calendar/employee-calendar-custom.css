@@ -1,8 +1,20 @@
+/*
+  This file uses MUI theme CSS variables for color consistency.
+  See: https://mui.com/material-ui/customization/default-theme/
+  Example variables:
+    --mui-palette-primary-main
+    --mui-palette-background-default
+    --mui-palette-background-paper
+    --mui-palette-text-primary
+    --mui-palette-text-secondary
+    --mui-palette-grey-100, --mui-palette-grey-200, etc.
+*/
+
 /* Calendar container */
 .rbc-calendar {
-  background: #fff;
+  background: var(--mui-palette-background-default, #fff);
   border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(100, 108, 255, 0.08);
   padding: 8px;
   height: 100%;
   min-height: 100%;
@@ -50,7 +62,7 @@
 
 /* Toolbar */
 .rbc-toolbar {
-  background: #f5f5f5;
+  background: var(--mui-palette-background-paper, #f5f5f5);
   border-radius: 12px;
   margin-bottom: 8px;
   padding: 4px 8px;
@@ -92,11 +104,11 @@
 
 /* Weekday headers */
 .rbc-header {
-  background: #f0f4f8;
-  color: #1976d2;
+  background: var(--mui-palette-grey-100, #f0f4f8);
+  color: var(--mui-palette-primary-main, #646cff);
   font-weight: 600;
   font-size: 1rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--mui-palette-grey-200, #e0e0e0);
 }
 
 @media (min-width: 600px) {
@@ -137,18 +149,18 @@
 
 /* Ensure date header border aligns with time slot grid */
 .rbc-header {
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--mui-palette-grey-200, #e0e0e0);
   box-sizing: border-box;
 }
 .rbc-time-header-cell {
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--mui-palette-grey-200, #e0e0e0);
   box-sizing: border-box;
 }
 
 /* Time gutter */
 .rbc-time-gutter {
-  background: #fafafa;
-  color: #888;
+  background: var(--mui-palette-grey-50, #fafafa);
+  color: var(--mui-palette-text-secondary, #888);
   font-size: 0.95rem;
 }
 
@@ -175,11 +187,11 @@
 
 /* Event styling */
 .rbc-event {
-  background: #e3f2fd !important;
-  color: #1976d2 !important;
-  border: 1px solid #1976d2 !important;
+  background: var(--mui-palette-primary-light, #e3f2fd) !important;
+  color: var(--mui-palette-primary-main, #646cff) !important;
+  border: 1px solid var(--mui-palette-primary-main, #646cff) !important;
   border-radius: 8px !important;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08) !important;
+  box-shadow: 0 2px 8px rgba(100, 108, 255, 0.08) !important;
   padding: 4px 8px !important;
   font-size: 14px !important;
   margin: 0 auto !important;
@@ -317,8 +329,8 @@
 }
 
 .rbc-time-gutter {
-  border-right: 1px solid #e0e0e0;
-  background: #fafafa;
+  border-right: 1px solid var(--mui-palette-grey-200, #e0e0e0);
+  background: var(--mui-palette-grey-50, #fafafa);
   width: 4rem;
   min-width: 4rem;
   max-width: 4rem;
@@ -350,7 +362,7 @@
 
 .rbc-header,
 .rbc-day-bg {
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid var(--mui-palette-grey-200, #e0e0e0);
 }
 
 .rbc-header:last-child,
@@ -365,7 +377,7 @@
 }
 
 .rbc-header {
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--mui-palette-grey-200, #e0e0e0);
 }
 
 .rbc-row-content {
@@ -381,7 +393,7 @@
 /* Optionally, style the scrollbar for the grid for consistency */
 .rbc-time-content {
   scrollbar-width: thin;
-  scrollbar-color: #e0e0e0 #fafafa;
+  scrollbar-color: var(--mui-palette-grey-200, #e0e0e0) var(--mui-palette-grey-50, #fafafa);
 }
 
 /* Hide scrollbar but keep scrollability for the grid */
