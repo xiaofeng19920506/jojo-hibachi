@@ -517,7 +517,6 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
                 borderRadius: 8,
                 boxShadow: "0 4px 16px rgba(0, 0, 0, 0.15)",
                 padding: 16,
-                // animation: `${fadeIn} 0.18s ease`, // Removed to fix styled-components keyframes error
               }}
               role="dialog"
               aria-modal="true"
