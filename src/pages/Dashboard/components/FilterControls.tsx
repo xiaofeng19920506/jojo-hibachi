@@ -56,7 +56,13 @@ const FilterControls: React.FC<FilterControlsProps> = ({
         <Button
           variant="text"
           onClick={() => setShowFilters((prev) => !prev)}
-          sx={{ mb: 1 }}
+          sx={{
+            mb: 1,
+            color: theme.palette.mode === "dark" ? "#fff" : "#000",
+            "&:hover": {
+              backgroundColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
+            },
+          }}
         >
           {showFilters ? "Hide Filters" : "Show Filters"}
         </Button>
@@ -77,6 +83,21 @@ const FilterControls: React.FC<FilterControlsProps> = ({
                 minWidth: 160,
                 width: { xs: "100%", sm: "auto" },
                 mb: { xs: 1, sm: 0 },
+                "& .MuiInputLabel-root": {
+                  color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                },
+                "& .MuiSelect-select": {
+                  color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: theme.palette.mode === "dark" ? "#666" : "#ccc",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: theme.palette.mode === "dark" ? "#888" : "#999",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: theme.palette.primary.main,
+                },
               }}
             >
               <InputLabel id="table-select-label">Table</InputLabel>
@@ -104,6 +125,21 @@ const FilterControls: React.FC<FilterControlsProps> = ({
               fontSize: { xs: 16, sm: 18 },
               width: { xs: "100%", sm: "auto" },
               mb: { xs: 1, sm: 0 },
+              "& .MuiInputLabel-root": {
+                color: theme.palette.mode === "dark" ? "#fff" : "#000",
+              },
+              "& .MuiInputBase-input": {
+                color: theme.palette.mode === "dark" ? "#fff" : "#000",
+              },
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.mode === "dark" ? "#666" : "#ccc",
+              },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.mode === "dark" ? "#888" : "#999",
+              },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.primary.main,
+              },
             }}
             InputProps={{ style: { fontSize: 16 } }}
             InputLabelProps={{ style: { fontSize: 16 } }}
@@ -120,6 +156,21 @@ const FilterControls: React.FC<FilterControlsProps> = ({
               fontSize: { xs: 16, sm: 18 },
               width: { xs: "100%", sm: "auto" },
               mb: { xs: 1, sm: 0 },
+              "& .MuiInputLabel-root": {
+                color: theme.palette.mode === "dark" ? "#fff" : "#000",
+              },
+              "& .MuiInputBase-input": {
+                color: theme.palette.mode === "dark" ? "#fff" : "#000",
+              },
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.mode === "dark" ? "#666" : "#ccc",
+              },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.mode === "dark" ? "#888" : "#999",
+              },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.primary.main,
+              },
             }}
             InputProps={{ style: { fontSize: 16 } }}
           />
@@ -135,6 +186,21 @@ const FilterControls: React.FC<FilterControlsProps> = ({
               fontSize: { xs: 16, sm: 18 },
               width: { xs: "100%", sm: "auto" },
               mb: { xs: 1, sm: 0 },
+              "& .MuiInputLabel-root": {
+                color: theme.palette.mode === "dark" ? "#fff" : "#000",
+              },
+              "& .MuiInputBase-input": {
+                color: theme.palette.mode === "dark" ? "#fff" : "#000",
+              },
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.mode === "dark" ? "#666" : "#ccc",
+              },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.mode === "dark" ? "#888" : "#999",
+              },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.primary.main,
+              },
             }}
             InputProps={{ style: { fontSize: 16 } }}
           />
@@ -146,6 +212,21 @@ const FilterControls: React.FC<FilterControlsProps> = ({
                 fontSize: { xs: 16, sm: 18 },
                 width: { xs: "100%", sm: "auto" },
                 mb: { xs: 1, sm: 0 },
+                "& .MuiInputLabel-root": {
+                  color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                },
+                "& .MuiSelect-select": {
+                  color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderColor: theme.palette.mode === "dark" ? "#666" : "#ccc",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: theme.palette.mode === "dark" ? "#888" : "#999",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: theme.palette.primary.main,
+                },
               }}
             >
               <InputLabel id="status-filter-label">Status</InputLabel>
@@ -175,6 +256,21 @@ const FilterControls: React.FC<FilterControlsProps> = ({
               fontSize: { xs: 16, sm: 18 },
               width: { xs: "100%", sm: "auto" },
               mb: { xs: 1, sm: 0 },
+              "& .MuiInputLabel-root": {
+                color: theme.palette.mode === "dark" ? "#fff" : "#000",
+              },
+              "& .MuiSelect-select": {
+                color: theme.palette.mode === "dark" ? "#fff" : "#000",
+              },
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.mode === "dark" ? "#666" : "#ccc",
+              },
+              "&:hover .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.mode === "dark" ? "#888" : "#999",
+              },
+              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.primary.main,
+              },
             }}
           >
             <InputLabel id="items-per-page-label">Items per page</InputLabel>

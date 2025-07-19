@@ -1,7 +1,7 @@
 import { Box, CircularProgress, Alert, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import DataTable from "../../components/DataTable/DataTable";
 import type { TableType } from "../../components/DataTable/types";
-import GlobalAppBar from "../../components/GloabalAppBar/GlobalAppBar";
 import FilterControls from "./components/FilterControls";
 import PaginationControls from "./components/PaginationControls";
 import EditDialog from "./components/EditDialog";
@@ -9,6 +9,7 @@ import { useDashboard } from "./hooks/useDashboard";
 
 // Main Dashboard Component
 const Dashboard: React.FC = () => {
+  const theme = useTheme();
   const {
     // State
     searchQuery,
@@ -87,11 +88,19 @@ const Dashboard: React.FC = () => {
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
+        backgroundColor: theme.palette.mode === "dark" ? "#000" : "#fff",
+        color: theme.palette.mode === "dark" ? "#fff" : "#000",
       }}
     >
-      <GlobalAppBar />
       <Box sx={{ flex: 1, p: { xs: 1, sm: 3 }, overflow: "auto" }}>
-        <Typography variant="h4" mb={3} sx={{ fontSize: { xs: 22, sm: 32 } }}>
+        <Typography
+          variant="h4"
+          mb={3}
+          sx={{
+            fontSize: { xs: 22, sm: 32 },
+            color: theme.palette.mode === "dark" ? "#fff" : "#000",
+          }}
+        >
           {userRole === "admin" ? getGreeting() : "Reservations"}
         </Typography>
 

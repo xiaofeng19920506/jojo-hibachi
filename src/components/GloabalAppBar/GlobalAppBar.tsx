@@ -215,23 +215,49 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                   Logout
                 </Button>
               )}
+
+              {/* Theme Toggle - Always visible on desktop */}
+              {setThemeMode && (
+                <IconButton
+                  color="inherit"
+                  onClick={() =>
+                    setThemeMode(themeMode === "dark" ? "light" : "dark")
+                  }
+                  sx={{ 
+                    ml: 1,
+                    color: "#fff",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    },
+                  }}
+                  aria-label="toggle dark mode"
+                >
+                  {themeMode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
+                </IconButton>
+              )}
             </>
-          )}
-          {!isMobile && setThemeMode && (
-            <IconButton
-              color="inherit"
-              onClick={() =>
-                setThemeMode(themeMode === "dark" ? "light" : "dark")
-              }
-              sx={{ ml: 1 }}
-              aria-label="toggle dark mode"
-            >
-              {themeMode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
-            </IconButton>
           )}
         </Box>
         {isMobile && (
           <>
+            {/* Theme Toggle for Mobile - Always visible next to hamburger */}
+            {setThemeMode && (
+              <IconButton
+                color="inherit"
+                onClick={() =>
+                  setThemeMode(themeMode === "dark" ? "light" : "dark")
+                }
+                sx={{ 
+                  color: "#fff",
+                  "&:hover": {
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                  },
+                }}
+                aria-label="toggle dark mode"
+              >
+                {themeMode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
+              </IconButton>
+            )}
             <IconButton
               color="inherit"
               edge="end"
@@ -271,13 +297,20 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                       </ListItemButton>
                     </ListItem>
                   )}
+                  {/* Theme Toggle - Always visible in mobile drawer */}
                   {setThemeMode && (
                     <ListItem disablePadding>
                       <ListItemButton
                         onClick={() =>
                           setThemeMode(themeMode === "dark" ? "light" : "dark")
                         }
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                        }}
                       >
+                        {themeMode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
                         <ListItemText
                           primary={
                             themeMode === "dark" ? "Light Mode" : "Dark Mode"
