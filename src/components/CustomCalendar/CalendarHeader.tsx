@@ -68,7 +68,10 @@ const HeaderDate = styled.span`
     font-size: 0.8rem;
   }
 `;
-const ToggleButton = styled.button<{ $active?: boolean; $isDarkMode?: boolean }>`
+const ToggleButton = styled.button<{
+  $active?: boolean;
+  $isDarkMode?: boolean;
+}>`
   margin-right: 8px;
   padding: 4px 12px;
   border: none;

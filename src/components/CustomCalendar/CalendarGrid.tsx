@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { useTheme } from "@mui/material/styles";
 import type { CalendarView, CalendarEvent } from "./CustomCalendar";
@@ -301,6 +301,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
   // Time indicator logic
   const [now, setNow] = useState(new Date());
+  const hasAutoScrolled = useRef(false);
+
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(interval);
@@ -323,15 +325,6 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
     const indicatorTop = headerHeight + (hour + minute / 60) * hourHeight;
 
-    console.log("CalendarGrid - Time indicator position:", {
-      hour,
-      minute,
-      isMobileView,
-      hourHeight,
-      indicatorTop,
-      isWithinRange,
-    });
-
     return {
       top: indicatorTop,
       left: 0,
@@ -340,6 +333,41 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   };
 
   const timeIndicatorPosition = getTimeIndicatorPosition();
+
+  // Scroll to current time function
+  const scrollToCurrentTime = () => {
+    if (calendarContainerRef?.current && timeIndicatorPosition) {
+      const headerHeight = 40;
+      const scrollTop = timeIndicatorPosition.top - headerHeight - 150; // Show context above current time
+      calendarContainerRef.current.scrollTo({
+        top: Math.max(0, scrollTop),
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Auto-scroll to current time when component mounts (only once)
+  useEffect(() => {
+    if (
+      view === "week" &&
+      isWithinRange &&
+      calendarContainerRef?.current &&
+      !hasAutoScrolled.current
+    ) {
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        scrollToCurrentTime();
+        hasAutoScrolled.current = true;
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [view, isWithinRange]);
+
+  // Reset auto-scroll flag when view changes
+  useEffect(() => {
+    hasAutoScrolled.current = false;
+  }, [view]);
+
   const gridTemplateColumns = isMobileView
     ? `minmax(${timeGutterWidth}px, ${timeGutterWidth}px) repeat(${days.length}, minmax(${dayColumnWidthRem}rem, ${dayColumnWidthRem}rem))`
     : `minmax(${timeGutterWidth}px, ${timeGutterWidth}px) repeat(${days.length}, minmax(0, 1fr))`;

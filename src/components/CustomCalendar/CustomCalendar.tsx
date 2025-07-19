@@ -162,16 +162,16 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
         onToday={handleToday}
         onViewChange={handleViewChange}
       />
-      <CalendarGrid
-        currentDate={currentDate}
-        view={view}
-        events={events}
-        onEventClick={onEventClick}
-        dayColumnWidthRem={dayColumnWidthRem}
-        timeGutterWidth={timeGutterWidth}
-        slotRef={slotRef}
-        calendarContainerRef={calendarContainerRef}
-      />
+              <CalendarGrid
+          currentDate={currentDate}
+          view={view}
+          events={events}
+          onEventClick={onEventClick}
+          dayColumnWidthRem={dayColumnWidthRem}
+          timeGutterWidth={timeGutterWidth}
+          slotRef={slotRef}
+          calendarContainerRef={calendarContainerRef}
+        />
     </CalendarContainer>
   );
 };
