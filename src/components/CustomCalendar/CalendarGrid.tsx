@@ -126,8 +126,8 @@ const HeaderCell = styled.div<{ $isToday?: boolean; $isDarkMode?: boolean }>`
 `;
 
 const GutterCell = styled.div<{ $isDarkMode?: boolean }>`
-  background: #000 !important;
-  color: #fff !important;
+  background: ${(props) => (props.$isDarkMode ? "#000" : "#fff")};
+  color: ${(props) => (props.$isDarkMode ? "#fff" : "#888")};
   font-size: 1rem;
   text-align: right;
   border-right: 1px solid ${(props) => (props.$isDarkMode ? "#444" : "#eee")};
@@ -144,8 +144,8 @@ const GutterCell = styled.div<{ $isDarkMode?: boolean }>`
     position: sticky;
     left: 0;
     z-index: 3;
-    background: #000 !important;
-    color: #fff !important;
+    background: ${(props) => (props.$isDarkMode ? "#000" : "#fff")};
+    color: ${(props) => (props.$isDarkMode ? "#fff" : "#888")};
     padding-right: 28px;
     min-width: 56px;
   }
