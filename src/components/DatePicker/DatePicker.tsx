@@ -235,64 +235,6 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
     );
 
     // --- Calculate popup position ---
-    const getPopupPosition = () => {
-      if (!wrapperRef.current)
-        return { top: "50%", left: "50%", transform: "translate(-50%, -50%)" };
-
-      const rect = wrapperRef.current.getBoundingClientRect();
-      const viewportWidth = window.innerWidth;
-      const isLandscape = window.innerWidth > window.innerHeight;
-
-      // Use compact popup dimensions for mobile landscape
-      const popupWidth = isLandscape ? Math.min(200, viewportWidth * 0.9) : 280;
-
-      if (isLandscape) {
-        // Landscape mode - stick popup to the top of the viewport
-        let top = 0; // Stick to top
-        let left = rect.left;
-
-        // If the popup would be cut off on the right, move it left
-        if (left + popupWidth > viewportWidth - 5) {
-          left = viewportWidth - popupWidth - 5;
-        }
-        // Never go off the left edge
-        if (left < 5) left = 5;
-
-        return {
-          top: `${top}px`,
-          left: `${left}px`,
-          transform: "none",
-        };
-      } else {
-        // Portrait mode - always position below and center/edge protect
-        const GAP = 8;
-        let top = rect.bottom + GAP;
-        let left = Math.max(
-          20,
-          Math.min(
-            viewportWidth - popupWidth - 20,
-            rect.left - (popupWidth - rect.width) / 2
-          )
-        );
-        return {
-          top: `${top}px`,
-          left: `${left}px`,
-          transform: "none",
-        };
-      }
-    };
-
-    // --- Accessibility: Focus trap in popup ---
-    useEffect(() => {
-      if (open) {
-        const focusable = wrapperRef.current?.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-        focusable?.[0]?.focus();
-      }
-    }, [open]);
-
-    // --- Calculate and set popup position on open ---
     useEffect(() => {
       if (open && wrapperRef.current && popupRef.current) {
         const inputRect = wrapperRef.current.getBoundingClientRect();
@@ -314,6 +256,16 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
         }
 
         setPopupCoords({ top, left });
+      }
+    }, [open]);
+
+    // --- Accessibility: Focus trap in popup ---
+    useEffect(() => {
+      if (open) {
+        const focusable = wrapperRef.current?.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        focusable?.[0]?.focus();
       }
     }, [open]);
 
@@ -374,8 +326,8 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
       if (minDate && date < minDate) return;
       if (maxDate && date > maxDate) return;
       setSelectedDate(date);
+      onChange?.(new Date(date)); // Always emit a new Date object
       setOpen(false);
-      onChange?.(date);
     };
 
     const handlePrevMonth = () => {
@@ -456,16 +408,7 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
     const currentYear = new Date().getFullYear();
     const YEARS = Array.from({ length: 21 }, (_, i) => currentYear - 10 + i);
 
-    // 1. In the component, determine if we're in mobile landscape mode
-    const isLandscape = window.innerWidth > window.innerHeight;
-
-    // 2. When calculating popup position, keep the logic as is
-    const popupPos = getPopupPosition();
-    // 3. For landscape mode, always set topPosition to '0px'
-    const topPosition = isLandscape ? "0px" : popupPos.top;
-
     // Debug log
-    console.log("isLandscape:", isLandscape, "topPosition:", topPosition);
 
     return (
       <PickerWrapper ref={wrapperRef}>
