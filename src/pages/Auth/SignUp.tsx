@@ -3,13 +3,14 @@ import {
   SignInWrapper,
   Form,
   Input,
-  Button,
   Title,
   ErrorMessage,
   RegisterPrompt,
 } from "./elements";
 import { Link, useNavigate } from "react-router-dom";
 import { useRegisterMutation } from "../../services/api";
+import Button from "@mui/material/Button";
+import { useTheme } from "@mui/material/styles";
 
 const SignUp: React.FC = () => {
   const [firstName, setFirstName] = useState("");
@@ -26,6 +27,7 @@ const SignUp: React.FC = () => {
 
   const navigate = useNavigate();
   const [register] = useRegisterMutation();
+  const theme = useTheme();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -203,8 +205,24 @@ const SignUp: React.FC = () => {
         />
         <Button
           type="submit"
+          variant="contained"
           disabled={loading}
-          style={{ fontSize: 16, minHeight: 44, minWidth: 44 }}
+          sx={{
+            marginTop: 2,
+            backgroundColor:
+              theme.palette.mode === "dark"
+                ? "#000"
+                : theme.palette.primary.main,
+            color: "#fff",
+            fontSize: "18px",
+            fontWeight: 600,
+            "&:hover": {
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "#333"
+                  : theme.palette.primary.dark,
+            },
+          }}
         >
           {loading ? "Signing Up..." : "Sign Up"}
         </Button>

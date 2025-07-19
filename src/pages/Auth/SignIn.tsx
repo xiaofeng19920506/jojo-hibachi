@@ -5,11 +5,12 @@ import {
   SignInWrapper,
   Form,
   Input,
-  Button,
   Title,
   ErrorMessage,
   RegisterPrompt,
 } from "./elements";
+import Button from "@mui/material/Button";
+import { useTheme } from "@mui/material/styles";
 import { useAppDispatch } from "../../utils/hooks";
 import { login } from "../../features/userSlice";
 import { useLoginMutation } from "../../services/api";
@@ -20,6 +21,7 @@ const SignIn: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const theme = useTheme();
 
   // RTK Query login mutation
   const [loginMutation, { isLoading }] = useLoginMutation();
@@ -82,8 +84,24 @@ const SignIn: React.FC = () => {
         />
         <Button
           type="submit"
+          variant="contained"
           disabled={isLoading}
-          style={{ fontSize: 16, minHeight: 44, minWidth: 44 }}
+          sx={{
+            marginTop: 2,
+            backgroundColor:
+              theme.palette.mode === "dark"
+                ? "#000"
+                : theme.palette.primary.main,
+            color: "#fff",
+            fontSize: "18px",
+            fontWeight: 600,
+            "&:hover": {
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "#333"
+                  : theme.palette.primary.dark,
+            },
+          }}
         >
           {isLoading ? "Signing In..." : "Sign In"}
         </Button>

@@ -141,7 +141,77 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
           </Typography>
         </Box>
         <Box display="flex" alignItems="center" gap={2}>
-          {setThemeMode && (
+          {!isMobile && (
+            <>
+              {allActionButtons.map((button, index) => {
+                const isSpecial = [
+                  "Weekly Calendar",
+                  "Book Now",
+                  "Profile",
+                  "Logout",
+                  "Login",
+                  "Sign Up",
+                ].includes(button.label);
+                return (
+                  <Button
+                    key={index}
+                    variant={button.variant || "outlined"}
+                    color={button.color || "primary"}
+                    onClick={button.onClick}
+                    disabled={button.disabled}
+                    sx={{
+                      textTransform: "none",
+                      width: { xs: "100%", sm: "auto" },
+                      borderColor: "#fff",
+                      color: "#fff",
+                      ...(isSpecial && {
+                        border: "2px solid #fff",
+                        backgroundColor: "transparent",
+                        "&:hover": {
+                          backgroundColor:
+                            button.label === "Login" ||
+                            button.label === "Sign Up"
+                              ? theme.palette.primary.main
+                              : theme.palette.secondary.main,
+                          borderColor:
+                            button.label === "Login" ||
+                            button.label === "Sign Up"
+                              ? theme.palette.primary.main
+                              : theme.palette.secondary.main,
+                          color: "#fff",
+                        },
+                      }),
+                    }}
+                  >
+                    {button.label}
+                  </Button>
+                );
+              })}
+
+              {showLogout && isAuthenticated && (
+                <Button
+                  variant="outlined"
+                  color="error"
+                  onClick={handleLogout}
+                  sx={{
+                    textTransform: "none",
+                    width: { xs: "100%", sm: "auto" },
+                    border: "2px solid #fff",
+                    color: "#fff",
+                    backgroundColor: "transparent",
+                    "&:hover": {
+                      backgroundColor: theme.palette.secondary.main,
+                      borderColor: theme.palette.secondary.main,
+                      color: "#fff",
+                    },
+                  }}
+                >
+                  Logout
+                </Button>
+              )}
+            </>
+          )}
+          {!isMobile && setThemeMode && (
             <IconButton
               color="inherit"
               onClick={() =>
@@ -154,7 +224,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
             </IconButton>
           )}
         </Box>
-        {isMobile ? (
+        {isMobile && (
           <>
             <IconButton
               color="inherit"
@@ -195,81 +265,25 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                       </ListItemButton>
                     </ListItem>
                   )}
+                  {setThemeMode && (
+                    <ListItem disablePadding>
+                      <ListItemButton
+                        onClick={() =>
+                          setThemeMode(themeMode === "dark" ? "light" : "dark")
+                        }
+                      >
+                        <ListItemText
+                          primary={
+                            themeMode === "dark" ? "Light Mode" : "Dark Mode"
+                          }
+                        />
+                      </ListItemButton>
+                    </ListItem>
+                  )}
                 </List>
               </Box>
             </Drawer>
           </>
-        ) : (
-          <Box
-            display="flex"
-            gap={2}
-            alignItems="center"
-            sx={{
-              flexDirection: { xs: "column", sm: "row" },
-              width: { xs: "100%", sm: "auto" },
-              mt: { xs: 1, sm: 0 },
-              mb: { xs: 1, sm: 0 },
-              justifyContent: { xs: "flex-end", sm: "flex-end" },
-            }}
-          >
-            {allActionButtons.map((button, index) => {
-              const isSpecial = [
-                "Weekly Calendar",
-                "Book Now",
-                "Profile",
-                "Logout",
-                "Login",
-              ].includes(button.label);
-              return (
-                <Button
-                  key={index}
-                  variant={button.variant || "outlined"}
-                  color={button.color || "primary"}
-                  onClick={button.onClick}
-                  disabled={button.disabled}
-                  sx={{
-                    textTransform: "none",
-                    width: { xs: "100%", sm: "auto" },
-                    borderColor: "#fff",
-                    color: "#fff",
-                    ...(isSpecial && {
-                      border: "2px solid #fff",
-                      backgroundColor: "transparent",
-                      "&:hover": {
-                        backgroundColor: theme.palette.secondary.main,
-                        borderColor: theme.palette.secondary.main,
-                        color: "#fff",
-                      },
-                    }),
-                  }}
-                >
-                  {button.label}
-                </Button>
-              );
-            })}
-
-            {showLogout && isAuthenticated && (
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={handleLogout}
-                sx={{
-                  textTransform: "none",
-                  width: { xs: "100%", sm: "auto" },
-                  border: "2px solid #fff",
-                  color: "#fff",
-                  backgroundColor: "transparent",
-                  "&:hover": {
-                    backgroundColor: theme.palette.secondary.main,
-                    borderColor: theme.palette.secondary.main,
-                    color: "#fff",
-                  },
-                }}
-              >
-                Logout
-              </Button>
-            )}
-          </Box>
         )}
       </Toolbar>
     </AppBar>
