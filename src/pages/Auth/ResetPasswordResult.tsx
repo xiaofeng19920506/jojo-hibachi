@@ -1,36 +1,82 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { SignInWrapper, Title, Button } from "./elements";
+import { SignInWrapper, Title } from "./elements";
+import Button from "@mui/material/Button";
+import { Box, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 
 const ResetPasswordResult: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const theme = useTheme();
   const params = new URLSearchParams(location.search);
   const status = params.get("status");
   const message = params.get("message");
 
   return (
     <SignInWrapper>
-      <Title style={{ fontSize: 22 }}>
-        {status === "success"
-          ? "Password Reset Successful"
-          : "Password Reset Failed"}
-      </Title>
-      <div
-        style={{
-          marginBottom: 16,
-          color: status === "success" ? "green" : "red",
-        }}
+      <Box
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="center"
+        gap={3}
+        sx={{ width: "100%", maxWidth: "400px" }}
       >
-        {message ||
-          (status === "success"
-            ? "You can now sign in with your new password."
-            : "Something went wrong. Please try again.")}
-      </div>
-      {status === "success" ? (
-        <Button onClick={() => navigate("/signin")}>Go to Sign In</Button>
-      ) : (
-        <Button onClick={() => navigate("/reset-password")}>Try Again</Button>
-      )}
+        <Title style={{ fontSize: 22 }}>
+          {status === "success"
+            ? "Password Reset Successful"
+            : "Password Reset Failed"}
+        </Title>
+        
+        <Typography
+          variant="body1"
+          sx={{
+            color: status === "success" ? "success.main" : "error.main",
+            textAlign: "center",
+            fontSize: "16px",
+            lineHeight: 1.5,
+          }}
+        >
+          {message ||
+            (status === "success"
+              ? "You can now sign in with your new password."
+              : "Something went wrong. Please try again.")}
+        </Typography>
+
+        {status === "success" ? (
+          <Button
+            variant="contained"
+            onClick={() => navigate("/signin")}
+            sx={{
+              backgroundColor: theme.palette.mode === "dark" ? "#000" : theme.palette.primary.main,
+              color: "#fff",
+              fontSize: "18px",
+              fontWeight: 600,
+              "&:hover": {
+                backgroundColor: theme.palette.mode === "dark" ? "#333" : theme.palette.primary.dark,
+              },
+            }}
+          >
+            Go to Sign In
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            onClick={() => navigate("/reset-password")}
+            sx={{
+              backgroundColor: theme.palette.mode === "dark" ? "#000" : theme.palette.primary.main,
+              color: "#fff",
+              fontSize: "18px",
+              fontWeight: 600,
+              "&:hover": {
+                backgroundColor: theme.palette.mode === "dark" ? "#333" : theme.palette.primary.dark,
+              },
+            }}
+          >
+            Try Again
+          </Button>
+        )}
+      </Box>
     </SignInWrapper>
   );
 };
