@@ -1,13 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import {
-  SignInWrapper,
-  Form,
-  Input,
-  Button,
-  Title,
-  ErrorMessage,
-} from "./elements";
+import { SignInWrapper, Form, Input, Title, ErrorMessage } from "./elements";
+import Button from "@mui/material/Button";
+import { useTheme } from "@mui/material/styles";
 import { useResetPasswordMutation } from "../../services/api";
 
 const ResetPassword: React.FC = () => {
@@ -26,6 +21,7 @@ const ResetPassword: React.FC = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [resetPassword, { isLoading }] = useResetPasswordMutation();
   const navigate = useNavigate();
+  const theme = useTheme();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -80,15 +76,49 @@ const ResetPassword: React.FC = () => {
         />
         <Button
           type="submit"
+          variant="contained"
           disabled={isLoading}
-          style={{ fontSize: 16, minHeight: 44, minWidth: 44 }}
+          sx={{
+            marginTop: 2,
+            backgroundColor:
+              theme.palette.mode === "dark"
+                ? theme.palette.primary.main
+                : theme.palette.primary.main,
+            color: theme.palette.mode === "dark" ? "#000" : "#fff",
+            fontSize: "18px",
+            fontWeight: 600,
+            "&:hover": {
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? theme.palette.primary.dark
+                  : theme.palette.primary.dark,
+              color: theme.palette.mode === "dark" ? "#000" : "#fff",
+            },
+          }}
         >
           {isLoading ? "Resetting..." : "Reset Password"}
         </Button>
         <Button
           type="button"
-          style={{ fontSize: 16, minHeight: 44, minWidth: 44, marginTop: 8 }}
+          variant="contained"
           onClick={() => navigate("/signin")}
+          sx={{
+            marginTop: 2,
+            backgroundColor:
+              theme.palette.mode === "dark"
+                ? "#000"
+                : theme.palette.secondary.main,
+            color: theme.palette.mode === "dark" ? "#fff" : "#fff",
+            fontSize: "18px",
+            fontWeight: 600,
+            "&:hover": {
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "#333"
+                  : theme.palette.secondary.dark,
+              color: theme.palette.mode === "dark" ? "#fff" : "#fff",
+            },
+          }}
         >
           Back to Sign In
         </Button>
