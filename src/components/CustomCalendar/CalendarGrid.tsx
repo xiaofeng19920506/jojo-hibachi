@@ -302,6 +302,14 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   // Time indicator logic
   const [now, setNow] = useState(new Date());
   const hasAutoScrolled = useRef(false);
+  const gridContainerRef = useRef<HTMLDivElement>(null);
+  const [scrollableWidth, setScrollableWidth] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (gridContainerRef.current) {
+      setScrollableWidth(gridContainerRef.current.scrollWidth);
+    }
+  }, [days.length, dayColumnWidthRem, timeGutterWidth]);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
@@ -382,7 +390,12 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
   return (
     <CalendarGridContainer
-      ref={calendarContainerRef}
+      ref={(el) => {
+        if (calendarContainerRef) {
+          calendarContainerRef.current = el;
+        }
+        gridContainerRef.current = el;
+      }}
       $isDarkMode={isDarkMode}
       style={{
         gridTemplateColumns,
@@ -404,7 +417,37 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           </HeaderCell>
         );
       })}
-      {/* Time gutter and body cells */}
+      {/* Wrapper for day columns to overlay the time indicator */}
+      <div
+        style={{
+          position: "absolute",
+          left: timeGutterWidth,
+          top: 0,
+          height: "100%",
+          width: `calc(100% - ${timeGutterWidth}px)`,
+          pointerEvents: "none",
+          zIndex: 1000,
+        }}
+      >
+        {/* Time indicator absolutely positioned over the columns area, with width set to scrollable width */}
+        {timeIndicatorPosition && scrollableWidth && (
+          <div
+            style={{
+              position: "absolute",
+              top: `${timeIndicatorPosition.top}px`,
+              left: 0,
+              width: scrollableWidth - timeGutterWidth,
+              height: "2px",
+              background: "red",
+              zIndex: 1000,
+              pointerEvents: "none",
+              boxShadow: "0 0 6px 2px rgba(255, 0, 0, 0.15)",
+              transition: "top 0.2s linear",
+            }}
+            title="Current time indicator"
+          />
+        )}
+      </div>
       {hours.map((hour, rowIdx) => [
         <GutterCell key={`gutter-${hour}`} $isDarkMode={isDarkMode}>
           {hour}:00
@@ -478,24 +521,6 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           );
         }),
       ])}
-      {/* Time indicator that scrolls with the calendar */}
-      {timeIndicatorPosition && (
-        <div
-          style={{
-            position: "absolute",
-            top: `${timeIndicatorPosition.top}px`,
-            left: `${timeIndicatorPosition.left}px`,
-            right: `${timeIndicatorPosition.right}px`,
-            height: "2px",
-            background: "red",
-            zIndex: 1000,
-            pointerEvents: "none",
-            boxShadow: "0 0 6px 2px rgba(255, 0, 0, 0.15)",
-            transition: "top 0.2s linear",
-          }}
-          title="Current time indicator"
-        />
-      )}
     </CalendarGridContainer>
   );
 };

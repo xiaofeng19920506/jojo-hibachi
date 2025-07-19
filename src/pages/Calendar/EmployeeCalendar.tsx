@@ -126,7 +126,7 @@ const EmployeeCalendar: React.FC = () => {
       }
     }, 100);
   }, [calendarDate]);
-1
+  1;
   useEffect(() => {
     // Auto-scroll to closest current time slot on mount
     setTimeout(() => {
@@ -250,6 +250,7 @@ const EmployeeCalendar: React.FC = () => {
               variant="h4"
               sx={{
                 color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                display: { xs: "none", sm: "block" }, // Hide on mobile
               }}
             >
               Weekly Calendar

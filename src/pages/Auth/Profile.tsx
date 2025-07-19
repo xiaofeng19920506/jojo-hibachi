@@ -41,7 +41,7 @@ const Profile: React.FC = () => {
       setFormError(null);
       setSuccess(null);
       const result = await refetch();
-      
+
       // Manually update form fields with fresh data
       const user = result.data?.data?.user;
       if (user) {
@@ -64,7 +64,7 @@ const Profile: React.FC = () => {
           setZipCode("");
         }
       }
-      
+
       setSuccess("Profile refreshed successfully.");
     } catch (err: any) {
       setFormError("Failed to refresh profile. Please try again.");
@@ -248,7 +248,7 @@ const Profile: React.FC = () => {
           minHeight: { xs: "100vh", sm: "auto" },
           display: "flex",
           flexDirection: "column",
-          gap: 2,
+          gap: 1, // Reduced gap for a more compact form
           // Mobile specific styling
           "@media (max-width: 600px)": {
             margin: 0,
@@ -257,14 +257,14 @@ const Profile: React.FC = () => {
             minHeight: "100vh",
             justifyContent: "flex-start",
             overflow: "auto",
-            paddingTop: "80px", // Add space for the app bar
+            paddingTop: "32px", // Reduced space for the app bar
           },
         }}
       >
-        <Typography 
-          variant="h4" 
-          sx={{ 
-            textAlign: "center", 
+        <Typography
+          variant="h4"
+          sx={{
+            textAlign: "center",
             mb: 2,
             color: theme.palette.mode === "dark" ? "#fff" : "#000",
             "@media (max-width: 600px)": {
