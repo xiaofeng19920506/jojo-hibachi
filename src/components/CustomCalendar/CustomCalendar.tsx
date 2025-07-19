@@ -163,21 +163,25 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
     // Use the calculated hour height in pixels
     const actualHourHeight = getHourHeightInPixels();
     // Calculate position based on current time, accounting for header row
-    const headerRowHeight = 50; // Approximate header row height
+    const headerRowHeight = 40; // Grid template uses minmax(2.5rem, auto) = 40px
     // For 0:52 AM, this should be: headerRowHeight + (0 + 52/60) * actualHourHeight
-    indicatorTop =
+    const absoluteIndicatorTop =
       headerRowHeight + (hoursSinceStart + minute / 60) * actualHourHeight;
     // Ensure it's within bounds
-    if (indicatorTop < headerRowHeight) indicatorTop = headerRowHeight;
-    if (indicatorTop > headerRowHeight + actualHourHeight * hours.length)
+    if (absoluteIndicatorTop < headerRowHeight) indicatorTop = headerRowHeight;
+    else if (
+      absoluteIndicatorTop >
+      headerRowHeight + actualHourHeight * hours.length
+    )
       indicatorTop = headerRowHeight + actualHourHeight * hours.length;
+    else indicatorTop = absoluteIndicatorTop;
   }
 
   // Auto-scroll to current time indicator
   const scrollToCurrentTime = () => {
     if (calendarContainerRef.current && isWithinRange) {
       // Scroll to show current time with some context above
-      const headerRowHeight = 50; // Approximate header row height
+      const headerRowHeight = 40; // Grid template uses minmax(2.5rem, auto) = 40px
       const scrollTop = indicatorTop - headerRowHeight - 150; // Show context above current time
       calendarContainerRef.current.scrollTo({
         top: Math.max(0, scrollTop),
@@ -185,6 +189,23 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
       });
     }
   };
+
+  // Track scroll position to keep indicator at current time
+  const [scrollTop, setScrollTop] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (calendarContainerRef.current) {
+        setScrollTop(calendarContainerRef.current.scrollTop);
+      }
+    };
+
+    const container = calendarContainerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+      return () => container.removeEventListener("scroll", handleScroll);
+    }
+  }, []);
 
   // Auto-scroll to current time when calendar mounts or view changes to week
   useEffect(() => {
@@ -238,6 +259,7 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
         showIndicator={isWithinRange}
         slotRef={slotRef}
         calendarContainerRef={calendarContainerRef}
+        scrollTop={scrollTop}
       />
     </CalendarContainer>
   );

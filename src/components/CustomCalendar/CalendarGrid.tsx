@@ -22,6 +22,7 @@ interface CalendarGridProps {
   showIndicator?: boolean;
   slotRef?: React.RefObject<HTMLDivElement | null>;
   calendarContainerRef?: React.RefObject<HTMLDivElement | null>;
+  scrollTop?: number;
 }
 
 const CalendarGridContainer = styled.div<{ $isDarkMode?: boolean }>`
@@ -293,6 +294,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   showIndicator = false,
   slotRef,
   calendarContainerRef,
+  scrollTop = 0,
 }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -416,7 +418,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
         <div
           style={{
             position: "absolute",
-            top: `${indicatorTop}px`,
+            top: `${indicatorTop - scrollTop}px`,
             left: `${timeGutterWidth}px`,
             right: 0,
             height: "2px",
