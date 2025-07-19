@@ -240,24 +240,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
         </Box>
         {isMobile && (
           <>
-            {/* Theme Toggle for Mobile - Always visible next to hamburger */}
-            {setThemeMode && (
-              <IconButton
-                color="inherit"
-                onClick={() =>
-                  setThemeMode(themeMode === "dark" ? "light" : "dark")
-                }
-                sx={{ 
-                  color: "#fff",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.1)",
-                  },
-                }}
-                aria-label="toggle dark mode"
-              >
-                {themeMode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
-              </IconButton>
-            )}
             <IconButton
               color="inherit"
               edge="end"

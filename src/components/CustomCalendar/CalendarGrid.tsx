@@ -196,10 +196,7 @@ const BodyCell = styled.div<{ $isToday?: boolean; $isDarkMode?: boolean }>`
   }
 `;
 
-const TodayColumnWrapper = styled.div`
-  position: relative;
-  height: 100%;
-`;
+// Removed TodayColumnWrapper since we're no longer using it
 
 const EventWrapper = styled.div<{
   $top: number;
@@ -354,93 +351,17 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           const dayEvents = events.filter((ev) => isSameDay(ev.start, day));
           // Overlap meta for this day
           const overlapMeta = getOverlappingMeta(dayEvents);
-          // Instead of rendering indicator in the first cell, render a wrapper for each column
-          if (rowIdx === 0) {
-            return (
-              <TodayColumnWrapper
-                key={`col-${colIdx}`}
-                // no ref here
-              >
-                {hours.map((h, hIdx) => {
-                  const cellEvents = events.filter(
-                    (ev) => isSameDay(ev.start, day) && isSameHour(ev.start, h)
-                  );
-                  const dayEvents = events.filter((ev) =>
-                    isSameDay(ev.start, day)
-                  );
-                  const overlapMeta = getOverlappingMeta(dayEvents);
-                  return (
-                    <BodyCell
-                      key={`cell-${hIdx}-${colIdx}`}
-                      $isToday={isToday}
-                      $isDarkMode={isDarkMode}
-                      ref={
-                        hIdx === 0 && colIdx === 0 && slotRef
-                          ? slotRef
-                          : undefined
-                      }
-                    >
-                      {cellEvents.map((ev) => {
-                        const span = getEventSpan(ev);
-                        const top = 0;
-                        const height = span * HOUR_HEIGHT;
-                        const meta = overlapMeta[ev.id] || { col: 0, total: 1 };
-                        const width = 100 / meta.total;
-                        const left = meta.col * width;
-                        const startStr = ev.start.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        });
-                        const endStr = ev.end.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        });
-                        const tooltip = (
-                          <div>
-                            <div>
-                              <strong>{ev.title}</strong>
-                            </div>
-                            <div>
-                              {startStr} - {endStr}
-                            </div>
-                            {ev.notes && (
-                              <div style={{ marginTop: 4 }}>{ev.notes}</div>
-                            )}
-                          </div>
-                        );
-                        return (
-                          <EventWrapper
-                            key={ev.id}
-                            $top={top}
-                            $height={height}
-                            $left={left}
-                            $width={width}
-                          >
-                            <Tooltip title={tooltip} arrow placement="top">
-                              <span>
-                                <EventCard
-                                  event={ev}
-                                  onClick={() => onEventClick?.(ev)}
-                                />
-                              </span>
-                            </Tooltip>
-                          </EventWrapper>
-                        );
-                      })}
-                    </BodyCell>
-                  );
-                })}
-                {/* Render the time indicator absolutely in every column */}
-                {showIndicator && <CurrentTimeIndicator top={indicatorTop} />}
-              </TodayColumnWrapper>
-            );
-          }
-          // For non-first rows, render as before
+          
           return (
             <BodyCell
               key={`cell-${rowIdx}-${colIdx}`}
               $isToday={isToday}
               $isDarkMode={isDarkMode}
+              ref={
+                rowIdx === 0 && colIdx === 0 && slotRef
+                  ? slotRef
+                  : undefined
+              }
             >
               {cellEvents.map((ev) => {
                 const span = getEventSpan(ev);
@@ -465,7 +386,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                     <div>
                       {startStr} - {endStr}
                     </div>
-                    {ev.notes && <div style={{ marginTop: 4 }}>{ev.notes}</div>}
+                    {ev.notes && (
+                      <div style={{ marginTop: 4 }}>{ev.notes}</div>
+                    )}
                   </div>
                 );
                 return (
@@ -491,6 +414,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           );
         }),
       ])}
+      {/* Render the time indicator absolutely positioned */}
+      {showIndicator && <CurrentTimeIndicator top={indicatorTop} />}
     </CalendarGridContainer>
   );
 };

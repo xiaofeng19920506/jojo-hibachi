@@ -183,12 +183,19 @@ const Profile: React.FC = () => {
       sx={{
         display: "flex",
         justifyContent: "center",
-        alignItems: "center",
-        height: "100vh",
+        alignItems: { xs: "flex-start", sm: "center" },
+        minHeight: "100vh",
         width: "100vw",
         backgroundColor: theme.palette.mode === "dark" ? "#000" : "#f0f2f5",
         color: theme.palette.mode === "dark" ? "#fff" : "#000",
-        pt: 8, // Add top padding to account for the App-level GlobalAppBar
+        pt: { xs: 0, sm: 8 }, // Remove top padding on mobile, keep on desktop
+        // Mobile specific styling
+        "@media (max-width: 600px)": {
+          padding: 0,
+          margin: 0,
+          alignItems: "flex-start",
+          overflow: "auto",
+        },
       }}
     >
       <Paper
@@ -196,18 +203,41 @@ const Profile: React.FC = () => {
         onSubmit={handleSubmit}
         elevation={3}
         sx={{
-          padding: 4,
-          borderRadius: 2,
+          padding: { xs: 2, sm: 4 },
+          borderRadius: { xs: 0, sm: 2 },
           backgroundColor: theme.palette.mode === "dark" ? "#1a1a1a" : "white",
           color: theme.palette.mode === "dark" ? "#fff" : "#000",
-          width: "50%",
-          maxWidth: "30rem",
+          width: { xs: "100%", sm: "50%" },
+          maxWidth: { xs: "100%", sm: "30rem" },
+          minHeight: { xs: "100vh", sm: "auto" },
           display: "flex",
           flexDirection: "column",
           gap: 2,
+          // Mobile specific styling
+          "@media (max-width: 600px)": {
+            margin: 0,
+            borderRadius: 0,
+            width: "100%",
+            minHeight: "100vh",
+            justifyContent: "flex-start",
+            overflow: "auto",
+            paddingTop: "80px", // Add space for the app bar
+          },
         }}
       >
-        <Typography variant="h4" sx={{ textAlign: "center", mb: 2 }}>
+        <Typography 
+          variant="h4" 
+          sx={{ 
+            textAlign: "center", 
+            mb: 2,
+            color: theme.palette.mode === "dark" ? "#fff" : "#000",
+            "@media (max-width: 600px)": {
+              fontSize: "1.5rem",
+              fontWeight: "bold",
+              marginBottom: 3,
+            },
+          }}
+        >
           My Profile
         </Typography>
         {formError && (
