@@ -111,12 +111,12 @@ const HeaderCell = styled.div<{ $isToday?: boolean; $isDarkMode?: boolean }>`
   padding: 8px 0;
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 10;
 
   @media (max-width: 600px) {
     position: sticky;
     top: 0;
-    z-index: 2;
+    z-index: 10;
   }
 
   @media (max-width: 600px) and (orientation: landscape) {
@@ -126,14 +126,14 @@ const HeaderCell = styled.div<{ $isToday?: boolean; $isDarkMode?: boolean }>`
 `;
 
 const GutterCell = styled.div<{ $isDarkMode?: boolean }>`
-  background: ${(props) => (props.$isDarkMode ? "#000" : "#fafafa")};
-  color: ${(props) => (props.$isDarkMode ? "#ccc" : "#888")};
+  background: #000 !important;
+  color: #fff !important;
   font-size: 1rem;
   text-align: right;
   border-right: 1px solid ${(props) => (props.$isDarkMode ? "#444" : "#eee")};
   border-bottom: 1px solid
     ${(props) => (props.$isDarkMode ? "#444" : "#e0e0e0")};
-  padding-right: 8px;
+  padding-right: 16px;
   position: sticky;
   left: 0;
   z-index: 3;
@@ -144,7 +144,10 @@ const GutterCell = styled.div<{ $isDarkMode?: boolean }>`
     position: sticky;
     left: 0;
     z-index: 3;
-    background: #fafafa;
+    background: #000 !important;
+    color: #fff !important;
+    padding-right: 28px;
+    min-width: 56px;
   }
 
   @media (max-width: 600px) and (orientation: landscape) {
@@ -207,7 +210,7 @@ const EventWrapper = styled.div<{
   left: ${({ $left }) => $left}%;
   width: ${({ $width }) => $width}%;
   height: ${({ $height }) => $height}px;
-  z-index: 5;
+  z-index: 1;
   right: 4px;
 `;
 
@@ -417,37 +420,24 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           </HeaderCell>
         );
       })}
-      {/* Wrapper for day columns to overlay the time indicator */}
-      <div
-        style={{
-          position: "absolute",
-          left: timeGutterWidth,
-          top: 0,
-          height: "100%",
-          width: `calc(100% - ${timeGutterWidth}px)`,
-          pointerEvents: "none",
-          zIndex: 1000,
-        }}
-      >
-        {/* Time indicator absolutely positioned over the columns area, with width set to scrollable width */}
-        {timeIndicatorPosition && scrollableWidth && (
-          <div
-            style={{
-              position: "absolute",
-              top: `${timeIndicatorPosition.top}px`,
-              left: 0,
-              width: scrollableWidth - timeGutterWidth,
-              height: "2px",
-              background: "red",
-              zIndex: 1000,
-              pointerEvents: "none",
-              boxShadow: "0 0 6px 2px rgba(255, 0, 0, 0.15)",
-              transition: "top 0.2s linear",
-            }}
-            title="Current time indicator"
-          />
-        )}
-      </div>
+      {/* Remove the grid body wrapper and restore the time indicator rendering */}
+      {timeIndicatorPosition && scrollableWidth && (
+        <div
+          style={{
+            position: "absolute",
+            top: `${timeIndicatorPosition.top}px`,
+            left: timeGutterWidth,
+            width: scrollableWidth - timeGutterWidth,
+            height: "2px",
+            background: "red",
+            zIndex: 2,
+            pointerEvents: "none",
+            boxShadow: "0 0 6px 2px rgba(255, 0, 0, 0.15)",
+            transition: "top 0.2s linear",
+          }}
+          title="Current time indicator"
+        />
+      )}
       {hours.map((hour, rowIdx) => [
         <GutterCell key={`gutter-${hour}`} $isDarkMode={isDarkMode}>
           {hour}:00
