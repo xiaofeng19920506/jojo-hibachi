@@ -1,19 +1,19 @@
 import { useState, useEffect, type FormEvent } from "react";
 import {
-  SignInWrapper,
-  Form,
-  Input,
-  Button,
-  Title,
-  ErrorMessage,
-} from "./elements";
+  Box,
+  TextField,
+  Button as MuiButton,
+  Typography,
+  Paper,
+} from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import {
   useGetUserProfileQuery,
   useUpdateUserProfileMutation,
 } from "../../services/api";
-import GlobalAppBar from "../../components/GloabalAppBar/GlobalAppBar";
 
 const Profile: React.FC = () => {
+  const theme = useTheme();
   const {
     data: profile,
     isLoading,
@@ -134,121 +134,175 @@ const Profile: React.FC = () => {
 
   if (isLoading) {
     return (
-      <>
-        <GlobalAppBar />
-        <SignInWrapper>Loading...</SignInWrapper>
-      </>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          width: "100vw",
+          backgroundColor: theme.palette.mode === "dark" ? "#000" : "#f0f2f5",
+          color: theme.palette.mode === "dark" ? "#fff" : "#000",
+        }}
+      >
+        Loading...
+      </Box>
     );
   }
 
   if (isError) {
     return (
-      <>
-        <GlobalAppBar />
-        <SignInWrapper>
-          <ErrorMessage>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+          width: "100vw",
+          backgroundColor: theme.palette.mode === "dark" ? "#000" : "#f0f2f5",
+          color: theme.palette.mode === "dark" ? "#fff" : "#000",
+        }}
+      >
+        <Box sx={{ textAlign: "center" }}>
+          <Typography color="error" sx={{ mb: 2 }}>
             Failed to load profile:{" "}
             {(error as any)?.data?.message ||
               (error as any)?.message ||
               "Unknown error"}
-          </ErrorMessage>
-          <Button onClick={() => refetch()}>Retry</Button>
-        </SignInWrapper>
-      </>
+          </Typography>
+          <MuiButton variant="contained" onClick={() => refetch()}>
+            Retry
+          </MuiButton>
+        </Box>
+      </Box>
     );
   }
 
   return (
-    <>
-      <GlobalAppBar />
-      <SignInWrapper>
-        <Form onSubmit={handleSubmit}>
-          <Title style={{ fontSize: 22 }}>My Profile</Title>
-          {formError && <ErrorMessage>{formError}</ErrorMessage>}
-          {success && (
-            <div style={{ color: "green", marginBottom: 8 }}>{success}</div>
-          )}
-          <Input
-            type="text"
-            placeholder="First Name"
-            value={firstName}
-            required
-            onChange={(e) => setFirstName(e.target.value)}
-            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-          />
-          <Input
-            type="text"
-            placeholder="Last Name"
-            value={lastName}
-            required
-            onChange={(e) => setLastName(e.target.value)}
-            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-          />
-          <Input
-            type="tel"
-            placeholder="Phone Number"
-            value={phone}
-            required
-            onChange={(e) => setPhone(e.target.value)}
-            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-          />
-          <Input
-            type="email"
-            placeholder="Email"
-            value={email}
-            required
-            onChange={(e) => setEmail(e.target.value)}
-            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-          />
-          <Input
-            type="text"
-            placeholder="Address"
-            value={address}
-            required
-            onChange={(e) => setAddress(e.target.value)}
-            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-          />
-          <Input
-            type="text"
-            placeholder="City"
-            value={city}
-            required
-            onChange={(e) => setCity(e.target.value)}
-            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-          />
-          <Input
-            type="text"
-            placeholder="State"
-            value={state}
-            required
-            onChange={(e) => setState(e.target.value)}
-            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-          />
-          <Input
-            type="text"
-            placeholder="Zip Code"
-            value={zipCode}
-            required
-            onChange={(e) => setZipCode(e.target.value)}
-            style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
-          />
-          <Button
-            type="submit"
-            disabled={isSaving}
-            style={{ fontSize: 16, minHeight: 44, minWidth: 44 }}
-          >
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
-          <Button
-            type="button"
-            onClick={() => refetch()}
-            style={{ fontSize: 14, minHeight: 36, minWidth: 44, marginTop: 8 }}
-          >
-            Refresh Profile
-          </Button>
-        </Form>
-      </SignInWrapper>
-    </>
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        width: "100vw",
+        backgroundColor: theme.palette.mode === "dark" ? "#000" : "#f0f2f5",
+        color: theme.palette.mode === "dark" ? "#fff" : "#000",
+        pt: 8, // Add top padding to account for the App-level GlobalAppBar
+      }}
+    >
+      <Paper
+        component="form"
+        onSubmit={handleSubmit}
+        elevation={3}
+        sx={{
+          padding: 4,
+          borderRadius: 2,
+          backgroundColor: theme.palette.mode === "dark" ? "#1a1a1a" : "white",
+          color: theme.palette.mode === "dark" ? "#fff" : "#000",
+          width: "50%",
+          maxWidth: "30rem",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        <Typography variant="h4" sx={{ textAlign: "center", mb: 2 }}>
+          My Profile
+        </Typography>
+        {formError && (
+          <Typography color="error" sx={{ textAlign: "center" }}>
+            {formError}
+          </Typography>
+        )}
+        {success && (
+          <Typography color="success.main" sx={{ textAlign: "center" }}>
+            {success}
+          </Typography>
+        )}
+        <TextField
+          label="First Name"
+          value={firstName}
+          required
+          onChange={(e) => setFirstName(e.target.value)}
+          sx={{ mb: 2 }}
+          fullWidth
+        />
+        <TextField
+          label="Last Name"
+          value={lastName}
+          required
+          onChange={(e) => setLastName(e.target.value)}
+          sx={{ mb: 2 }}
+          fullWidth
+        />
+        <TextField
+          label="Phone Number"
+          value={phone}
+          required
+          onChange={(e) => setPhone(e.target.value)}
+          sx={{ mb: 2 }}
+          fullWidth
+        />
+        <TextField
+          label="Email"
+          value={email}
+          required
+          onChange={(e) => setEmail(e.target.value)}
+          sx={{ mb: 2 }}
+          fullWidth
+        />
+        <TextField
+          label="Address"
+          value={address}
+          required
+          onChange={(e) => setAddress(e.target.value)}
+          sx={{ mb: 2 }}
+          fullWidth
+        />
+        <TextField
+          label="City"
+          value={city}
+          required
+          onChange={(e) => setCity(e.target.value)}
+          sx={{ mb: 2 }}
+          fullWidth
+        />
+        <TextField
+          label="State"
+          value={state}
+          required
+          onChange={(e) => setState(e.target.value)}
+          sx={{ mb: 2 }}
+          fullWidth
+        />
+        <TextField
+          label="Zip Code"
+          value={zipCode}
+          required
+          onChange={(e) => setZipCode(e.target.value)}
+          sx={{ mb: 2 }}
+          fullWidth
+        />
+        <MuiButton
+          type="submit"
+          variant="contained"
+          disabled={isSaving}
+          sx={{ mb: 1 }}
+          fullWidth
+        >
+          {isSaving ? "Saving..." : "Save"}
+        </MuiButton>
+        <MuiButton
+          type="button"
+          variant="outlined"
+          onClick={() => refetch()}
+          fullWidth
+        >
+          Refresh Profile
+        </MuiButton>
+      </Paper>
+    </Box>
   );
 };
 

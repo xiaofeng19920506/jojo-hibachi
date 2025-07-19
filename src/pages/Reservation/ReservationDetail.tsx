@@ -8,7 +8,6 @@ import {
 } from "@mui/material";
 import { useGetUserReservationByIdQuery } from "../../services/api";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import GlobalAppBar from "../../components/GloabalAppBar/GlobalAppBar";
 
 // Utility to check if device is mobile
 const isMobile =
@@ -49,9 +48,7 @@ const ReservationDetail: React.FC = () => {
   }
 
   return (
-    <>
-      <GlobalAppBar title="Fancy Hibachi" subtitle="" />
-      <Box
+    <Box
         sx={{
           height: "100vh",
           width: "100vw",
@@ -190,7 +187,6 @@ const ReservationDetail: React.FC = () => {
           <Divider sx={{ my: 1 }} />
         </Paper>
       </Box>
-    </>
   );
 };
 

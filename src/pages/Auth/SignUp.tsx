@@ -1,15 +1,13 @@
 import { useState, type FormEvent } from "react";
 import {
-  SignInWrapper,
-  Form,
-  Input,
-  Title,
-  ErrorMessage,
-  RegisterPrompt,
-} from "./elements";
+  Box,
+  TextField,
+  Button as MuiButton,
+  Typography,
+  Paper,
+} from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import { useRegisterMutation } from "../../services/api";
-import Button from "@mui/material/Button";
 import { useTheme } from "@mui/material/styles";
 
 const SignUp: React.FC = () => {
@@ -127,111 +125,141 @@ const SignUp: React.FC = () => {
   };
 
   return (
-    <SignInWrapper>
-      <Form onSubmit={handleSubmit}>
-        <Title style={{ fontSize: 22 }}>Sign Up</Title>
-        {error && <ErrorMessage>{error}</ErrorMessage>}
-        <Input
-          type="text"
-          placeholder="First Name"
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        width: "100vw",
+        backgroundColor: theme.palette.mode === "dark" ? "#000" : "#f0f2f5",
+        color: theme.palette.mode === "dark" ? "#fff" : "#000",
+        pt: 8, // Add top padding to account for the App-level GlobalAppBar
+      }}
+    >
+      <Paper
+        component="form"
+        onSubmit={handleSubmit}
+        elevation={3}
+        sx={{
+          padding: 4,
+          borderRadius: 2,
+          backgroundColor: theme.palette.mode === "dark" ? "#1a1a1a" : "white",
+          color: theme.palette.mode === "dark" ? "#fff" : "#000",
+          width: "50%",
+          maxWidth: "30rem",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          maxHeight: "90vh",
+          overflow: "auto",
+        }}
+      >
+        <Typography variant="h4" sx={{ textAlign: "center", mb: 2 }}>
+          Sign Up
+        </Typography>
+        {error && (
+          <Typography color="error" sx={{ textAlign: "center" }}>
+            {error}
+          </Typography>
+        )}
+        <TextField
+          label="First Name"
           value={firstName}
           required
           onChange={(e) => setFirstName(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          sx={{ mb: 2 }}
+          fullWidth
         />
-        <Input
-          type="text"
-          placeholder="Last Name"
+        <TextField
+          label="Last Name"
           value={lastName}
           required
           onChange={(e) => setLastName(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          sx={{ mb: 2 }}
+          fullWidth
         />
-        <Input
-          type="tel"
-          placeholder="Phone Number"
+        <TextField
+          label="Phone Number"
           value={phoneNumber}
           required
           onChange={(e) => setPhoneNumber(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          sx={{ mb: 2 }}
+          fullWidth
         />
-        <Input
+        <TextField
+          label="Email"
           type="email"
-          placeholder="Email"
           value={email}
           required
           onChange={(e) => setEmail(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          sx={{ mb: 2 }}
+          fullWidth
         />
-        <Input
-          type="text"
-          placeholder="Street Address"
+        <TextField
+          label="Street Address"
           value={streetAddress}
           required
           onChange={(e) => setStreetAddress(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          sx={{ mb: 2 }}
+          fullWidth
         />
-        <Input
-          type="text"
-          placeholder="City"
+        <TextField
+          label="City"
           value={city}
           required
           onChange={(e) => setCity(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          sx={{ mb: 2 }}
+          fullWidth
         />
-        <Input
-          type="text"
-          placeholder="State"
+        <TextField
+          label="State"
           value={state}
           required
           onChange={(e) => setState(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          sx={{ mb: 2 }}
+          fullWidth
         />
-        <Input
-          type="text"
-          placeholder="Zip Code"
+        <TextField
+          label="Zip Code"
           value={zipCode}
           required
           onChange={(e) => setZipCode(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          sx={{ mb: 2 }}
+          fullWidth
         />
-        <Input
+        <TextField
+          label="Password"
           type="password"
-          placeholder="Password"
           value={password}
           required
           onChange={(e) => setPassword(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          sx={{ mb: 2 }}
+          fullWidth
         />
-        <Button
+        <MuiButton
           type="submit"
           variant="contained"
           disabled={loading}
-          sx={{
-            marginTop: 2,
-            backgroundColor:
-              theme.palette.mode === "dark"
-                ? "#000"
-                : theme.palette.primary.main,
-            color: "#fff",
-            fontSize: "18px",
-            fontWeight: 600,
-            "&:hover": {
-              backgroundColor:
-                theme.palette.mode === "dark"
-                  ? "#333"
-                  : theme.palette.primary.dark,
-            },
-          }}
+          sx={{ mb: 2 }}
+          fullWidth
         >
           {loading ? "Signing Up..." : "Sign Up"}
-        </Button>
-
-        <RegisterPrompt style={{ fontSize: "16px", marginTop: 8 }}>
-          Already have an account? <Link to="/signin">Sign In</Link>
-        </RegisterPrompt>
-      </Form>
-    </SignInWrapper>
+        </MuiButton>
+        <Typography sx={{ textAlign: "center", mt: 1, fontSize: "16px" }}>
+          Already have an account?{" "}
+          <Link
+            to="/signin"
+            style={{ 
+              color: theme.palette.mode === "dark" ? "#90caf9" : "#0077cc", 
+              textDecoration: "none" 
+            }}
+          >
+            Sign In
+          </Link>
+        </Typography>
+      </Paper>
+    </Box>
   );
 };
 

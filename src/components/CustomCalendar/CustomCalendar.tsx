@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
+import { useTheme } from "@mui/material/styles";
 import CalendarHeader from "./CalendarHeader";
 import CalendarGrid from "./CalendarGrid";
 // import "./CustomCalendar.css";
@@ -23,10 +24,10 @@ interface CustomCalendarProps {
   onViewChange?: (view: CalendarView) => void;
 }
 
-const CalendarContainer = styled.div`
-  border: 1px solid #ddd;
+const CalendarContainer = styled.div<{ $isDarkMode?: boolean }>`
+  border: 1px solid ${(props) => (props.$isDarkMode ? "#444" : "#ddd")};
   border-radius: 8px;
-  background: #fff;
+  background: ${(props) => (props.$isDarkMode ? "#000" : "#fff")};
   width: 80%;
   margin-left: auto;
   margin-right: auto;
@@ -106,6 +107,8 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
   view: controlledView,
   onViewChange,
 }) => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   // If controlled, use props; otherwise, use internal state
   const [internalDate, setInternalDate] = useState(new Date());
   const [internalView, setInternalView] = useState<CalendarView>("week");
@@ -174,7 +177,7 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
   };
 
   return (
-    <CalendarContainer>
+    <CalendarContainer $isDarkMode={isDarkMode}>
       <CalendarHeader
         currentDate={currentDate}
         view={view}

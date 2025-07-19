@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { useTheme } from "@mui/material/styles";
 import type { CalendarView, CalendarEvent } from "./CustomCalendar";
 import EventCard from "./EventCard";
 import CurrentTimeIndicator from "./CurrentTimeIndicator";
@@ -23,14 +24,14 @@ interface CalendarGridProps {
   slotRef?: React.RefObject<HTMLDivElement | null>;
 }
 
-const CalendarGridContainer = styled.div`
+const CalendarGridContainer = styled.div<{ $isDarkMode?: boolean }>`
   display: grid;
   width: 100%;
   height: 100%;
   overflow-y: auto;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE 10+ */
-  background: #fff;
+  background: ${(props) => (props.$isDarkMode ? "#000" : "#fff")};
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   padding: 8px 8px 0 8px;
@@ -86,14 +87,29 @@ const CalendarGridContainer = styled.div`
   }
 `;
 
-const HeaderCell = styled.div<{ $isToday?: boolean }>`
-  background: ${({ $isToday }) => ($isToday ? "#f5f5f5" : "#f0f0f8")};
-  color: ${({ $isToday }) => ($isToday ? "#1976d2" : "inherit")};
+const HeaderCell = styled.div<{ $isToday?: boolean; $isDarkMode?: boolean }>`
+  background: ${({ $isToday, $isDarkMode }) =>
+    $isDarkMode
+      ? $isToday
+        ? "#333"
+        : "#222"
+      : $isToday
+      ? "#f5f5f5"
+      : "#f0f0f8"};
+  color: ${({ $isToday, $isDarkMode }) =>
+    $isDarkMode
+      ? $isToday
+        ? "#90caf9"
+        : "#fff"
+      : $isToday
+      ? "#1976d2"
+      : "inherit"};
   font-weight: 500;
   font-size: 1.1rem;
   text-align: center;
-  border-right: 1px solid #eee;
-  border-bottom: 1px solid #e0e0e0;
+  border-right: 1px solid ${(props) => (props.$isDarkMode ? "#444" : "#eee")};
+  border-bottom: 1px solid
+    ${(props) => (props.$isDarkMode ? "#444" : "#e0e0e0")};
   padding: 8px 0;
   position: sticky;
   top: 0;
@@ -111,13 +127,14 @@ const HeaderCell = styled.div<{ $isToday?: boolean }>`
   }
 `;
 
-const GutterCell = styled.div`
-  background: #fafafa;
-  color: #888;
+const GutterCell = styled.div<{ $isDarkMode?: boolean }>`
+  background: ${(props) => (props.$isDarkMode ? "#000" : "#fafafa")};
+  color: ${(props) => (props.$isDarkMode ? "#ccc" : "#888")};
   font-size: 1rem;
   text-align: right;
-  border-right: 1px solid #eee;
-  border-bottom: 1px solid #e0e0e0;
+  border-right: 1px solid ${(props) => (props.$isDarkMode ? "#444" : "#eee")};
+  border-bottom: 1px solid
+    ${(props) => (props.$isDarkMode ? "#444" : "#e0e0e0")};
   padding-right: 8px;
   position: sticky;
   left: 0;
@@ -143,10 +160,18 @@ const TopLeftCell = styled(GutterCell)`
   z-index: 4;
 `;
 
-const BodyCell = styled.div<{ $isToday?: boolean }>`
-  background: ${({ $isToday }) => ($isToday ? "#e3f2fd" : "#fff")};
-  border-right: 1px solid #f0f0f0;
-  border-bottom: 1px solid #f0f0f0;
+const BodyCell = styled.div<{ $isToday?: boolean; $isDarkMode?: boolean }>`
+  background: ${({ $isToday, $isDarkMode }) =>
+    $isDarkMode
+      ? $isToday
+        ? "#1a1a1a"
+        : "#000"
+      : $isToday
+      ? "#e3f2fd"
+      : "#fff"};
+  border-right: 1px solid ${(props) => (props.$isDarkMode ? "#333" : "#f0f0f0")};
+  border-bottom: 1px solid
+    ${(props) => (props.$isDarkMode ? "#333" : "#f0f0f0")};
   min-height: ${HOUR_HEIGHT_CSS};
   position: relative;
   font-size: 1rem;
@@ -272,6 +297,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   showIndicator = false,
   slotRef,
 }) => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
   const weekDates = getWeekDates(currentDate);
   const days = view === "week" ? weekDates : [currentDate];
 
@@ -291,18 +318,19 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
   return (
     <CalendarGridContainer
+      $isDarkMode={isDarkMode}
       style={{
         gridTemplateColumns,
         gridTemplateRows,
       }}
     >
       {/* Top-left cell */}
-      <TopLeftCell />
+      <TopLeftCell $isDarkMode={isDarkMode} />
       {/* Date headers */}
       {days.map((d, i) => {
         const isToday = isSameDay(d, new Date());
         return (
-          <HeaderCell key={i} $isToday={isToday}>
+          <HeaderCell key={i} $isToday={isToday} $isDarkMode={isDarkMode}>
             {d.toLocaleDateString(undefined, {
               weekday: "short",
               month: "numeric",
@@ -313,7 +341,9 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
       })}
       {/* Time gutter and body cells */}
       {hours.map((hour, rowIdx) => [
-        <GutterCell key={`gutter-${hour}`}>{hour}:00</GutterCell>,
+        <GutterCell key={`gutter-${hour}`} $isDarkMode={isDarkMode}>
+          {hour}:00
+        </GutterCell>,
         ...days.map((day, colIdx) => {
           const isToday = isSameDay(day, new Date());
           // Find events that start at this day/hour
@@ -343,6 +373,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                     <BodyCell
                       key={`cell-${hIdx}-${colIdx}`}
                       $isToday={isToday}
+                      $isDarkMode={isDarkMode}
                       ref={
                         hIdx === 0 && colIdx === 0 && slotRef
                           ? slotRef
@@ -406,7 +437,11 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           }
           // For non-first rows, render as before
           return (
-            <BodyCell key={`cell-${rowIdx}-${colIdx}`} $isToday={isToday}>
+            <BodyCell
+              key={`cell-${rowIdx}-${colIdx}`}
+              $isToday={isToday}
+              $isDarkMode={isDarkMode}
+            >
               {cellEvents.map((ev) => {
                 const span = getEventSpan(ev);
                 const top = 0;

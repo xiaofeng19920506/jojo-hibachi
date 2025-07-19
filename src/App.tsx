@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import ProtectedRoute from "./components/ProtectedRoute/ProtectedRoute";
 import HomeNav from "./components/HomeNav/HomeNav";
@@ -29,9 +29,50 @@ interface AppProps {
 }
 
 const App: React.FC<AppProps> = ({ themeMode, setThemeMode }) => {
+  const location = useLocation();
+
+  // Get appropriate title and subtitle for the current route
+  const getAppBarProps = () => {
+    if (location.pathname === "/booknow") {
+      return {
+        title: "Book Now",
+        subtitle: "Make your reservation",
+      };
+    }
+    if (location.pathname === "/profile") {
+      return {
+        title: "Profile",
+        subtitle: "Manage your account",
+      };
+    }
+    if (location.pathname === "/calendar") {
+      return {
+        title: "Weekly Calendar",
+        subtitle: "View reservations",
+      };
+    }
+    if (location.pathname.startsWith("/reservation/")) {
+      return {
+        title: "Fancy Hibachi",
+        subtitle: "",
+      };
+    }
+    return {
+      title: "Dashboard",
+      subtitle: undefined,
+    };
+  };
+
+  const { title, subtitle } = getAppBarProps();
+
   return (
     <AuthInitializer>
-      <GlobalAppBar themeMode={themeMode} setThemeMode={setThemeMode} />
+      <GlobalAppBar
+        title={title}
+        subtitle={subtitle}
+        themeMode={themeMode}
+        setThemeMode={setThemeMode}
+      />
       <Routes>
         <Route
           path="/signin"

@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Step, StepLabel, Stepper, Box, Container, Paper } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import CustomerInfo from "./CustomerInfo";
 import DateTime from "./DateTime";
 import DetailsAndPolicies from "./DetailsAndPolicies";
 import Confirmation from "./Confirmation";
-import GlobalAppBar from "../GloabalAppBar/GlobalAppBar";
 
 const steps = [
   "Customer Info",
@@ -14,54 +14,24 @@ const steps = [
 ];
 
 const ReservationStepper = () => {
+  const theme = useTheme();
   const [activeStep, setActiveStep] = useState(0);
 
   const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
   const handleReset = () => setActiveStep(0);
 
-  // Get current step info for the app bar
-  const getCurrentStepInfo = () => {
-    const stepTitles = {
-      0: "Customer Information",
-      1: "Select Date & Time",
-      2: "Details & Policies",
-      3: "Booking Confirmation",
-    };
-
-    const stepSubtitles = {
-      0: "Please provide your contact information",
-      1: "Choose your preferred date and time",
-      2: "Review details and accept our policies",
-      3: "Your reservation is almost complete!",
-    };
-
-    return {
-      title: stepTitles[activeStep as keyof typeof stepTitles] || "Book Now",
-      subtitle: stepSubtitles[activeStep as keyof typeof stepSubtitles],
-    };
-  };
-
-  const { title, subtitle } = getCurrentStepInfo();
-
   return (
     <Box
       sx={{
         minHeight: "100vh",
         width: "100vw",
-        bgcolor: "grey.50",
+        bgcolor: theme.palette.mode === "dark" ? "#000" : "grey.50",
         display: "flex",
         flexDirection: "column",
+        pt: 8, // Add top padding to account for the App-level GlobalAppBar
       }}
     >
-      <GlobalAppBar
-        title={title}
-        subtitle={subtitle}
-        showNavigation={true}
-        showLogout={true}
-        elevation={4}
-      />
-
       <Container
         maxWidth="lg"
         sx={{

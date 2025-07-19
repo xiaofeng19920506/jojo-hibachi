@@ -2,14 +2,12 @@ import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import {
-  SignInWrapper,
-  Form,
-  Input,
-  Title,
-  ErrorMessage,
-  RegisterPrompt,
-} from "./elements";
-import Button from "@mui/material/Button";
+  Box,
+  TextField,
+  Button as MuiButton,
+  Typography,
+  Paper,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useAppDispatch } from "../../utils/hooks";
 import { login } from "../../features/userSlice";
@@ -62,63 +60,95 @@ const SignIn: React.FC = () => {
   };
 
   return (
-    <SignInWrapper>
-      <Form onSubmit={handleSubmit}>
-        <Title style={{ fontSize: 22 }}>Sign In</Title>
-        {error && <ErrorMessage>{error}</ErrorMessage>}
-        <Input
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        width: "100vw",
+        backgroundColor: theme.palette.mode === "dark" ? "#000" : "#f0f2f5",
+        color: theme.palette.mode === "dark" ? "#fff" : "#000",
+        pt: 8, // Add top padding to account for the App-level GlobalAppBar
+      }}
+    >
+      <Paper
+        component="form"
+        onSubmit={handleSubmit}
+        elevation={3}
+        sx={{
+          padding: 4,
+          borderRadius: 2,
+          backgroundColor: theme.palette.mode === "dark" ? "#1a1a1a" : "white",
+          color: theme.palette.mode === "dark" ? "#fff" : "#000",
+          width: "50%",
+          maxWidth: "30rem",
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+        }}
+      >
+        <Typography variant="h4" sx={{ textAlign: "center", mb: 2 }}>
+          Sign In
+        </Typography>
+        {error && (
+          <Typography color="error" sx={{ textAlign: "center" }}>
+            {error}
+          </Typography>
+        )}
+        <TextField
+          label="Email"
           type="email"
-          placeholder="Email"
           value={email}
           required
           onChange={(e) => setEmail(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          sx={{ mb: 2 }}
+          fullWidth
         />
-        <Input
+        <TextField
+          label="Password"
           type="password"
-          placeholder="Password"
           value={password}
           required
           onChange={(e) => setPassword(e.target.value)}
-          style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
+          sx={{ mb: 2 }}
+          fullWidth
         />
-        <Button
+        <MuiButton
           type="submit"
           variant="contained"
           disabled={isLoading}
-          sx={{
-            marginTop: 2,
-            backgroundColor:
-              theme.palette.mode === "dark"
-                ? "#000"
-                : theme.palette.primary.main,
-            color: "#fff",
-            fontSize: "18px",
-            fontWeight: 600,
-            "&:hover": {
-              backgroundColor:
-                theme.palette.mode === "dark"
-                  ? "#333"
-                  : theme.palette.primary.dark,
-            },
-          }}
+          sx={{ mb: 2 }}
+          fullWidth
         >
           {isLoading ? "Signing In..." : "Sign In"}
-        </Button>
-        <div style={{ textAlign: "center", marginTop: 8 }}>
+        </MuiButton>
+        <Box sx={{ textAlign: "center", mt: 1 }}>
           <Link
             to="/forgot-password"
-            style={{ fontSize: 16, color: "#0077cc", textDecoration: "none" }}
+            style={{ 
+              fontSize: 16, 
+              color: theme.palette.mode === "dark" ? "#90caf9" : "#0077cc", 
+              textDecoration: "none" 
+            }}
           >
             Forgot Password?
           </Link>
-        </div>
-
-        <RegisterPrompt style={{ fontSize: "16px", marginTop: 8 }}>
-          Don't have an account? <Link to="/signup">Register</Link>
-        </RegisterPrompt>
-      </Form>
-    </SignInWrapper>
+        </Box>
+        <Typography sx={{ textAlign: "center", mt: 1, fontSize: "16px" }}>
+          Don't have an account?{" "}
+          <Link
+            to="/signup"
+            style={{ 
+              color: theme.palette.mode === "dark" ? "#90caf9" : "#0077cc", 
+              textDecoration: "none" 
+            }}
+          >
+            Register
+          </Link>
+        </Typography>
+      </Paper>
+    </Box>
   );
 };
 

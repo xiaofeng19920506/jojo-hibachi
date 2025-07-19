@@ -8,12 +8,12 @@ import {
   useGetAdminEmployeeAssignedReservationsQuery,
 } from "../../services/api";
 import { MenuItem, Select, InputLabel } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useNavigate } from "react-router-dom";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { useRef } from "react";
-import GlobalAppBar from "../../components/GloabalAppBar/GlobalAppBar";
 import {
   CalendarRoot,
   CalendarAppBarWrapper,
@@ -26,6 +26,7 @@ import {
 } from "./elements";
 import DatePicker from "../../components/DatePicker/DatePicker";
 import type { DatePickerRef } from "../../components/DatePicker/DatePicker";
+import "./employee-calendar-custom.css";
 
 interface CalendarEvent {
   id: string;
@@ -37,6 +38,7 @@ interface CalendarEvent {
 }
 
 const EmployeeCalendar: React.FC = () => {
+  const theme = useTheme();
   const { user } = useAppSelector((state) => state.user);
   const userRole = user?.role || "user";
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
@@ -105,22 +107,7 @@ const EmployeeCalendar: React.FC = () => {
     }
   }, [userRole, allEmployees, selectedEmployeeId]);
 
-  useEffect(() => {
-    const setBg = () => {
-      document.querySelectorAll(".rbc-day-bg").forEach((el) => {
-        (el as HTMLElement).style.background = "#e3f2fd";
-        (el as HTMLElement).style.backgroundColor = "#e3f2fd";
-        (el as HTMLElement).style.opacity = "1";
-      });
-    };
-    setBg();
-    const calendar = document.querySelector(".rbc-time-view");
-    if (calendar) {
-      const observer = new MutationObserver(setBg);
-      observer.observe(calendar, { childList: true, subtree: true });
-      return () => observer.disconnect();
-    }
-  }, []);
+  // Removed the setBg useEffect since we're now using styled-components with theme props
 
   useEffect(() => {
     setTimeout(() => {
@@ -247,84 +234,116 @@ const EmployeeCalendar: React.FC = () => {
   const datePickerRef = useRef<DatePickerRef>(null);
 
   return (
-    <CalendarRoot>
-      <CalendarAppBarWrapper>
-        <GlobalAppBar />
-      </CalendarAppBarWrapper>
-      <CalendarContent>
-        {/* Title and Select Employee on the same row for admin, directly under AppBar */}
-        <CalendarTitleRow>
-          <CalendarTitle variant="h4">Weekly Calendar</CalendarTitle>
-          {userRole === "admin" && (
-            <CalendarEmployeeSelect>
-              <InputLabel id="employee-select-label">
-                Select Employee
-              </InputLabel>
-              <Select
-                labelId="employee-select-label"
-                value={selectedEmployeeId}
-                onChange={(e) => setSelectedEmployeeId(e.target.value)}
-                label="Select Employee"
-                sx={{
-                  minWidth: 200,
-                  "@media (max-width: 600px)": {
-                    minWidth: 150,
-                  },
-                  "@media (max-width: 600px) and (orientation: landscape)": {
-                    minWidth: 120,
-                    fontSize: "0.8rem",
-                  },
+    <>
+      {/* Removed inline styles since we're now using styled-components with theme props */}
+      <CalendarRoot
+        sx={{
+          backgroundColor: theme.palette.mode === "dark" ? "#000" : "#f0f2f5",
+          color: theme.palette.mode === "dark" ? "#fff" : "#000",
+        }}
+      >
+        <CalendarAppBarWrapper></CalendarAppBarWrapper>
+        <CalendarContent>
+          {/* Title and Select Employee on the same row for admin, directly under AppBar */}
+          <CalendarTitleRow>
+            <CalendarTitle
+              variant="h4"
+              sx={{
+                color: theme.palette.mode === "dark" ? "#fff" : "#000",
+              }}
+            >
+              Weekly Calendar
+            </CalendarTitle>
+            {userRole === "admin" && (
+              <CalendarEmployeeSelect>
+                <InputLabel id="employee-select-label">
+                  Select Employee
+                </InputLabel>
+                <Select
+                  labelId="employee-select-label"
+                  value={selectedEmployeeId}
+                  onChange={(e) => setSelectedEmployeeId(e.target.value)}
+                  label="Select Employee"
+                  sx={{
+                    minWidth: 200,
+                    "@media (max-width: 600px)": {
+                      minWidth: 150,
+                    },
+                    "@media (max-width: 600px) and (orientation: landscape)": {
+                      minWidth: 120,
+                      fontSize: "0.8rem",
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                    },
+                    "& .MuiSelect-select": {
+                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor:
+                        theme.palette.mode === "dark" ? "#666" : "#ccc",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor:
+                        theme.palette.mode === "dark" ? "#888" : "#999",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: theme.palette.primary.main,
+                    },
+                  }}
+                >
+                  {allEmployees.map((emp: any) => (
+                    <MenuItem key={emp.id} value={emp.id}>
+                      {emp.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </CalendarEmployeeSelect>
+            )}
+            <CalendarControlsRow>
+              <ArrowBackIosNewIcon
+                style={{
+                  cursor: "pointer",
+                  flex: "0 0 auto",
+                  fontSize: window.innerWidth <= 600 ? "1.2rem" : "1.5rem",
+                  color: theme.palette.mode === "dark" ? "#fff" : "#000",
                 }}
-              >
-                {allEmployees.map((emp: any) => (
-                  <MenuItem key={emp.id} value={emp.id}>
-                    {emp.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </CalendarEmployeeSelect>
-          )}
-          <CalendarControlsRow>
-            <ArrowBackIosNewIcon
-              style={{
-                cursor: "pointer",
-                flex: "0 0 auto",
-                fontSize: window.innerWidth <= 600 ? "1.2rem" : "1.5rem",
-              }}
-              onClick={() => datePickerRef.current?.goToPrevWeek()}
+                onClick={() => datePickerRef.current?.goToPrevWeek()}
+              />
+              <DatePicker
+                ref={datePickerRef}
+                value={calendarDate}
+                onChange={(date) => {
+                  setCalendarDate(date);
+                }}
+                showTime={false}
+              />
+              <ArrowForwardIosIcon
+                style={{
+                  cursor: "pointer",
+                  flex: "0 0 auto",
+                  fontSize: window.innerWidth <= 600 ? "1.2rem" : "1.5rem",
+                  color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                }}
+                onClick={() => datePickerRef.current?.goToNextWeek()}
+              />
+            </CalendarControlsRow>
+          </CalendarTitleRow>
+          <CalendarContainer
+            style={{ position: "relative", height: "100%", overflow: "auto" }}
+          >
+            <CustomCalendar
+              events={events}
+              onEventClick={(event) =>
+                navigate(`/reservation/${event.reservationId}`)
+              }
+              currentDate={calendarDate}
+              onDateChange={setCalendarDate}
             />
-            <DatePicker
-              ref={datePickerRef}
-              value={calendarDate}
-              onChange={(date) => {
-                setCalendarDate(date);
-              }}
-              showTime={false}
-            />
-            <ArrowForwardIosIcon
-              style={{
-                cursor: "pointer",
-                flex: "0 0 auto",
-                fontSize: window.innerWidth <= 600 ? "1.2rem" : "1.5rem",
-              }}
-              onClick={() => datePickerRef.current?.goToNextWeek()}
-            />
-          </CalendarControlsRow>
-        </CalendarTitleRow>
-        <CalendarContainer
-          style={{ position: "relative", height: "100%", overflow: "auto" }}
-        >
-          <CustomCalendar
-            events={events}
-            onEventClick={(event) =>
-              navigate(`/reservation/${event.reservationId}`)
-            }
-            currentDate={calendarDate}
-            onDateChange={setCalendarDate}
-          />
-        </CalendarContainer>
-      </CalendarContent>
-    </CalendarRoot>
+          </CalendarContainer>
+        </CalendarContent>
+      </CalendarRoot>
+    </>
   );
 };
 

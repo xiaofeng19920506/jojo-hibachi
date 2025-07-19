@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { useTheme } from "@mui/material/styles";
 import type { CalendarView } from "./CustomCalendar";
 
 interface CalendarHeaderProps {
@@ -11,13 +12,13 @@ interface CalendarHeaderProps {
   onViewChange: (v: CalendarView) => void;
 }
 
-const HeaderBar = styled.div`
+const HeaderBar = styled.div<{ $isDarkMode?: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  background: #f5f5f5;
-  border-bottom: 1px solid #eee;
+  background: ${(props) => (props.$isDarkMode ? "#000" : "#f5f5f5")};
+  border-bottom: 1px solid ${(props) => (props.$isDarkMode ? "#444" : "#eee")};
 
   @media (max-width: 600px) {
     padding: 8px 12px;
@@ -67,12 +68,14 @@ const HeaderDate = styled.span`
     font-size: 0.8rem;
   }
 `;
-const ToggleButton = styled.button<{ active?: boolean }>`
+const ToggleButton = styled.button<{ active?: boolean; $isDarkMode?: boolean }>`
   margin-right: 8px;
   padding: 4px 12px;
   border: none;
-  background: ${({ active }) => (active ? "#9c27b0" : "#e0e0e0")};
-  color: ${({ active }) => (active ? "#fff" : "inherit")};
+  background: ${({ active, $isDarkMode }) =>
+    active ? "#9c27b0" : $isDarkMode ? "#333" : "#e0e0e0"};
+  color: ${({ active, $isDarkMode }) =>
+    active ? "#fff" : $isDarkMode ? "#fff" : "inherit"};
   border-radius: 4px;
   cursor: pointer;
 
@@ -104,23 +107,33 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   currentDate,
   view,
   onViewChange,
-}) => (
-  <HeaderBar>
-    <Nav>
-      <HeaderDate>{formatDate(currentDate, view)}</HeaderDate>
-    </Nav>
-    <ViewToggle>
-      <ToggleButton
-        active={view === "week"}
-        onClick={() => onViewChange("week")}
-      >
-        Week
-      </ToggleButton>
-      <ToggleButton active={view === "day"} onClick={() => onViewChange("day")}>
-        Day
-      </ToggleButton>
-    </ViewToggle>
-  </HeaderBar>
-);
+}) => {
+  const theme = useTheme();
+  const isDarkMode = theme.palette.mode === "dark";
+
+  return (
+    <HeaderBar $isDarkMode={isDarkMode}>
+      <Nav>
+        <HeaderDate>{formatDate(currentDate, view)}</HeaderDate>
+      </Nav>
+      <ViewToggle>
+        <ToggleButton
+          active={view === "week"}
+          $isDarkMode={isDarkMode}
+          onClick={() => onViewChange("week")}
+        >
+          Week
+        </ToggleButton>
+        <ToggleButton
+          active={view === "day"}
+          $isDarkMode={isDarkMode}
+          onClick={() => onViewChange("day")}
+        >
+          Day
+        </ToggleButton>
+      </ViewToggle>
+    </HeaderBar>
+  );
+};
 
 export default CalendarHeader;
