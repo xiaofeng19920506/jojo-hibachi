@@ -272,10 +272,12 @@ const DatePicker = forwardRef<DatePickerRef, DatePickerProps>(
     // --- Close popup on outside click or Escape ---
     useEffect(() => {
       function handleClick(e: MouseEvent) {
-        if (
-          wrapperRef.current &&
-          !wrapperRef.current.contains(e.target as Node)
-        ) {
+        const target = e.target as Node;
+        const insideWrapper =
+          wrapperRef.current && wrapperRef.current.contains(target);
+        const insidePopup =
+          popupRef.current && popupRef.current.contains(target);
+        if (!insideWrapper && !insidePopup) {
           setOpen(false);
         }
       }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CustomCalendar from "../../components/CustomCalendar/CustomCalendar";
-import { format, startOfWeek, addDays } from "date-fns";
+import { format, startOfWeek, addDays, parseISO } from "date-fns";
 import { useAppSelector } from "../../utils/hooks";
 import {
   useGetAdminEmployeesQuery,
@@ -43,17 +43,18 @@ const EmployeeCalendar: React.FC = () => {
   const userRole = user?.role || "user";
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const navigate = useNavigate();
-  const [calendarDate, setCalendarDate] = useState<Date>(() => {
-    return new Date();
-  });
+  // Store week start as a string for reliable reactivity
+  const [weekStartStr, setWeekStartStr] = useState(() =>
+    format(startOfWeek(new Date(), { weekStartsOn: 0 }), "yyyy-MM-dd")
+  );
+  const calendarDate = parseISO(weekStartStr);
 
   const { data: allEmployees = [] } = useGetAdminEmployeesQuery(undefined, {
     skip: userRole !== "admin",
   });
 
-  const weekStart = startOfWeek(calendarDate, { weekStartsOn: 0 });
+  const weekStart = parseISO(weekStartStr);
   const weekEnd = addDays(weekStart, 6);
-  const weekStartStr = format(weekStart, "yyyy-MM-dd");
   const weekEndStr = format(weekEnd, "yyyy-MM-dd");
 
   const hasAuthToken = !!localStorage.getItem("authToken");
@@ -314,9 +315,11 @@ const EmployeeCalendar: React.FC = () => {
               <DatePicker
                 ref={datePickerRef}
                 value={calendarDate}
-                onChange={(date) => {
-                  setCalendarDate(date);
-                }}
+                onChange={(date) =>
+                  setWeekStartStr(
+                    format(startOfWeek(date, { weekStartsOn: 0 }), "yyyy-MM-dd")
+                  )
+                }
                 showTime={false}
               />
               <ArrowForwardIosIcon
@@ -339,7 +342,11 @@ const EmployeeCalendar: React.FC = () => {
                 navigate(`/reservation/${event.reservationId}`)
               }
               currentDate={calendarDate}
-              onDateChange={setCalendarDate}
+              onDateChange={(date) =>
+                setWeekStartStr(
+                  format(startOfWeek(date, { weekStartsOn: 0 }), "yyyy-MM-dd")
+                )
+              }
             />
           </CalendarContainer>
         </CalendarContent>
