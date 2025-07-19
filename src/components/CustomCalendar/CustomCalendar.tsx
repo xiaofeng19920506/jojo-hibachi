@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import styled from "styled-components";
 import { useTheme } from "@mui/material/styles";
 import CalendarHeader from "./CalendarHeader";
@@ -193,19 +193,19 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
   // Track scroll position to keep indicator at current time
   const [scrollTop, setScrollTop] = useState(0);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (calendarContainerRef.current) {
-        setScrollTop(calendarContainerRef.current.scrollTop);
-      }
-    };
+  const handleScroll = useCallback(() => {
+    if (calendarContainerRef.current) {
+      setScrollTop(calendarContainerRef.current.scrollTop);
+    }
+  }, []);
 
+  useEffect(() => {
     const container = calendarContainerRef.current;
     if (container) {
       container.addEventListener("scroll", handleScroll);
       return () => container.removeEventListener("scroll", handleScroll);
     }
-  }, []);
+  }, [handleScroll]);
 
   // Auto-scroll to current time when calendar mounts or view changes to week
   useEffect(() => {
