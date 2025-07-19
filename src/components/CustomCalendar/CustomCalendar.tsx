@@ -34,16 +34,18 @@ const CalendarContainer = styled.div<{ $isDarkMode?: boolean }>`
   margin-top: 24px;
   margin-bottom: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  overflow: auto;
+  overflow: hidden;
   flex: 1;
   display: flex;
   flex-direction: column;
+  height: calc(100vh - 100px); /* Fixed height minus header space */
 
   @media (min-width: 600px) {
     width: 100%;
     margin: 0;
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    height: calc(100vh - 80px);
   }
 
   @media (max-width: 600px) {
@@ -53,10 +55,10 @@ const CalendarContainer = styled.div<{ $isDarkMode?: boolean }>`
     margin: 0;
     box-shadow: none;
     padding: 0;
-    overflow: auto;
+    overflow: hidden;
     -webkit-overflow-scrolling: touch;
-    height: 100%;
-    min-height: 100%;
+    height: 100vh;
+    min-height: 100vh;
     flex: 1;
   }
 
@@ -67,10 +69,10 @@ const CalendarContainer = styled.div<{ $isDarkMode?: boolean }>`
     margin: 0;
     box-shadow: none;
     padding: 0;
-    overflow: auto;
+    overflow: hidden;
     -webkit-overflow-scrolling: touch;
-    height: 100%;
-    min-height: 100%;
+    height: 100vh;
+    min-height: 100vh;
     flex: 1;
   }
 
@@ -81,10 +83,10 @@ const CalendarContainer = styled.div<{ $isDarkMode?: boolean }>`
     margin: 0;
     box-shadow: none;
     padding: 0;
-    overflow: auto;
+    overflow: hidden;
     -webkit-overflow-scrolling: touch;
-    height: 100%;
-    min-height: 100%;
+    height: 100vh;
+    min-height: 100vh;
     flex: 1;
   }
 `;
@@ -135,7 +137,9 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
 
   // Ref and state for slot height
   const slotRef = useRef<HTMLDivElement>(null);
+  const calendarContainerRef = useRef<HTMLDivElement>(null);
   const [slotHeight, setSlotHeight] = useState<number>(0);
+
   useEffect(() => {
     if (slotRef.current) {
       setSlotHeight(slotRef.current.offsetHeight);
@@ -148,11 +152,38 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
   let indicatorTop = 0;
   if (isWithinRange && slotHeight > 0) {
     const hoursSinceStart = hour - calendarStartHour;
-    indicatorTop = (hoursSinceStart + minute / 60) * slotHeight;
-    if (indicatorTop < 0) indicatorTop = 0;
-    if (indicatorTop > slotHeight * hours.length)
-      indicatorTop = slotHeight * hours.length;
+    // Use the actual measured hour height from the slot
+    const actualHourHeight = slotHeight;
+    // Calculate position based on current time, accounting for header height
+    const headerHeight = 50; // Approximate header height
+    indicatorTop = headerHeight + (hoursSinceStart + minute / 60) * actualHourHeight;
+    // Ensure it's within bounds
+    if (indicatorTop < headerHeight) indicatorTop = headerHeight;
+    if (indicatorTop > headerHeight + actualHourHeight * hours.length)
+      indicatorTop = headerHeight + actualHourHeight * hours.length;
   }
+
+  // Auto-scroll to current time indicator
+  const scrollToCurrentTime = () => {
+    if (calendarContainerRef.current && isWithinRange && slotHeight > 0) {
+      // Scroll to show current time with some context above
+      const headerHeight = 50; // Approximate header height
+      const scrollTop = indicatorTop - headerHeight - 150; // Show context above current time
+      calendarContainerRef.current.scrollTo({
+        top: Math.max(0, scrollTop),
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Auto-scroll on mount and when view changes to week
+  useEffect(() => {
+    if (view === "week") {
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(scrollToCurrentTime, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [view, slotHeight]);
 
   // Navigation handlers (no longer used internally)
   const handlePrev = () => {
@@ -185,6 +216,7 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
         onNext={handleNext}
         onToday={handleToday}
         onViewChange={handleViewChange}
+        onGoToNow={scrollToCurrentTime}
       />
       <CalendarGrid
         currentDate={currentDate}
@@ -196,6 +228,7 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
         indicatorTop={indicatorTop}
         showIndicator={isWithinRange && slotHeight > 0}
         slotRef={slotRef}
+        calendarContainerRef={calendarContainerRef}
       />
     </CalendarContainer>
   );

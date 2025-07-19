@@ -22,6 +22,7 @@ interface CalendarGridProps {
   indicatorTop?: number;
   showIndicator?: boolean;
   slotRef?: React.RefObject<HTMLDivElement | null>;
+  calendarContainerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 const CalendarGridContainer = styled.div<{ $isDarkMode?: boolean }>`
@@ -35,6 +36,7 @@ const CalendarGridContainer = styled.div<{ $isDarkMode?: boolean }>`
   border-radius: 16px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   padding: 8px 8px 0 8px;
+  flex: 1;
   &::-webkit-scrollbar {
     display: none; /* Chrome/Safari/Webkit */
   }
@@ -42,10 +44,11 @@ const CalendarGridContainer = styled.div<{ $isDarkMode?: boolean }>`
     border-radius: 12px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
     padding: 0px 0px 0 0px;
+    height: calc(100vh - 120px); /* Account for header */
   }
   @media (max-width: 600px) {
     width: 100%;
-    height: 100%;
+    height: calc(100vh - 80px); /* Account for header */
     border-radius: 0;
     box-shadow: none;
     padding: 0px 0px 0 0px;
@@ -54,12 +57,11 @@ const CalendarGridContainer = styled.div<{ $isDarkMode?: boolean }>`
     position: relative;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
-    min-height: 100%;
     flex: 1;
   }
   @media (max-width: 600px) and (orientation: landscape) {
     width: 100%;
-    height: 100%;
+    height: calc(100vh - 60px); /* Smaller header in landscape */
     border-radius: 0;
     box-shadow: none;
     padding: 0px 0px 0 0px;
@@ -68,12 +70,11 @@ const CalendarGridContainer = styled.div<{ $isDarkMode?: boolean }>`
     position: relative;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
-    min-height: 100%;
     flex: 1;
   }
   @media (max-width: 600px) and (orientation: portrait) {
     width: 100%;
-    height: 100%;
+    height: calc(100vh - 80px);
     border-radius: 0;
     box-shadow: none;
     padding: 0px 0px 0 0px;
@@ -82,7 +83,6 @@ const CalendarGridContainer = styled.div<{ $isDarkMode?: boolean }>`
     position: relative;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
-    min-height: 100%;
     flex: 1;
   }
 `;
@@ -293,6 +293,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   indicatorTop = 0,
   showIndicator = false,
   slotRef,
+  calendarContainerRef,
 }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -315,6 +316,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
   return (
     <CalendarGridContainer
+      ref={calendarContainerRef}
       $isDarkMode={isDarkMode}
       style={{
         gridTemplateColumns,
@@ -351,16 +353,14 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           const dayEvents = events.filter((ev) => isSameDay(ev.start, day));
           // Overlap meta for this day
           const overlapMeta = getOverlappingMeta(dayEvents);
-          
+
           return (
             <BodyCell
               key={`cell-${rowIdx}-${colIdx}`}
               $isToday={isToday}
               $isDarkMode={isDarkMode}
               ref={
-                rowIdx === 0 && colIdx === 0 && slotRef
-                  ? slotRef
-                  : undefined
+                rowIdx === 0 && colIdx === 0 && slotRef ? slotRef : undefined
               }
             >
               {cellEvents.map((ev) => {
@@ -386,9 +386,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
                     <div>
                       {startStr} - {endStr}
                     </div>
-                    {ev.notes && (
-                      <div style={{ marginTop: 4 }}>{ev.notes}</div>
-                    )}
+                    {ev.notes && <div style={{ marginTop: 4 }}>{ev.notes}</div>}
                   </div>
                 );
                 return (
