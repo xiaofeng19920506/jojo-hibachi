@@ -140,6 +140,14 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
   const calendarContainerRef = useRef<HTMLDivElement>(null);
   const [slotHeight, setSlotHeight] = useState<number>(0);
 
+  // Convert CSS height to pixels for calculation
+  const getHourHeightInPixels = () => {
+    if (mobile) {
+      return window.matchMedia("(orientation: landscape)").matches ? 40 : 56; // 2.5rem = 40px, 3.5rem = 56px
+    }
+    return 100; // 6.25rem = 100px
+  };
+
   useEffect(() => {
     if (slotRef.current) {
       setSlotHeight(slotRef.current.offsetHeight);
@@ -150,25 +158,27 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
   const minute = now.getMinutes();
   const isWithinRange = hour >= calendarStartHour && hour < calendarEndHour;
   let indicatorTop = 0;
-  if (isWithinRange && slotHeight > 0) {
+  if (isWithinRange) {
     const hoursSinceStart = hour - calendarStartHour;
-    // Use the actual measured hour height from the slot
-    const actualHourHeight = slotHeight;
-    // Calculate position based on current time, accounting for header height
-    const headerHeight = 50; // Approximate header height
-    indicatorTop = headerHeight + (hoursSinceStart + minute / 60) * actualHourHeight;
+    // Use the calculated hour height in pixels
+    const actualHourHeight = getHourHeightInPixels();
+    // Calculate position based on current time, accounting for header row
+    const headerRowHeight = 50; // Approximate header row height
+    // For 0:52 AM, this should be: headerRowHeight + (0 + 52/60) * actualHourHeight
+    indicatorTop =
+      headerRowHeight + (hoursSinceStart + minute / 60) * actualHourHeight;
     // Ensure it's within bounds
-    if (indicatorTop < headerHeight) indicatorTop = headerHeight;
-    if (indicatorTop > headerHeight + actualHourHeight * hours.length)
-      indicatorTop = headerHeight + actualHourHeight * hours.length;
+    if (indicatorTop < headerRowHeight) indicatorTop = headerRowHeight;
+    if (indicatorTop > headerRowHeight + actualHourHeight * hours.length)
+      indicatorTop = headerRowHeight + actualHourHeight * hours.length;
   }
 
   // Auto-scroll to current time indicator
   const scrollToCurrentTime = () => {
-    if (calendarContainerRef.current && isWithinRange && slotHeight > 0) {
+    if (calendarContainerRef.current && isWithinRange) {
       // Scroll to show current time with some context above
-      const headerHeight = 50; // Approximate header height
-      const scrollTop = indicatorTop - headerHeight - 150; // Show context above current time
+      const headerRowHeight = 50; // Approximate header row height
+      const scrollTop = indicatorTop - headerRowHeight - 150; // Show context above current time
       calendarContainerRef.current.scrollTo({
         top: Math.max(0, scrollTop),
         behavior: "smooth",
@@ -176,7 +186,7 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
     }
   };
 
-  // Auto-scroll on mount and when view changes to week
+  // Auto-scroll to current time when calendar mounts or view changes to week
   useEffect(() => {
     if (view === "week") {
       // Small delay to ensure DOM is ready
@@ -216,7 +226,6 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
         onNext={handleNext}
         onToday={handleToday}
         onViewChange={handleViewChange}
-        onGoToNow={scrollToCurrentTime}
       />
       <CalendarGrid
         currentDate={currentDate}
@@ -226,7 +235,7 @@ const CustomCalendar: React.FC<CustomCalendarProps> = ({
         dayColumnWidthRem={dayColumnWidthRem}
         timeGutterWidth={timeGutterWidth}
         indicatorTop={indicatorTop}
-        showIndicator={isWithinRange && slotHeight > 0}
+        showIndicator={isWithinRange}
         slotRef={slotRef}
         calendarContainerRef={calendarContainerRef}
       />

@@ -126,7 +126,7 @@ const EmployeeCalendar: React.FC = () => {
       }
     }, 100);
   }, [calendarDate]);
-
+1
   useEffect(() => {
     // Auto-scroll to closest current time slot on mount
     setTimeout(() => {

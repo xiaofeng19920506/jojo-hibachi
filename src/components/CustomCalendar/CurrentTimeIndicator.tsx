@@ -12,6 +12,9 @@ const Line = styled.div<{ $top: number }>`
   box-shadow: 0 0 6px 2px rgba(255, 0, 0, 0.15);
   transition: top 0.2s linear;
   top: ${({ $top }) => $top}px;
+  /* Ensure it spans across the grid content area */
+  margin-left: 0;
+  margin-right: 0;
 `;
 
 const CurrentTimeIndicator: React.FC<{ top: number }> = ({ top }) => {

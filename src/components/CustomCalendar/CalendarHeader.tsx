@@ -10,7 +10,6 @@ interface CalendarHeaderProps {
   onNext: () => void;
   onToday: () => void;
   onViewChange: (v: CalendarView) => void;
-  onGoToNow?: () => void;
 }
 
 const HeaderBar = styled.div<{ $isDarkMode?: boolean }>`
@@ -108,7 +107,6 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   currentDate,
   view,
   onViewChange,
-  onGoToNow,
 }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -133,15 +131,6 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         >
           Day
         </ToggleButton>
-        {onGoToNow && (
-          <ToggleButton
-            $isDarkMode={isDarkMode}
-            onClick={onGoToNow}
-            style={{ marginLeft: '8px' }}
-          >
-            Now
-          </ToggleButton>
-        )}
       </ViewToggle>
     </HeaderBar>
   );

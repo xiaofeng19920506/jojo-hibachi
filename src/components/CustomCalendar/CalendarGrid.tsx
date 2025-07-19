@@ -3,7 +3,6 @@ import styled from "styled-components";
 import { useTheme } from "@mui/material/styles";
 import type { CalendarView, CalendarEvent } from "./CustomCalendar";
 import EventCard from "./EventCard";
-import CurrentTimeIndicator from "./CurrentTimeIndicator";
 import Tooltip from "@mui/material/Tooltip";
 
 const hours = Array.from({ length: 24 }, (_, i) => i); // 0-23 (midnight to 11pm)
@@ -412,8 +411,23 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           );
         }),
       ])}
-      {/* Render the time indicator absolutely positioned */}
-      {showIndicator && <CurrentTimeIndicator top={indicatorTop} />}
+      {/* Render the time indicator positioned within the grid content */}
+      {showIndicator && (
+        <div
+          style={{
+            position: "absolute",
+            top: `${indicatorTop}px`,
+            left: `${timeGutterWidth}px`,
+            right: 0,
+            height: "2px",
+            background: "red",
+            zIndex: 20,
+            pointerEvents: "none",
+            boxShadow: "0 0 6px 2px rgba(255, 0, 0, 0.15)",
+            transition: "top 0.2s linear",
+          }}
+        />
+      )}
     </CalendarGridContainer>
   );
 };
