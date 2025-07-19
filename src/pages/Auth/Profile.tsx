@@ -35,6 +35,42 @@ const Profile: React.FC = () => {
   const [formError, setFormError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // Handler for refresh profile button
+  const handleRefreshProfile = async () => {
+    try {
+      setFormError(null);
+      setSuccess(null);
+      const result = await refetch();
+      
+      // Manually update form fields with fresh data
+      const user = result.data?.data?.user;
+      if (user) {
+        setFirstName(user.firstName || "");
+        setLastName(user.lastName || "");
+        setPhone(user.phone || user.phoneNumber || "");
+        setEmail(user.email || "");
+
+        // Parse address: "street address, city, state, zipcode"
+        if (user.address) {
+          const parts = user.address.split(",");
+          setAddress(parts[0]?.trim() || "");
+          setCity(parts[1]?.trim() || "");
+          setState(parts[2]?.trim() || "");
+          setZipCode(parts[3]?.trim() || "");
+        } else {
+          setAddress("");
+          setCity("");
+          setState("");
+          setZipCode("");
+        }
+      }
+      
+      setSuccess("Profile refreshed successfully.");
+    } catch (err: any) {
+      setFormError("Failed to refresh profile. Please try again.");
+    }
+  };
+
   // Prefill form when profile data arrives
   useEffect(() => {
     const user = profile?.data?.user;
@@ -325,9 +361,16 @@ const Profile: React.FC = () => {
         </MuiButton>
         <MuiButton
           type="button"
-          variant="outlined"
-          onClick={() => refetch()}
+          variant="contained"
+          color="secondary"
+          onClick={handleRefreshProfile}
           fullWidth
+          sx={{
+            color: "#fff",
+            "&:hover": {
+              color: "#fff",
+            },
+          }}
         >
           Refresh Profile
         </MuiButton>
