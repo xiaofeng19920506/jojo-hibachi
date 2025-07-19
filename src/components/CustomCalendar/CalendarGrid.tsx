@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useTheme } from "@mui/material/styles";
 import type { CalendarView, CalendarEvent } from "./CustomCalendar";
@@ -18,11 +18,8 @@ interface CalendarGridProps {
   onEventClick?: (event: CalendarEvent) => void;
   dayColumnWidthRem?: number;
   timeGutterWidth?: number;
-  indicatorTop?: number;
-  showIndicator?: boolean;
   slotRef?: React.RefObject<HTMLDivElement | null>;
   calendarContainerRef?: React.RefObject<HTMLDivElement | null>;
-  scrollTop?: number;
 }
 
 const CalendarGridContainer = styled.div<{ $isDarkMode?: boolean }>`
@@ -37,6 +34,7 @@ const CalendarGridContainer = styled.div<{ $isDarkMode?: boolean }>`
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
   padding: 8px 8px 0 8px;
   flex: 1;
+  position: relative; /* For absolutely positioned time indicator */
   &::-webkit-scrollbar {
     display: none; /* Chrome/Safari/Webkit */
   }
@@ -290,11 +288,8 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
   onEventClick,
   dayColumnWidthRem = 15,
   timeGutterWidth = 60,
-  indicatorTop = 0,
-  showIndicator = false,
   slotRef,
   calendarContainerRef,
-  scrollTop = 0,
 }) => {
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === "dark";
@@ -303,6 +298,48 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
 
   // Grid template - use flexible widths for desktop, fixed for mobile
   const isMobileView = window.innerWidth <= 600;
+
+  // Time indicator logic
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const hour = now.getHours();
+  const minute = now.getMinutes();
+  const isWithinRange = hour >= 0 && hour < 24;
+
+  // Calculate time indicator position
+  const getTimeIndicatorPosition = () => {
+    if (!isWithinRange) return null;
+
+    const headerHeight = 40; // Approximate header height
+    const hourHeight = isMobileView
+      ? window.matchMedia("(orientation: landscape)").matches
+        ? 40
+        : 56
+      : HOUR_HEIGHT;
+
+    const indicatorTop = headerHeight + (hour + minute / 60) * hourHeight;
+
+    console.log("CalendarGrid - Time indicator position:", {
+      hour,
+      minute,
+      isMobileView,
+      hourHeight,
+      indicatorTop,
+      isWithinRange,
+    });
+
+    return {
+      top: indicatorTop,
+      left: 0,
+      right: 0,
+    };
+  };
+
+  const timeIndicatorPosition = getTimeIndicatorPosition();
   const gridTemplateColumns = isMobileView
     ? `minmax(${timeGutterWidth}px, ${timeGutterWidth}px) repeat(${days.length}, minmax(${dayColumnWidthRem}rem, ${dayColumnWidthRem}rem))`
     : `minmax(${timeGutterWidth}px, ${timeGutterWidth}px) repeat(${days.length}, minmax(0, 1fr))`;
@@ -413,21 +450,22 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({
           );
         }),
       ])}
-      {/* Render the time indicator positioned within the grid content */}
-      {showIndicator && (
+      {/* Time indicator that scrolls with the calendar */}
+      {timeIndicatorPosition && (
         <div
           style={{
             position: "absolute",
-            top: `${indicatorTop - scrollTop}px`,
-            left: `${timeGutterWidth}px`,
-            right: 0,
+            top: `${timeIndicatorPosition.top}px`,
+            left: `${timeIndicatorPosition.left}px`,
+            right: `${timeIndicatorPosition.right}px`,
             height: "2px",
             background: "red",
-            zIndex: 20,
+            zIndex: 1000,
             pointerEvents: "none",
             boxShadow: "0 0 6px 2px rgba(255, 0, 0, 0.15)",
             transition: "top 0.2s linear",
           }}
+          title="Current time indicator"
         />
       )}
     </CalendarGridContainer>

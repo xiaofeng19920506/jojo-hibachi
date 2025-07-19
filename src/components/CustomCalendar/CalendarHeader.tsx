@@ -68,14 +68,14 @@ const HeaderDate = styled.span`
     font-size: 0.8rem;
   }
 `;
-const ToggleButton = styled.button<{ active?: boolean; $isDarkMode?: boolean }>`
+const ToggleButton = styled.button<{ $active?: boolean; $isDarkMode?: boolean }>`
   margin-right: 8px;
   padding: 4px 12px;
   border: none;
-  background: ${({ active, $isDarkMode }) =>
-    active ? "#9c27b0" : $isDarkMode ? "#333" : "#e0e0e0"};
-  color: ${({ active, $isDarkMode }) =>
-    active ? "#fff" : $isDarkMode ? "#fff" : "inherit"};
+  background: ${({ $active, $isDarkMode }) =>
+    $active ? "#9c27b0" : $isDarkMode ? "#333" : "#e0e0e0"};
+  color: ${({ $active, $isDarkMode }) =>
+    $active ? "#fff" : $isDarkMode ? "#fff" : "inherit"};
   border-radius: 4px;
   cursor: pointer;
 
@@ -118,14 +118,14 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
       </Nav>
       <ViewToggle>
         <ToggleButton
-          active={view === "week"}
+          $active={view === "week"}
           $isDarkMode={isDarkMode}
           onClick={() => onViewChange("week")}
         >
           Week
         </ToggleButton>
         <ToggleButton
-          active={view === "day"}
+          $active={view === "day"}
           $isDarkMode={isDarkMode}
           onClick={() => onViewChange("day")}
         >
