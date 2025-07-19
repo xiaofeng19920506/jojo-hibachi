@@ -63,29 +63,36 @@ const SignIn: React.FC = () => {
     <Box
       sx={{
         display: "flex",
-        justifyContent: "center",
+        flexDirection: "column",
         alignItems: "center",
-        height: "100vh",
         width: "100vw",
-        backgroundColor: theme.palette.mode === "dark" ? "#000" : "#f0f2f5",
+        backgroundColor: theme.palette.mode === "dark" ? "#23272f" : "#fff",
         color: theme.palette.mode === "dark" ? "#fff" : "#000",
-        pt: 8, // Add top padding to account for the App-level GlobalAppBar
+        pt: { xs: "56px", sm: "64px" },
+        minHeight: { xs: "calc(100vh - 56px)", sm: "calc(100vh - 64px)" },
       }}
     >
       <Paper
         component="form"
         onSubmit={handleSubmit}
-        elevation={3}
+        elevation={0}
         sx={{
-          padding: 4,
-          borderRadius: 2,
-          backgroundColor: theme.palette.mode === "dark" ? "#1a1a1a" : "white",
-          color: theme.palette.mode === "dark" ? "#fff" : "#000",
-          width: "50%",
-          maxWidth: "30rem",
           display: "flex",
           flexDirection: "column",
+          flex: { xs: 1, sm: "unset" },
+          justifyContent: "flex-start",
+          pt: { xs: 0, sm: 4 },
+          pb: { xs: 2, sm: 4 },
+          px: { xs: 2, sm: 4 },
+          borderRadius: { xs: 0, sm: 2 },
+          backgroundColor: theme.palette.mode === "dark" ? "#23272f" : "#fff",
+          color: theme.palette.mode === "dark" ? "#fff" : "#000",
+          width: { xs: "100vw", sm: "50%" },
+          maxWidth: { xs: "100vw", sm: "30rem" },
           gap: 2,
+          alignSelf: "center",
+          boxShadow: "none",
+          border: "none",
         }}
       >
         <Typography variant="h4" sx={{ textAlign: "center", mb: 2 }}>
@@ -126,10 +133,10 @@ const SignIn: React.FC = () => {
         <Box sx={{ textAlign: "center", mt: 1 }}>
           <Link
             to="/forgot-password"
-            style={{ 
-              fontSize: 16, 
-              color: theme.palette.mode === "dark" ? "#90caf9" : "#0077cc", 
-              textDecoration: "none" 
+            style={{
+              fontSize: 16,
+              color: theme.palette.mode === "dark" ? "#90caf9" : "#0077cc",
+              textDecoration: "none",
             }}
           >
             Forgot Password?
@@ -139,9 +146,9 @@ const SignIn: React.FC = () => {
           Don't have an account?{" "}
           <Link
             to="/signup"
-            style={{ 
-              color: theme.palette.mode === "dark" ? "#90caf9" : "#0077cc", 
-              textDecoration: "none" 
+            style={{
+              color: theme.palette.mode === "dark" ? "#90caf9" : "#0077cc",
+              textDecoration: "none",
             }}
           >
             Register

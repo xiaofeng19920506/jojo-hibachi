@@ -78,3 +78,17 @@ button:focus-visible {
 *::after {
   box-sizing: border-box;
 }
+
+#root {
+  position: absolute;
+  top: 56px;
+  min-height: calc(100vh - 56px);
+  width: 100vw;
+}
+
+@media (min-width: 600px) {
+  #root {
+    top: 64px;
+    min-height: calc(100vh - 64px);
+  }
+}

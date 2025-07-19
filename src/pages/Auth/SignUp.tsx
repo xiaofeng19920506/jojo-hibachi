@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import {
   Box,
   TextField,
@@ -6,121 +7,64 @@ import {
   Typography,
   Paper,
 } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
-import { useRegisterMutation } from "../../services/api";
 import { useTheme } from "@mui/material/styles";
+import { useAppDispatch } from "../../utils/hooks";
+import { login } from "../../features/userSlice";
+import { useRegisterMutation } from "../../services/api";
 
 const SignUp: React.FC = () => {
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const theme = useTheme();
+
+  const [registerMutation, { isLoading }] = useRegisterMutation();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [email, setEmail] = useState("");
-  const [streetAddress, setStreetAddress] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
-  const [state, setState] = useState("");
+  const [stateField, setStateField] = useState("");
   const [zipCode, setZipCode] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const navigate = useNavigate();
-  const [register] = useRegisterMutation();
-  const theme = useTheme();
+  const [role] = useState("user"); // role is always 'user', no setter needed
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    if (
-      !firstName ||
-      !lastName ||
-      !phoneNumber ||
-      !email ||
-      !streetAddress ||
-      !city ||
-      !state ||
-      !zipCode ||
-      !password
-    ) {
-      setError("Please fill in all fields.");
+    if (!email || !password || !confirmPassword) {
+      setError("All fields are required.");
       return;
     }
-
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    setError(null);
     try {
-      setLoading(true);
-      setError(null);
-
-      // Format address fields with smart title case
-      const toSmartTitleCase = (str: string) => {
-        const smallWords = [
-          "van",
-          "de",
-          "of",
-          "and",
-          "the",
-          "in",
-          "on",
-          "at",
-          "by",
-          "for",
-          "with",
-          "a",
-          "an",
-        ];
-        return str
-          .toLowerCase()
-          .split(" ")
-          .map((word, i) => {
-            if (word.startsWith("mc") && word.length > 2) {
-              return "Mc" + word.charAt(2).toUpperCase() + word.slice(3);
-            }
-            if (word.startsWith("mac") && word.length > 3) {
-              return "Mac" + word.charAt(3).toUpperCase() + word.slice(4);
-            }
-            if (word.includes("'")) {
-              return word
-                .split("'")
-                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                .join("'");
-            }
-            if (i !== 0 && smallWords.includes(word)) {
-              return word;
-            }
-            return word.charAt(0).toUpperCase() + word.slice(1);
-          })
-          .join(" ");
-      };
-
-      const formattedAddress = toSmartTitleCase(streetAddress.trim());
-      const formattedCity = toSmartTitleCase(city.trim());
-      const formattedState = state.trim().slice(0, 2).toUpperCase();
-      const formattedZip = zipCode.trim();
-      const fullAddress =
-        `${formattedAddress}, ${formattedCity}, ${formattedState}, ${formattedZip}`
-          .replace(/\s+/g, " ")
-          .trim();
-
-      const result = await register({
+      const result = await registerMutation({
         email,
         password,
-        role: "user",
-        firstName:
-          firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase(),
-        lastName:
-          lastName.charAt(0).toUpperCase() + lastName.slice(1).toLowerCase(),
-        phone: phoneNumber,
-        address: fullAddress,
-        city: formattedCity,
-        state: formattedState,
-        zipCode: formattedZip,
+        role,
+        firstName,
+        lastName,
+        phone,
+        address,
+        city,
+        state: stateField,
+        zipCode,
       }).unwrap();
-      localStorage.setItem("authToken", (result as { token: string }).token);
-      // Note: The user will be automatically logged in by AuthInitializer
-      // when they navigate to the dashboard
-      navigate("/dashboard");
+      const { token, user } = result as { token: string; user: any };
+      if (!token) throw new Error("No token received from server");
+      if (!user) throw new Error("No user data received from server");
+      const normalizedUser = { ...user, id: user.id || user._id };
+      localStorage.setItem("authToken", token);
+      localStorage.setItem("user", JSON.stringify(normalizedUser));
+      dispatch(login(normalizedUser));
+      navigate("/");
     } catch (err: any) {
-      setError(err.data?.message || err.message || "Registration failed.");
-    } finally {
-      setLoading(false);
+      setError(err.data?.message || err.message || "Registration failed");
     }
   };
 
@@ -128,31 +72,37 @@ const SignUp: React.FC = () => {
     <Box
       sx={{
         display: "flex",
-        justifyContent: "center",
+        flexDirection: "column",
         alignItems: "center",
-        height: "100vh",
         width: "100vw",
-        backgroundColor: theme.palette.mode === "dark" ? "#000" : "#f0f2f5",
+        backgroundColor: theme.palette.mode === "dark" ? "#23272f" : "#fff",
         color: theme.palette.mode === "dark" ? "#fff" : "#000",
-        pt: 8, // Add top padding to account for the App-level GlobalAppBar
+        pt: { xs: "56px", sm: "64px" },
+        minHeight: { xs: "calc(100vh - 56px)", sm: "calc(100vh - 64px)" },
       }}
     >
       <Paper
         component="form"
         onSubmit={handleSubmit}
-        elevation={3}
+        elevation={0}
         sx={{
-          padding: 4,
-          borderRadius: 2,
-          backgroundColor: theme.palette.mode === "dark" ? "#1a1a1a" : "white",
-          color: theme.palette.mode === "dark" ? "#fff" : "#000",
-          width: "50%",
-          maxWidth: "30rem",
           display: "flex",
           flexDirection: "column",
+          flex: 1,
+          justifyContent: "flex-start",
+          pt: { xs: 0, sm: 4 },
+          pb: { xs: 2, sm: 4 },
+          px: { xs: 2, sm: 4 },
+          borderRadius: { xs: 0, sm: 2 },
+          backgroundColor: theme.palette.mode === "dark" ? "#23272f" : "#fff",
+          color: theme.palette.mode === "dark" ? "#fff" : "#000",
+          width: { xs: "100vw", sm: "50%" },
+          maxWidth: { xs: "100vw", sm: "30rem" },
           gap: 2,
-          maxHeight: "90vh",
-          overflow: "auto",
+          alignSelf: "center",
+          boxShadow: "none",
+          border: "none",
+          height: "100%",
         }}
       >
         <Typography variant="h4" sx={{ textAlign: "center", mb: 2 }}>
@@ -163,6 +113,33 @@ const SignUp: React.FC = () => {
             {error}
           </Typography>
         )}
+        <TextField
+          label="Email"
+          type="email"
+          value={email}
+          required
+          onChange={(e) => setEmail(e.target.value)}
+          sx={{ mb: 2 }}
+          fullWidth
+        />
+        <TextField
+          label="Password"
+          type="password"
+          value={password}
+          required
+          onChange={(e) => setPassword(e.target.value)}
+          sx={{ mb: 2 }}
+          fullWidth
+        />
+        <TextField
+          label="Confirm Password"
+          type="password"
+          value={confirmPassword}
+          required
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          sx={{ mb: 2 }}
+          fullWidth
+        />
         <TextField
           label="First Name"
           value={firstName}
@@ -180,27 +157,18 @@ const SignUp: React.FC = () => {
           fullWidth
         />
         <TextField
-          label="Phone Number"
-          value={phoneNumber}
+          label="Phone"
+          value={phone}
           required
-          onChange={(e) => setPhoneNumber(e.target.value)}
+          onChange={(e) => setPhone(e.target.value)}
           sx={{ mb: 2 }}
           fullWidth
         />
         <TextField
-          label="Email"
-          type="email"
-          value={email}
+          label="Address"
+          value={address}
           required
-          onChange={(e) => setEmail(e.target.value)}
-          sx={{ mb: 2 }}
-          fullWidth
-        />
-        <TextField
-          label="Street Address"
-          value={streetAddress}
-          required
-          onChange={(e) => setStreetAddress(e.target.value)}
+          onChange={(e) => setAddress(e.target.value)}
           sx={{ mb: 2 }}
           fullWidth
         />
@@ -214,9 +182,9 @@ const SignUp: React.FC = () => {
         />
         <TextField
           label="State"
-          value={state}
+          value={stateField}
           required
-          onChange={(e) => setState(e.target.value)}
+          onChange={(e) => setStateField(e.target.value)}
           sx={{ mb: 2 }}
           fullWidth
         />
@@ -228,31 +196,22 @@ const SignUp: React.FC = () => {
           sx={{ mb: 2 }}
           fullWidth
         />
-        <TextField
-          label="Password"
-          type="password"
-          value={password}
-          required
-          onChange={(e) => setPassword(e.target.value)}
-          sx={{ mb: 2 }}
-          fullWidth
-        />
         <MuiButton
           type="submit"
           variant="contained"
-          disabled={loading}
+          disabled={isLoading}
           sx={{ mb: 2 }}
           fullWidth
         >
-          {loading ? "Signing Up..." : "Sign Up"}
+          {isLoading ? "Registering..." : "Sign Up"}
         </MuiButton>
         <Typography sx={{ textAlign: "center", mt: 1, fontSize: "16px" }}>
           Already have an account?{" "}
           <Link
             to="/signin"
-            style={{ 
-              color: theme.palette.mode === "dark" ? "#90caf9" : "#0077cc", 
-              textDecoration: "none" 
+            style={{
+              color: theme.palette.mode === "dark" ? "#90caf9" : "#0077cc",
+              textDecoration: "none",
             }}
           >
             Sign In

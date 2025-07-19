@@ -84,7 +84,7 @@ const Dashboard: React.FC = () => {
     <Box
       sx={{
         width: "100vw",
-        height: "100vh",
+        height: { xs: "calc(100vh - 64px)", sm: "calc(100vh - 56px)" },
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",

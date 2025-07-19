@@ -24,12 +24,12 @@ const ReservationStepper = () => {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        minHeight: { xs: "calc(100vh - 56px)", sm: "calc(100vh - 64px)" },
         width: "100vw",
         bgcolor: theme.palette.mode === "dark" ? "#000" : "grey.50",
         display: "flex",
         flexDirection: "column",
-        pt: 8, // Add top padding to account for the App-level GlobalAppBar
+        pt: { xs: 0, sm: 8 }, // Remove top padding on mobile, keep on desktop
       }}
     >
       <Container
