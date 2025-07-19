@@ -52,6 +52,10 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
   // Remove isBookNow, appBarColor, and appBarSx logic. Always use color='primary' and no special sx for /booknow.
 
+  // Force unauthenticated state for password reset pages
+  const currentPath = location.pathname;
+  const isOnPasswordResetFlow = currentPath.includes("/reset-password") || currentPath.includes("/forgot-password");
+
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
@@ -66,7 +70,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
 
   const getNavigationButtons = () => {
     const buttons: ActionButton[] = [];
-    const currentPath = location.pathname;
 
     // Always add Book Now button first
     if (currentPath !== "/booknow") {
@@ -78,8 +81,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
       });
     }
     
-    // Force unauthenticated state for password reset pages
-    const isOnPasswordResetFlow = currentPath.includes("/reset-password") || currentPath.includes("/forgot-password");
     const shouldShowUnauthenticatedButtons = !isAuthenticated || isOnPasswordResetFlow;
     
     // Then add the rest of the navigation logic for authenticated/unauthenticated users
@@ -260,7 +261,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                       </ListItemButton>
                     </ListItem>
                   ))}
-                  {showLogout && isAuthenticated && (
+                  {showLogout && isAuthenticated && !isOnPasswordResetFlow && (
                     <ListItem disablePadding>
                       <ListItemButton onClick={handleLogout}>
                         <ListItemText
