@@ -77,8 +77,13 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
         onClick: () => handleNavigation("/booknow"),
       });
     }
+    
+    // Force unauthenticated state for password reset pages
+    const isOnPasswordResetFlow = currentPath.includes("/reset-password") || currentPath.includes("/forgot-password");
+    const shouldShowUnauthenticatedButtons = !isAuthenticated || isOnPasswordResetFlow;
+    
     // Then add the rest of the navigation logic for authenticated/unauthenticated users
-    if (!isAuthenticated) {
+    if (shouldShowUnauthenticatedButtons) {
       if (currentPath !== "/signin") {
         buttons.push({
           label: "Login",
@@ -188,7 +193,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                 );
               })}
 
-              {showLogout && isAuthenticated && (
+              {showLogout && isAuthenticated && !isOnPasswordResetFlow && (
                 <Button
                   variant="outlined"
                   color="error"
