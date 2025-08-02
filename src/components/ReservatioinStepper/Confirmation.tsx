@@ -1,4 +1,5 @@
 import { Box, Button, Typography, Divider } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../utils/hooks";
 import { resetReservation } from "../../features/userSlice";
@@ -9,6 +10,7 @@ interface Props {
 }
 
 const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
+  const theme = useTheme();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { customerInfo } = useAppSelector((state) => state.user);
@@ -65,10 +67,15 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
           textAlign: "left",
           mt: 2,
           m: "auto",
-          bgcolor: "#fafafa",
+          bgcolor:
+            theme.palette.mode === "dark" ? "background.paper" : "#fafafa",
           p: 3,
           borderRadius: 2,
           boxShadow: 1,
+          border:
+            theme.palette.mode === "dark"
+              ? `1px solid ${theme.palette.divider}`
+              : "none",
         }}
       >
         <Typography sx={{ fontWeight: 600, mb: 1 }}>

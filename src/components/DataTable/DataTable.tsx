@@ -39,6 +39,14 @@ const DataTable: React.FC<DataTableProps> = ({
   availableActions,
   userRole,
 }) => {
+  // Debug log for data
+  console.log(`[DataTable] ${tableType} data:`, data.length, "items");
+  if (data.length > 0 && tableType === "reservations") {
+    console.log("[DataTable] Sample reservation:", data[0]);
+  }
+  if (data.length > 0 && tableType === "employees") {
+    console.log("[DataTable] Sample employee:", data[0]);
+  }
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItem, setSelectedItem] = useState<SortableEntry | null>(null);
 
@@ -133,7 +141,13 @@ const DataTable: React.FC<DataTableProps> = ({
   // Add type guard for address fields in getCellValue
   const getCellValue = (item: SortableEntry, col: string): string => {
     if ("status" in item && col === "status") return item.status;
-    if ("name" in item && col === "name") return item.name;
+    if ("name" in item && col === "name") {
+      const name = item.name;
+      if (!name || name.trim() === "") {
+        return "Unknown";
+      }
+      return name.trim();
+    }
     if ("date" in item && col === "date") {
       // Try to format as human-readable date
       const dateValue = item.date;
@@ -159,12 +173,27 @@ const DataTable: React.FC<DataTableProps> = ({
       }
       return "-";
     }
-    if ("customerName" in item && col === "customerName")
-      return item.customerName;
-    if ("employeeName" in item && col === "employeeName")
-      return item.employeeName || "Unassigned";
-    if ("assignedEmployee" in item && col === "assignedEmployee")
-      return item.assignedEmployee;
+    if ("customerName" in item && col === "customerName") {
+      const customerName = item.customerName;
+      if (!customerName || customerName.trim() === "") {
+        return "Unknown Customer";
+      }
+      return customerName.trim();
+    }
+    if ("employeeName" in item && col === "employeeName") {
+      const employeeName = item.employeeName;
+      if (!employeeName || employeeName.trim() === "") {
+        return "Unassigned";
+      }
+      return employeeName.trim();
+    }
+    if ("assignedEmployee" in item && col === "assignedEmployee") {
+      const assignedEmployee = item.assignedEmployee;
+      if (!assignedEmployee || assignedEmployee.trim() === "") {
+        return "Unassigned";
+      }
+      return assignedEmployee.trim();
+    }
     if ("ordersAssigned" in item && col === "ordersAssigned")
       return `${item.ordersAssigned}`;
     if ("notes" in item && col === "notes") return item.notes || "-";

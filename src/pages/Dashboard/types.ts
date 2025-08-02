@@ -37,9 +37,10 @@ export interface ReservationEntry extends BaseEntry {
 
 // Employee object structure from API
 export interface ApiEmployeeData {
-  _id: string;
-  firstName: string;
-  lastName: string;
+  id?: string;
+  _id?: string;
+  firstName?: string;
+  lastName?: string;
   fullName?: string;
 }
 
@@ -67,7 +68,7 @@ export interface ApiReservationData {
   time: string;
   status: ReservationStatus;
   price?: number;
-  assignedChef: ApiEmployeeData | string | null;
+  assignedChef?: ApiEmployeeData | string | null;
   timeStamp: string;
 }
 

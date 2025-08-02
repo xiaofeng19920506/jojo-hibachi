@@ -4,6 +4,7 @@ import {
   useUpdateReservationStatusMutation,
   useChangeUserRoleMutation,
   useChangeEmployeeStatusMutation,
+  useAssignChefToReservationMutation,
   useGetAdminEmployeesQuery,
 } from "../../../services/api";
 import type { ReservationEntry, Employee, ReservationStatus } from "../types";
@@ -86,6 +87,12 @@ export const useDashboard = () => {
     skip: userRole !== "admin",
   });
 
+  // Debug log for available employees
+  console.log(
+    "[useDashboard] Available employees for assignment:",
+    allEmployeesData?.length || 0
+  );
+
   // Update mutation
   const [updateReservationStatus, { isLoading: updateStatusLoading }] =
     useUpdateReservationStatusMutation();
@@ -93,6 +100,8 @@ export const useDashboard = () => {
     useChangeUserRoleMutation();
   const [changeEmployeeStatus, { isLoading: changeEmployeeStatusLoading }] =
     useChangeEmployeeStatusMutation();
+  const [assignChefToReservation, { isLoading: assignChefLoading }] =
+    useAssignChefToReservationMutation();
 
   // Get current data based on active table
   const getCurrentData = (): SortableEntry[] => {
@@ -158,6 +167,10 @@ export const useDashboard = () => {
           break;
         case "assignchef":
         case "assignemployee":
+          console.log(
+            "[handleActionClick] Opening assign dialog for reservation:",
+            reservation.id
+          );
           setSelectedEmployeeId(reservation.employeeId || "");
           setDialogType("assign");
           setDialogOpen(true);
@@ -221,6 +234,14 @@ export const useDashboard = () => {
   };
 
   const handleDialogSave = async () => {
+    console.log("[handleDialogSave] Called with:", {
+      dialogType,
+      activeTable,
+      selectedReservation: selectedReservation?.id,
+      selectedEmployeeId,
+      userRole,
+    });
+
     if (!selectedReservation) return;
 
     // Role-based validation
@@ -289,6 +310,32 @@ export const useDashboard = () => {
           userId: selectedReservation.id,
           isActive: selectedStatus === "active",
         }).unwrap();
+      } else if (dialogType === "assign" && activeTable === "reservations") {
+        if (userRole !== "admin") {
+          console.error("Only admins can assign employees");
+          return;
+        }
+        // Assign chef to reservation
+        console.log("[handleDialogSave] Assigning chef:", {
+          reservationId: selectedReservation.id,
+          chefId: selectedEmployeeId,
+        });
+
+        if (!selectedEmployeeId) {
+          console.error("No employee selected for assignment");
+          return;
+        }
+
+        try {
+          const result = await assignChefToReservation({
+            id: selectedReservation.id,
+            chefId: selectedEmployeeId,
+          }).unwrap();
+          console.log("[handleDialogSave] Assignment successful:", result);
+        } catch (error) {
+          console.error("[handleDialogSave] Assignment failed:", error);
+          throw error;
+        }
       }
 
       handleDialogClose();
@@ -328,9 +375,11 @@ export const useDashboard = () => {
   const getEmployeeDisplayName = (employee: Employee) => {
     if (employee.name) return employee.name;
     if (employee.firstName && employee.lastName) {
-      return `${employee.firstName} ${employee.lastName}`;
+      return `${employee.firstName} ${employee.lastName}`.trim();
     }
-    return employee.email;
+    if (employee.firstName) return employee.firstName;
+    if (employee.lastName) return employee.lastName;
+    return employee.email || "Unknown Employee";
   };
 
   // Computed data
@@ -429,7 +478,8 @@ export const useDashboard = () => {
       getLoadingState() ||
       updateStatusLoading ||
       changeRoleLoading ||
-      changeEmployeeStatusLoading,
+      changeEmployeeStatusLoading ||
+      assignChefLoading,
     error: getErrorState(),
     userRole,
     user,
