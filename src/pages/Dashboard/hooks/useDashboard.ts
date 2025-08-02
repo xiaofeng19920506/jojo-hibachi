@@ -150,6 +150,12 @@ export const useDashboard = () => {
     console.log("[handleActionClick] raw action:", action);
     const normalizedAction = action.toLowerCase().replace(/\s/g, "");
     console.log("[handleActionClick] normalizedAction:", normalizedAction);
+    console.log(
+      "[handleActionClick] activeTable:",
+      activeTable,
+      "userRole:",
+      userRole
+    );
     if (activeTable === "reservations") {
       const reservation = item as ReservationEntry;
       setSelectedReservation(reservation);
@@ -178,11 +184,21 @@ export const useDashboard = () => {
         case "changestatus":
         case "updatestatus":
         case "status":
+          console.log(
+            "[handleActionClick] Opening status dialog for reservation:",
+            reservation.id,
+            "current status:",
+            reservation.status
+          );
           setSelectedStatus(reservation.status);
           setDialogType("status");
           setDialogOpen(true);
           break;
         default:
+          console.log(
+            "[handleActionClick] No matching action found for:",
+            normalizedAction
+          );
           break;
       }
     } else if (activeTable === "employees") {
@@ -310,6 +326,32 @@ export const useDashboard = () => {
           userId: selectedReservation.id,
           isActive: selectedStatus === "active",
         }).unwrap();
+      } else if (dialogType === "status" && activeTable === "reservations") {
+        if (userRole !== "admin") {
+          console.error("Only admins can change reservation status");
+          return;
+        }
+        // Update reservation status
+        console.log("[handleDialogSave] Updating reservation status:", {
+          reservationId: selectedReservation.id,
+          newStatus: selectedStatus,
+        });
+
+        if (!selectedStatus) {
+          console.error("No status selected for update");
+          return;
+        }
+
+        try {
+          const result = await updateReservationStatus({
+            id: selectedReservation.id,
+            status: selectedStatus,
+          }).unwrap();
+          console.log("[handleDialogSave] Status update successful:", result);
+        } catch (error) {
+          console.error("[handleDialogSave] Status update failed:", error);
+          throw error;
+        }
       } else if (dialogType === "assign" && activeTable === "reservations") {
         if (userRole !== "admin") {
           console.error("Only admins can assign employees");
