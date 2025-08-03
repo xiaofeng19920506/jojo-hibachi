@@ -5,6 +5,7 @@ import {
   useChangeUserRoleMutation,
   useChangeEmployeeStatusMutation,
   useAssignChefToReservationMutation,
+  useCancelReservationMutation,
   useGetAdminEmployeesQuery,
 } from "../../../services/api";
 import type { ReservationEntry, Employee, ReservationStatus } from "../types";
@@ -87,6 +88,8 @@ export const useDashboard = () => {
     useChangeEmployeeStatusMutation();
   const [assignChefToReservation, { isLoading: assignChefLoading }] =
     useAssignChefToReservationMutation();
+  const [cancelReservation, { isLoading: cancelReservationLoading }] =
+    useCancelReservationMutation();
 
   // Get current data based on active table
   const getCurrentData = (): SortableEntry[] => {
@@ -157,6 +160,11 @@ export const useDashboard = () => {
         case "status":
           setSelectedStatus(reservation.status);
           setDialogType("status");
+          setDialogOpen(true);
+          break;
+        case "cancel":
+          setSelectedReservation(reservation);
+          setDialogType("cancel");
           setDialogOpen(true);
           break;
         default:
@@ -309,6 +317,20 @@ export const useDashboard = () => {
           console.error("[handleDialogSave] Assignment failed:", error);
           throw error;
         }
+      } else if (dialogType === "cancel" && activeTable === "reservations") {
+        if (!selectedReservation) {
+          console.error("No reservation selected for cancellation");
+          return;
+        }
+
+        try {
+          await cancelReservation({
+            id: selectedReservation.id,
+          }).unwrap();
+        } catch (error) {
+          console.error("[handleDialogSave] Cancellation failed:", error);
+          throw error;
+        }
       }
 
       handleDialogClose();
@@ -452,7 +474,8 @@ export const useDashboard = () => {
       updateStatusLoading ||
       changeRoleLoading ||
       changeEmployeeStatusLoading ||
-      assignChefLoading,
+      assignChefLoading ||
+      cancelReservationLoading,
     error: getErrorState(),
     userRole,
     user,

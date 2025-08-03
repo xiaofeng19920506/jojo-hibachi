@@ -37,6 +37,7 @@ export const {
   useUpdateUserProfileMutation,
   useGetUserReservationsQuery,
   useGetUserReservationByIdQuery,
+  useCancelReservationMutation,
   useGetEmployeeProfileQuery,
   useGetEmployeeAssignedQuery,
   useGetEmployeeAssignedByIdQuery,

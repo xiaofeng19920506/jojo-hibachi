@@ -46,4 +46,11 @@ export const employeeApiEndpoints = (
     },
     providesTags: ["Reservations"],
   }),
+  cancelReservation: builder.mutation<any, { id: string }>({
+    query: ({ id }: { id: string }) => ({
+      url: `/reservation/${id}/cancel`,
+      method: "PATCH",
+    }),
+    invalidatesTags: ["Reservations"],
+  }),
 });
