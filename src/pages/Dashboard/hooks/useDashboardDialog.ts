@@ -3,7 +3,7 @@ import type { ReservationEntry, ReservationStatus } from '../types';
 
 export function useDashboardDialog() {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<'edit' | 'assign' | 'status' | 'role'>('edit');
+  const [dialogType, setDialogType] = useState<'edit' | 'assign' | 'status' | 'role' | 'cancel'>('edit');
   const [selectedReservation, setSelectedReservation] = useState<ReservationEntry | null>(null);
   const [editFormData, setEditFormData] = useState<Partial<ReservationEntry>>({});
   const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
