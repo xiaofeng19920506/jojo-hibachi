@@ -23,7 +23,7 @@ const HomeNav: React.FC = () => {
       if (user?.role) {
         switch (user.role.toLowerCase()) {
           case "user":
-            navigate("/booknow");
+            navigate("/dashboard");
             break;
           case "employee":
             navigate("/dashboard");

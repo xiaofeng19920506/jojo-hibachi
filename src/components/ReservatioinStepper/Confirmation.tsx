@@ -1,6 +1,5 @@
 import { Box, Button, Typography, Divider } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { useNavigate } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../utils/hooks";
 import { resetReservation } from "../../features/userSlice";
 
@@ -12,7 +11,6 @@ interface Props {
 const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
   const theme = useTheme();
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const { customerInfo } = useAppSelector((state) => state.user);
 
   const {

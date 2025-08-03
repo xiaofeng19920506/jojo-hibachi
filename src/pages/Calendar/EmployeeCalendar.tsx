@@ -43,6 +43,13 @@ const EmployeeCalendar: React.FC = () => {
   const userRole = user?.role || "user";
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const navigate = useNavigate();
+
+  // Redirect users with "user" role away from calendar
+  React.useEffect(() => {
+    if (userRole === "user") {
+      navigate("/dashboard");
+    }
+  }, [userRole, navigate]);
   // Store week start as a string for reliable reactivity
   const [weekStartStr, setWeekStartStr] = useState(() =>
     format(startOfWeek(new Date(), { weekStartsOn: 0 }), "yyyy-MM-dd")

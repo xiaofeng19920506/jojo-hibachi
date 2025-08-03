@@ -49,12 +49,14 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
+  const { isAuthenticated, user } = useAppSelector((state) => state.user);
   // Remove isBookNow, appBarColor, and appBarSx logic. Always use color='primary' and no special sx for /booknow.
 
   // Force unauthenticated state for password reset pages
   const currentPath = location.pathname;
-  const isOnPasswordResetFlow = currentPath.includes("/reset-password") || currentPath.includes("/forgot-password");
+  const isOnPasswordResetFlow =
+    currentPath.includes("/reset-password") ||
+    currentPath.includes("/forgot-password");
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -71,6 +73,16 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const getNavigationButtons = () => {
     const buttons: ActionButton[] = [];
 
+    // Debug logging
+    console.log("[GlobalAppBar] Debug info:", {
+      isAuthenticated,
+      userRole: user?.role,
+      currentPath,
+      isOnPasswordResetFlow,
+      shouldShowUnauthenticatedButtons:
+        !isAuthenticated || isOnPasswordResetFlow,
+    });
+
     // Always add Book Now button first
     if (currentPath !== "/booknow") {
       buttons.push({
@@ -80,9 +92,10 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
         onClick: () => handleNavigation("/booknow"),
       });
     }
-    
-    const shouldShowUnauthenticatedButtons = !isAuthenticated || isOnPasswordResetFlow;
-    
+
+    const shouldShowUnauthenticatedButtons =
+      !isAuthenticated || isOnPasswordResetFlow;
+
     // Then add the rest of the navigation logic for authenticated/unauthenticated users
     if (shouldShowUnauthenticatedButtons) {
       if (currentPath !== "/signin") {
@@ -102,7 +115,24 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
         });
       }
     } else {
-      if (currentPath !== "/calendar") {
+      // Show Dashboard for users with "user" role
+      console.log("[GlobalAppBar] Checking Dashboard button:", {
+        currentPath,
+        userRole: user?.role,
+        shouldShowDashboard:
+          currentPath !== "/dashboard" && user?.role === "user",
+      });
+      if (currentPath !== "/dashboard" && user?.role === "user") {
+        console.log("[GlobalAppBar] Adding Dashboard button");
+        buttons.push({
+          label: "Dashboard",
+          variant: "contained",
+          color: "primary",
+          onClick: () => handleNavigation("/dashboard"),
+        });
+      }
+      // Only show Weekly Calendar for employees and admins, not for users with "user" role
+      if (currentPath !== "/calendar" && user?.role && user.role !== "user") {
         buttons.push({
           label: "Weekly Calendar",
           variant: "contained",
@@ -120,6 +150,10 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
       }
     }
 
+    console.log(
+      "[GlobalAppBar] Final buttons:",
+      buttons.map((b) => b.label)
+    );
     return buttons;
   };
 
@@ -151,6 +185,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
             <>
               {allActionButtons.map((button, index) => {
                 const isSpecial = [
+                  "Dashboard",
                   "Weekly Calendar",
                   "Book Now",
                   "Profile",
@@ -223,7 +258,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                   onClick={() =>
                     setThemeMode(themeMode === "dark" ? "light" : "dark")
                   }
-                  sx={{ 
+                  sx={{
                     ml: 1,
                     color: "#fff",
                     "&:hover": {
@@ -232,7 +267,11 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                   }}
                   aria-label="toggle dark mode"
                 >
-                  {themeMode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
+                  {themeMode === "dark" ? (
+                    <Brightness7Icon />
+                  ) : (
+                    <Brightness4Icon />
+                  )}
                 </IconButton>
               )}
             </>
@@ -292,7 +331,11 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                           gap: 1,
                         }}
                       >
-                        {themeMode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
+                        {themeMode === "dark" ? (
+                          <Brightness7Icon />
+                        ) : (
+                          <Brightness4Icon />
+                        )}
                         <ListItemText
                           primary={
                             themeMode === "dark" ? "Light Mode" : "Dark Mode"
