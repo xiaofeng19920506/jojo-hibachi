@@ -31,7 +31,6 @@ interface AppProps {
 const App: React.FC<AppProps> = ({ themeMode, setThemeMode }) => {
   const location = useLocation();
 
-  // Get appropriate title and subtitle for the current route
   const getAppBarProps = () => {
     if (location.pathname === "/booknow") {
       return {

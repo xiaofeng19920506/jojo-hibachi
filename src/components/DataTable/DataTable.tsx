@@ -39,14 +39,6 @@ const DataTable: React.FC<DataTableProps> = ({
   availableActions,
   userRole,
 }) => {
-  // Debug log for data
-  console.log(`[DataTable] ${tableType} data:`, data.length, "items");
-  if (data.length > 0 && tableType === "reservations") {
-    console.log("[DataTable] Sample reservation:", data[0]);
-  }
-  if (data.length > 0 && tableType === "employees") {
-    console.log("[DataTable] Sample employee:", data[0]);
-  }
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedItem, setSelectedItem] = useState<SortableEntry | null>(null);
 

@@ -46,10 +46,7 @@ const SignIn: React.FC = () => {
       if (!user) {
         throw new Error("No user data received from server");
       }
-
-      // Normalize user object to always have an id field
       const normalizedUser = { ...user, id: user.id || user._id };
-      console.log("LOGIN USER OBJECT:", normalizedUser);
       localStorage.setItem("authToken", token);
       localStorage.setItem("user", JSON.stringify(normalizedUser));
       dispatch(login(normalizedUser));

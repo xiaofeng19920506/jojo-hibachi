@@ -77,9 +77,6 @@ const Dashboard: React.FC = () => {
       ? allEmployeesData
       : undefined;
 
-  // Add this for debugging
-  console.log("EditDialog props:", { dialogType, dialogOpen });
-
   return (
     <Box
       sx={{

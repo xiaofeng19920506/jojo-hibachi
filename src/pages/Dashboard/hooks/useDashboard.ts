@@ -32,10 +32,6 @@ export const useDashboard = () => {
   const { user, isInitialized } = useAppSelector((state) => state.user);
   const userRole = user?.role || "user";
 
-  // Debug log for userRole
-  console.log("[useDashboard] userRole:", userRole);
-
-  // State management
   const [searchQuery, setSearchQuery] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -43,11 +39,6 @@ export const useDashboard = () => {
     ReservationStatus | "all" | string
   >("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("");
-
-  // Debug log for activeTable
-  console.log("[useDashboard] activeTable:", activeTable);
-
-  // Dialog state and handlers
   const {
     dialogOpen,
     setDialogOpen,
@@ -87,12 +78,6 @@ export const useDashboard = () => {
     skip: userRole !== "admin",
   });
 
-  // Debug log for available employees
-  console.log(
-    "[useDashboard] Available employees for assignment:",
-    allEmployeesData?.length || 0
-  );
-
   // Update mutation
   const [updateReservationStatus, { isLoading: updateStatusLoading }] =
     useUpdateReservationStatusMutation();
@@ -131,7 +116,6 @@ export const useDashboard = () => {
     }
   };
 
-  // Get error state
   const getErrorState = (): string | null => {
     switch (activeTable) {
       case "reservations":
@@ -145,17 +129,8 @@ export const useDashboard = () => {
     }
   };
 
-  // Event handlers
   const handleActionClick = (action: string, item: SortableEntry) => {
-    console.log("[handleActionClick] raw action:", action);
     const normalizedAction = action.toLowerCase().replace(/\s/g, "");
-    console.log("[handleActionClick] normalizedAction:", normalizedAction);
-    console.log(
-      "[handleActionClick] activeTable:",
-      activeTable,
-      "userRole:",
-      userRole
-    );
     if (activeTable === "reservations") {
       const reservation = item as ReservationEntry;
       setSelectedReservation(reservation);
@@ -173,10 +148,6 @@ export const useDashboard = () => {
           break;
         case "assignchef":
         case "assignemployee":
-          console.log(
-            "[handleActionClick] Opening assign dialog for reservation:",
-            reservation.id
-          );
           setSelectedEmployeeId(reservation.employeeId || "");
           setDialogType("assign");
           setDialogOpen(true);
@@ -184,21 +155,11 @@ export const useDashboard = () => {
         case "changestatus":
         case "updatestatus":
         case "status":
-          console.log(
-            "[handleActionClick] Opening status dialog for reservation:",
-            reservation.id,
-            "current status:",
-            reservation.status
-          );
           setSelectedStatus(reservation.status);
           setDialogType("status");
           setDialogOpen(true);
           break;
         default:
-          console.log(
-            "[handleActionClick] No matching action found for:",
-            normalizedAction
-          );
           break;
       }
     } else if (activeTable === "employees") {
@@ -250,22 +211,11 @@ export const useDashboard = () => {
   };
 
   const handleDialogSave = async () => {
-    console.log("[handleDialogSave] Called with:", {
-      dialogType,
-      activeTable,
-      selectedReservation: selectedReservation?.id,
-      selectedEmployeeId,
-      userRole,
-    });
-
     if (!selectedReservation) return;
-
-    // Role-based validation
     if (dialogType === "assign" && userRole !== "admin") {
       console.error("Only admins can assign employees");
       return;
     }
-
     if (
       dialogType === "status" &&
       activeTable === "reservations" &&
@@ -278,8 +228,6 @@ export const useDashboard = () => {
     try {
       if (dialogType === "edit") {
         if (activeTable === "orders") {
-          // Order update not implemented yet
-          console.log("Order updates not implemented yet");
         } else if (activeTable === "employees") {
           if (userRole !== "admin") {
             console.error("Only admins can edit employees");
@@ -296,10 +244,7 @@ export const useDashboard = () => {
             }).unwrap();
           }
         } else if (activeTable === "customers") {
-          // Customer view only - no updates allowed
-          console.log("Customer updates not allowed");
         } else {
-          // Reservations - use role-appropriate mutation
           if (userRole === "admin") {
             await updateReservationStatus({
               id: selectedReservation.id,
@@ -331,12 +276,6 @@ export const useDashboard = () => {
           console.error("Only admins can change reservation status");
           return;
         }
-        // Update reservation status
-        console.log("[handleDialogSave] Updating reservation status:", {
-          reservationId: selectedReservation.id,
-          newStatus: selectedStatus,
-        });
-
         if (!selectedStatus) {
           console.error("No status selected for update");
           return;
@@ -347,7 +286,6 @@ export const useDashboard = () => {
             id: selectedReservation.id,
             status: selectedStatus,
           }).unwrap();
-          console.log("[handleDialogSave] Status update successful:", result);
         } catch (error) {
           console.error("[handleDialogSave] Status update failed:", error);
           throw error;
@@ -357,12 +295,6 @@ export const useDashboard = () => {
           console.error("Only admins can assign employees");
           return;
         }
-        // Assign chef to reservation
-        console.log("[handleDialogSave] Assigning chef:", {
-          reservationId: selectedReservation.id,
-          chefId: selectedEmployeeId,
-        });
-
         if (!selectedEmployeeId) {
           console.error("No employee selected for assignment");
           return;
@@ -373,7 +305,6 @@ export const useDashboard = () => {
             id: selectedReservation.id,
             chefId: selectedEmployeeId,
           }).unwrap();
-          console.log("[handleDialogSave] Assignment successful:", result);
         } catch (error) {
           console.error("[handleDialogSave] Assignment failed:", error);
           throw error;

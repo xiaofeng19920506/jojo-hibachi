@@ -7,7 +7,6 @@ import type {
 export const transformApiData = (
   apiData: ApiReservationData[]
 ): ReservationEntry[] => {
-  console.log("[transformApiData] Processing reservations:", apiData.length);
   return apiData.map((item) => {
     let employeeId: string | undefined;
     let employeeName: string | undefined;
@@ -58,13 +57,6 @@ export const transformApiData = (
       assignedChef: employeeId ?? "Unassigned",
       timeStamp: item.timeStamp,
     };
-
-    // Debug log for employee name issues
-    console.log(`[transformApiData] Reservation ${result.id}:`, {
-      assignedChef: item.assignedChef,
-      employeeId: result.employeeId,
-      employeeName: result.employeeName,
-    });
 
     return result;
   });
@@ -158,7 +150,6 @@ export const transformOrderData = (apiData: any[]) => {
 };
 
 export const transformEmployeeData = (apiData: any[]) => {
-  console.log("[transformEmployeeData] Processing employees:", apiData.length);
   return apiData.map((item) => {
     // Handle different name formats
     let name = "";
@@ -188,9 +179,6 @@ export const transformEmployeeData = (apiData: any[]) => {
       status: item.isActive === false ? "inactive" : "active",
       ordersAssigned: item.ordersAssigned || 0,
     };
-
-    // Debug log for employee name issues
-    console.log(`[transformEmployeeData] Employee ${result.id}:`, result.name);
 
     return result;
   });
