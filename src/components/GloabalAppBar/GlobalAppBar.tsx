@@ -73,17 +73,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const getNavigationButtons = () => {
     const buttons: ActionButton[] = [];
 
-    // Debug logging
-    console.log("[GlobalAppBar] Debug info:", {
-      isAuthenticated,
-      userRole: user?.role,
-      currentPath,
-      isOnPasswordResetFlow,
-      shouldShowUnauthenticatedButtons:
-        !isAuthenticated || isOnPasswordResetFlow,
-    });
-
-    // Always add Book Now button first
     if (currentPath !== "/booknow") {
       buttons.push({
         label: "Book Now",
@@ -96,7 +85,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     const shouldShowUnauthenticatedButtons =
       !isAuthenticated || isOnPasswordResetFlow;
 
-    // Then add the rest of the navigation logic for authenticated/unauthenticated users
     if (shouldShowUnauthenticatedButtons) {
       if (currentPath !== "/signin") {
         buttons.push({
@@ -115,15 +103,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
         });
       }
     } else {
-      // Show Dashboard for users with "user" role
-      console.log("[GlobalAppBar] Checking Dashboard button:", {
-        currentPath,
-        userRole: user?.role,
-        shouldShowDashboard:
-          currentPath !== "/dashboard" && user?.role === "user",
-      });
       if (currentPath !== "/dashboard" && user?.role === "user") {
-        console.log("[GlobalAppBar] Adding Dashboard button");
         buttons.push({
           label: "Dashboard",
           variant: "contained",
@@ -131,7 +111,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
           onClick: () => handleNavigation("/dashboard"),
         });
       }
-      // Only show Weekly Calendar for employees and admins, not for users with "user" role
       if (currentPath !== "/calendar" && user?.role && user.role !== "user") {
         buttons.push({
           label: "Weekly Calendar",
@@ -150,10 +129,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
       }
     }
 
-    console.log(
-      "[GlobalAppBar] Final buttons:",
-      buttons.map((b) => b.label)
-    );
     return buttons;
   };
 
