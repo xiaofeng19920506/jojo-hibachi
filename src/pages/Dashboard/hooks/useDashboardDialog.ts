@@ -1,20 +1,26 @@
-import { useState } from 'react';
-import type { ReservationEntry, ReservationStatus } from '../types';
+import { useState } from "react";
+import type { ReservationEntry, ReservationStatus } from "../types";
 
 export function useDashboardDialog() {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<'edit' | 'assign' | 'status' | 'role' | 'cancel'>('edit');
-  const [selectedReservation, setSelectedReservation] = useState<ReservationEntry | null>(null);
-  const [editFormData, setEditFormData] = useState<Partial<ReservationEntry>>({});
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState<ReservationStatus>('pending');
+  const [dialogType, setDialogType] = useState<
+    "edit" | "assign" | "status" | "role" | "cancel"
+  >("edit");
+  const [selectedReservation, setSelectedReservation] =
+    useState<ReservationEntry | null>(null);
+  const [editFormData, setEditFormData] = useState<Partial<ReservationEntry>>(
+    {}
+  );
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
+  const [selectedStatus, setSelectedStatus] =
+    useState<ReservationStatus>("pending");
 
   const handleDialogClose = () => {
     setDialogOpen(false);
     setSelectedReservation(null);
     setEditFormData({});
-    setSelectedEmployeeId('');
-    setSelectedStatus('pending');
+    setSelectedEmployeeId("");
+    setSelectedStatus("pending");
   };
 
   const handleEditFormChange = (
@@ -23,7 +29,7 @@ export function useDashboardDialog() {
     const { name, value } = e.target;
     setEditFormData((prev) => ({
       ...prev,
-      [name]: name === 'price' ? parseFloat(value) || 0 : value,
+      [name]: name === "price" ? parseFloat(value) || 0 : value,
     }));
   };
 
@@ -43,4 +49,4 @@ export function useDashboardDialog() {
     handleDialogClose,
     handleEditFormChange,
   };
-} 
+}
