@@ -44,7 +44,7 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
   const goToHome = () => {
     dispatch(resetReservation());
     onReset();
-    navigate("/");
+    window.location.href = "https://www.fancyhibachi.com";
   };
 
   return (
