@@ -282,7 +282,7 @@ export const useDashboard = () => {
         }
 
         try {
-          const result = await updateReservationStatus({
+          await updateReservationStatus({
             id: selectedReservation.id,
             status: selectedStatus,
           }).unwrap();
@@ -301,7 +301,7 @@ export const useDashboard = () => {
         }
 
         try {
-          const result = await assignChefToReservation({
+          await assignChefToReservation({
             id: selectedReservation.id,
             chefId: selectedEmployeeId,
           }).unwrap();
