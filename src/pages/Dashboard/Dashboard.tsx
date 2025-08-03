@@ -67,8 +67,6 @@ const Dashboard: React.FC = () => {
       </Box>
     );
   }
-
-  // Compute availableEmployees for assign dialog
   const availableEmployees =
     dialogOpen &&
     dialogType === "assign" &&

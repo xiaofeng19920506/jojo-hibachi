@@ -50,9 +50,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const { isAuthenticated, user } = useAppSelector((state) => state.user);
-  // Remove isBookNow, appBarColor, and appBarSx logic. Always use color='primary' and no special sx for /booknow.
-
-  // Force unauthenticated state for password reset pages
   const currentPath = location.pathname;
   const isOnPasswordResetFlow =
     currentPath.includes("/reset-password") ||
@@ -73,7 +70,8 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const getNavigationButtons = () => {
     const buttons: ActionButton[] = [];
 
-    if (currentPath !== "/booknow") {
+    // Always show Book Now button for authenticated users
+    if (isAuthenticated && !isOnPasswordResetFlow) {
       buttons.push({
         label: "Book Now",
         variant: "contained",
@@ -82,10 +80,8 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
       });
     }
 
-    const shouldShowUnauthenticatedButtons =
-      !isAuthenticated || isOnPasswordResetFlow;
-
-    if (shouldShowUnauthenticatedButtons) {
+    // Show login/signup buttons for unauthenticated users
+    if (!isAuthenticated || isOnPasswordResetFlow) {
       if (currentPath !== "/signin") {
         buttons.push({
           label: "Login",
@@ -103,28 +99,28 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
         });
       }
     } else {
-      if (currentPath !== "/dashboard" && user?.role === "user") {
-        buttons.push({
-          label: "Dashboard",
-          variant: "contained",
-          color: "primary",
-          onClick: () => handleNavigation("/dashboard"),
-        });
-      }
+      // For authenticated users, always show Dashboard and Profile
+      buttons.push({
+        label: "Dashboard",
+        variant: "contained",
+        color: "primary",
+        onClick: () => handleNavigation("/dashboard"),
+      });
+
+      buttons.push({
+        label: "Profile",
+        variant: "outlined",
+        color: "secondary",
+        onClick: () => handleNavigation("/profile"),
+      });
+
+      // Show Weekly Calendar only for non-user roles
       if (currentPath !== "/calendar" && user?.role && user.role !== "user") {
         buttons.push({
           label: "Weekly Calendar",
           variant: "contained",
           color: "primary",
           onClick: () => handleNavigation("/calendar"),
-        });
-      }
-      if (currentPath !== "/profile") {
-        buttons.push({
-          label: "Profile",
-          variant: "outlined",
-          color: "secondary",
-          onClick: () => handleNavigation("/profile"),
         });
       }
     }
