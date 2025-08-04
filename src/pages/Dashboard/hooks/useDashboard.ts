@@ -170,6 +170,10 @@ export const useDashboard = () => {
           setDialogType("cancel");
           setDialogOpen(true);
           break;
+        case "selectmenu":
+          // Navigate to menu page
+          window.location.href = `/reservation/${reservation.id}/menu`;
+          break;
         default:
           break;
       }
@@ -230,9 +234,10 @@ export const useDashboard = () => {
     if (
       dialogType === "status" &&
       activeTable === "reservations" &&
-      userRole !== "admin"
+      userRole !== "admin" &&
+      userRole !== "employee"
     ) {
-      console.error("Only admins can change reservation status");
+      console.error("Only admins and employees can change reservation status");
       return;
     }
 
@@ -520,7 +525,8 @@ export const useDashboard = () => {
     handleDialogClose,
     handleDialogSave,
     getAvailableTables,
-    getAvailableActions: () => getAvailableActions(userRole, activeTable),
+    getAvailableActions: (item: SortableEntry) =>
+      getAvailableActions(userRole, activeTable),
     getGreeting: () => getGreeting(user),
     // Add missing navigation/pagination
     currentPage,

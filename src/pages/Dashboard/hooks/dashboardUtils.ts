@@ -2,16 +2,18 @@ export function getAvailableActions(userRole: string, activeTable: string) {
   const actions: string[] = [];
   switch (userRole) {
     case "user":
-      if (activeTable === "reservations") actions.push("edit", "cancel");
+      if (activeTable === "reservations")
+        actions.push("edit", "cancel", "Select Menu");
       break;
     case "employee":
-      if (activeTable === "reservations") actions.push("edit", "Change Status");
+      if (activeTable === "reservations")
+        actions.push("edit", "Update Status", "Select Menu");
       break;
     case "admin":
       if (activeTable === "reservations") {
-        actions.push("edit", "Assign Chef", "Change Status");
+        actions.push("edit", "Assign Chef", "Update Status");
       } else if (activeTable === "employees") {
-        actions.push("Change Status", "Change Role");
+        actions.push("Update Status", "Change Role");
       } else if (activeTable === "customers") {
         actions.push("Change Role");
       }

@@ -113,4 +113,25 @@ export const publicApiEndpoints = (
       },
     }),
   }),
+  getMenuItems: builder.query<any[], void>({
+    query: () => "/menu/items",
+    providesTags: ["Menu"],
+  }),
+  updateReservationMenu: builder.mutation<
+    any,
+    {
+      reservationId: string;
+      menuItems: any[];
+      additionalNotes?: string;
+      deliveryInstructions?: string;
+      totalAmount: number;
+    }
+  >({
+    query: (data) => ({
+      url: `/reservation/${data.reservationId}/menu`,
+      method: "PATCH",
+      body: data,
+    }),
+    invalidatesTags: ["Reservations", "Menu"],
+  }),
 });

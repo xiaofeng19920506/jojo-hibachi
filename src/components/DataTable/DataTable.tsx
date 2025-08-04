@@ -108,6 +108,7 @@ const DataTable: React.FC<DataTableProps> = ({
             "status",
             "price",
             "notes",
+            "actions",
           ]
         : [
             "id",

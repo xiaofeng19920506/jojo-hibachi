@@ -22,6 +22,8 @@ const ResetPassword = lazy(() => import("./pages/Auth/ResetPassword"));
 const ResetPasswordResult = lazy(
   () => import("./pages/Auth/ResetPasswordResult")
 );
+const MenuPage = lazy(() => import("./pages/Menu/MenuPage"));
+const CheckoutPage = lazy(() => import("./pages/Menu/CheckoutPage"));
 
 interface AppProps {
   themeMode?: string;
@@ -50,10 +52,19 @@ const App: React.FC<AppProps> = ({ themeMode, setThemeMode }) => {
         subtitle: "View reservations",
       };
     }
-    if (location.pathname.startsWith("/reservation/")) {
+    if (
+      location.pathname.startsWith("/reservation/") &&
+      !location.pathname.includes("/menu")
+    ) {
       return {
         title: "Fancy Hibachi",
         subtitle: "",
+      };
+    }
+    if (location.pathname.includes("/menu")) {
+      return {
+        title: "Menu Selection",
+        subtitle: "Choose your dishes",
       };
     }
     return {
@@ -124,6 +135,26 @@ const App: React.FC<AppProps> = ({ themeMode, setThemeMode }) => {
             <Suspense fallback={<LoadingSpinner />}>
               <ReservationDetail />
             </Suspense>
+          }
+        />
+        <Route
+          path="/reservation/:reservationId/menu"
+          element={
+            <ProtectedRoute>
+              <Suspense fallback={<LoadingSpinner />}>
+                <MenuPage />
+              </Suspense>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reservation/:reservationId/checkout"
+          element={
+            <ProtectedRoute>
+              <Suspense fallback={<LoadingSpinner />}>
+                <CheckoutPage />
+              </Suspense>
+            </ProtectedRoute>
           }
         />
         <Route
