@@ -6,6 +6,7 @@ import {
   useChangeEmployeeStatusMutation,
   useAssignChefToReservationMutation,
   useCancelReservationMutation,
+  useUpdateReservationMutation,
   useGetAdminEmployeesQuery,
 } from "../../../services/api";
 import type { ReservationEntry, Employee, ReservationStatus } from "../types";
@@ -90,6 +91,8 @@ export const useDashboard = () => {
     useAssignChefToReservationMutation();
   const [cancelReservation, { isLoading: cancelReservationLoading }] =
     useCancelReservationMutation();
+  const [updateReservation, { isLoading: updateReservationLoading }] =
+    useUpdateReservationMutation();
 
   // Get current data based on active table
   const getCurrentData = (): SortableEntry[] => {
@@ -236,6 +239,26 @@ export const useDashboard = () => {
     try {
       if (dialogType === "edit") {
         if (activeTable === "orders") {
+        } else if (activeTable === "reservations") {
+          // Update reservation for users and employees
+          if (!selectedReservation) {
+            console.error("No reservation selected for update");
+            return;
+          }
+
+          try {
+            await updateReservation({
+              id: selectedReservation.id,
+              data: editFormData,
+            }).unwrap();
+            console.log("[handleDialogSave] Reservation update successful");
+          } catch (error) {
+            console.error(
+              "[handleDialogSave] Reservation update failed:",
+              error
+            );
+            throw error;
+          }
         } else if (activeTable === "employees") {
           if (userRole !== "admin") {
             console.error("Only admins can edit employees");
@@ -475,7 +498,8 @@ export const useDashboard = () => {
       changeRoleLoading ||
       changeEmployeeStatusLoading ||
       assignChefLoading ||
-      cancelReservationLoading,
+      cancelReservationLoading ||
+      updateReservationLoading,
     error: getErrorState(),
     userRole,
     user,

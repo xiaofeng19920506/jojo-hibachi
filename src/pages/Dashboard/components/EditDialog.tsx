@@ -13,6 +13,8 @@ import {
   Box,
 } from "@mui/material";
 import type { ReservationEntry, Employee } from "../types";
+import { useState } from "react";
+import dayjs from "dayjs";
 
 interface EditDialogProps {
   open: boolean;
@@ -54,6 +56,58 @@ const EditDialog: React.FC<EditDialogProps> = ({
   const isMobile =
     typeof window !== "undefined" &&
     window.matchMedia("(max-width:600px)").matches;
+
+  // Date validation logic
+  const minDate = dayjs().add(3, "day");
+  const [dateError, setDateError] = useState("");
+  const [timeError, setTimeError] = useState("");
+
+  const validateDate = (input: string) => {
+    const parsedInput = dayjs(input);
+    if (!parsedInput.isValid()) {
+      setDateError("Invalid date format.");
+      return false;
+    }
+    if (parsedInput.isBefore(minDate, "day")) {
+      setDateError("Date must be at least 3 days from today.");
+      return false;
+    }
+    setDateError("");
+    return true;
+  };
+
+  const validateTime = (selectedTime: string, selectedDate: string) => {
+    if (!selectedTime) {
+      setTimeError("Time is required.");
+      return false;
+    }
+
+    const now = new Date();
+    const selected = new Date(`${selectedDate}T${selectedTime}`);
+    if (selected < now) {
+      setTimeError("Time cannot be in the past.");
+      return false;
+    }
+
+    setTimeError("");
+    return true;
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (name === "date") {
+      validateDate(value);
+    }
+    onEditFormChange(e);
+  };
+
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (name === "time") {
+      validateTime(value, editFormData.date || "");
+    }
+    onEditFormChange(e);
+  };
   return (
     <Dialog
       open={open}
@@ -82,7 +136,13 @@ const EditDialog: React.FC<EditDialogProps> = ({
               margin="normal"
               InputLabelProps={{ shrink: true, style: { fontSize: 16 } }}
               value={editFormData.date || ""}
-              onChange={onEditFormChange}
+              onChange={handleDateChange}
+              error={!!dateError}
+              helperText={dateError}
+              inputProps={{
+                min: minDate.format("YYYY-MM-DD"),
+                style: { fontSize: 16 },
+              }}
               sx={{ fontSize: { xs: 16, sm: 18 } }}
             />
             {activeTable === "reservations" && (
@@ -94,7 +154,9 @@ const EditDialog: React.FC<EditDialogProps> = ({
                 margin="normal"
                 InputLabelProps={{ shrink: true, style: { fontSize: 16 } }}
                 value={editFormData.time || ""}
-                onChange={onEditFormChange}
+                onChange={handleTimeChange}
+                error={!!timeError}
+                helperText={timeError}
                 sx={{ fontSize: { xs: 16, sm: 18 } }}
               />
             )}
@@ -251,7 +313,16 @@ const EditDialog: React.FC<EditDialogProps> = ({
             Confirm Cancel
           </Button>
         ) : (
-          <Button variant="contained" onClick={onSave} disabled={loading}>
+          <Button
+            variant="contained"
+            onClick={onSave}
+            disabled={
+              loading ||
+              (dialogType === "edit" &&
+                activeTable === "reservations" &&
+                (!!dateError || !!timeError))
+            }
+          >
             {loading ? <CircularProgress size={20} /> : "Save"}
           </Button>
         )}

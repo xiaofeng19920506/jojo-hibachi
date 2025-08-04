@@ -38,6 +38,7 @@ export const {
   useGetUserReservationsQuery,
   useGetUserReservationByIdQuery,
   useCancelReservationMutation,
+  useUpdateReservationMutation,
   useGetEmployeeProfileQuery,
   useGetEmployeeAssignedQuery,
   useGetEmployeeAssignedByIdQuery,

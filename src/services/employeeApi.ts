@@ -53,4 +53,12 @@ export const employeeApiEndpoints = (
     }),
     invalidatesTags: ["Reservations"],
   }),
+  updateReservation: builder.mutation<any, { id: string; data: Partial<any> }>({
+    query: ({ id, data }: { id: string; data: Partial<any> }) => ({
+      url: `/reservation/${id}`,
+      method: "PATCH",
+      body: data,
+    }),
+    invalidatesTags: ["Reservations"],
+  }),
 });
