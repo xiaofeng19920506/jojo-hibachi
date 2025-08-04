@@ -96,7 +96,15 @@ const Confirmation: React.FC<Props> = ({ onReset, onBack }) => {
         </Typography>
         <Typography>
           <strong>Date:</strong>{" "}
-          {`${reservationMonth}/${reservationDay}/${reservationYear}`}
+          {customerInfo.date
+            ? new Date(customerInfo.date).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })
+            : reservationMonth && reservationDay && reservationYear
+            ? `${reservationMonth}/${reservationDay}/${reservationYear}`
+            : "N/A"}
         </Typography>
         <Typography>
           <strong>Time:</strong> {time}

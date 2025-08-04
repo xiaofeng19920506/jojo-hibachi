@@ -303,8 +303,10 @@ export const useDashboard = () => {
           isActive: selectedStatus === "active",
         }).unwrap();
       } else if (dialogType === "status" && activeTable === "reservations") {
-        if (userRole !== "admin") {
-          console.error("Only admins can change reservation status");
+        if (userRole !== "admin" && userRole !== "employee") {
+          console.error(
+            "Only admins and employees can change reservation status"
+          );
           return;
         }
         if (!selectedStatus) {
