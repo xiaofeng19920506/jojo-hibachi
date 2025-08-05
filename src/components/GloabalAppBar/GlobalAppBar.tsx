@@ -70,8 +70,8 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const getNavigationButtons = () => {
     const buttons: ActionButton[] = [];
 
-    // Always show Book Now button for authenticated users
-    if (isAuthenticated && !isOnPasswordResetFlow) {
+    // Always show Book Now button for all users
+    if (!isOnPasswordResetFlow) {
       buttons.push({
         label: "Book Now",
         variant: "contained",
