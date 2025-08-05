@@ -40,9 +40,9 @@ export const getAvailableActions = (
           "Selection Menu",
         ];
       } else if (userRole === "employee") {
-        return ["Edit", "Cancel", "Update Status"];
+        return ["Edit", "Cancel", "Update Status", "Selection Menu"];
       }
-      return ["Edit", "Cancel"];
+      return ["Edit", "Cancel", "Selection Menu"];
     case "food":
       return userRole === "admin" ? ["Update", "Delete"] : [];
     default:
