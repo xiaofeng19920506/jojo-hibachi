@@ -1,16 +1,17 @@
 import { useState } from "react";
 import type { ReservationEntry, ReservationStatus } from "../types";
+import type { FoodEntry } from "../../../components/DataTable/types";
 
 export function useDashboardDialog() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<
-    "edit" | "assign" | "status" | "role" | "cancel"
+    "edit" | "assign" | "status" | "cancel" | "role" | "delete" | "add"
   >("edit");
   const [selectedReservation, setSelectedReservation] =
     useState<ReservationEntry | null>(null);
-  const [editFormData, setEditFormData] = useState<Partial<ReservationEntry>>(
-    {}
-  );
+  const [editFormData, setEditFormData] = useState<
+    Partial<ReservationEntry> | Partial<FoodEntry>
+  >({});
   const [selectedEmployeeId, setSelectedEmployeeId] = useState("");
   const [selectedStatus, setSelectedStatus] =
     useState<ReservationStatus>("pending");

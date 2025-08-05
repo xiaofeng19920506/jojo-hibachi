@@ -27,8 +27,11 @@ const Dashboard: React.FC = () => {
     statusFilter,
     setStatusFilter,
     dialogOpen,
+    setDialogOpen,
     dialogType,
+    setDialogType,
     editFormData,
+    setEditFormData,
     selectedEmployeeId,
     selectedStatus,
     loading,
@@ -119,6 +122,17 @@ const Dashboard: React.FC = () => {
           onItemsPerPageChange={(value) => {
             setItemsPerPage(value);
             setCurrentPage(1);
+          }}
+          onAddNewFood={() => {
+            // Open dialog for adding new food
+            setDialogType("add");
+            setEditFormData({
+              name: "",
+              description: "",
+              price: 0,
+              category: "appetizer",
+            });
+            setDialogOpen(true);
           }}
           {...(userRole === "admin"
             ? {

@@ -132,6 +132,7 @@ const DataTable: React.FC<DataTableProps> = ({
       "assignedEmployee",
       "price",
     ],
+    food: ["name", "description", "price", "category", "actions"],
   };
 
   // Add type guard for address fields in getCellValue
@@ -194,6 +195,18 @@ const DataTable: React.FC<DataTableProps> = ({
       return `${item.ordersAssigned}`;
     if ("notes" in item && col === "notes") return item.notes || "-";
     if (col === "id") return item.id;
+    // Food-specific fields
+    if ("description" in item && col === "description")
+      return item.description || "-";
+    if ("category" in item && col === "category") return item.category || "-";
+    if ("preparationTime" in item && col === "preparationTime") {
+      const prepTime = item.preparationTime;
+      return prepTime ? `${prepTime} min` : "-";
+    }
+    if ("calories" in item && col === "calories") {
+      const calories = item.calories;
+      return calories ? `${calories} cal` : "-";
+    }
     return "-";
   };
 
@@ -226,6 +239,8 @@ const DataTable: React.FC<DataTableProps> = ({
           ];
         case "reservations":
           return ["Edit", "Cancel", "Assign Employee", "Update Status"];
+        case "food":
+          return ["Update", "Delete"];
         default:
           return [];
       }

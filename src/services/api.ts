@@ -19,7 +19,14 @@ const baseQuery = fetchBaseQuery({
 export const api = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["Reservations", "Customers", "Orders", "Employees", "Auth"],
+  tagTypes: [
+    "Reservations",
+    "Customers",
+    "Orders",
+    "Employees",
+    "Auth",
+    "MenuItems",
+  ],
   endpoints: (builder) => ({
     ...publicApiEndpoints(builder),
     ...userApiEndpoints(builder),
@@ -55,4 +62,10 @@ export const {
   useForgotPasswordMutation,
   useResetPasswordMutation,
   useGetAdminEmployeeAssignedReservationsQuery,
+  // Food/Menu Management
+  useGetMenuItemsQuery,
+  useGetMenuItemByIdQuery,
+  useCreateMenuItemMutation,
+  useUpdateMenuItemMutation,
+  useDeleteMenuItemMutation,
 } = api;

@@ -26,6 +26,7 @@ interface FilterControlsProps {
   itemsPerPage: number;
   onItemsPerPageChange: (value: number) => void;
   availableTables?: { value: string; label: string }[];
+  onAddNewFood?: () => void;
 }
 
 const FilterControls: React.FC<FilterControlsProps> = ({
@@ -42,6 +43,7 @@ const FilterControls: React.FC<FilterControlsProps> = ({
   itemsPerPage,
   onItemsPerPageChange,
   availableTables,
+  onAddNewFood,
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -49,6 +51,9 @@ const FilterControls: React.FC<FilterControlsProps> = ({
 
   // On desktop, always show filters
   const filtersVisible = !isMobile || showFilters;
+
+  // Check if current table is food table
+  const isFoodTable = activeTable === "food";
 
   return (
     <Box mb={2}>
@@ -60,7 +65,10 @@ const FilterControls: React.FC<FilterControlsProps> = ({
             mb: 1,
             color: theme.palette.mode === "dark" ? "#fff" : "#000",
             "&:hover": {
-              backgroundColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.1)",
+              backgroundColor:
+                theme.palette.mode === "dark"
+                  ? "rgba(255, 255, 255, 0.1)"
+                  : "rgba(0, 0, 0, 0.1)",
             },
           }}
         >
@@ -68,25 +76,72 @@ const FilterControls: React.FC<FilterControlsProps> = ({
         </Button>
       )}
       {filtersVisible && (
-        <Box
-          display="flex"
-          flexWrap="wrap"
-          alignItems="center"
-          sx={{
-            flexDirection: { xs: "column", sm: "row" },
-            gap: { xs: 1, sm: 2 },
-          }}
-        >
-          {onTableChange && availableTables && (
-            <FormControl
+        <>
+          {/* First row - Filters */}
+          <Box
+            display="flex"
+            flexWrap="wrap"
+            alignItems="center"
+            sx={{
+              flexDirection: { xs: "column", sm: "row" },
+              gap: { xs: 1, sm: 2 },
+              mb: isFoodTable ? 2 : 0,
+            }}
+          >
+            {onTableChange && availableTables && (
+              <FormControl
+                sx={{
+                  minWidth: 160,
+                  width: { xs: "100%", sm: "auto" },
+                  mb: { xs: 1, sm: 0 },
+                  "& .MuiInputLabel-root": {
+                    color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                  },
+                  "& .MuiSelect-select": {
+                    color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor:
+                      theme.palette.mode === "dark" ? "#666" : "#ccc",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor:
+                      theme.palette.mode === "dark" ? "#888" : "#999",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: theme.palette.primary.main,
+                  },
+                }}
+              >
+                <InputLabel id="table-select-label">Table</InputLabel>
+                <Select
+                  labelId="table-select-label"
+                  value={activeTable}
+                  label="Table"
+                  onChange={(e) => onTableChange(e.target.value)}
+                >
+                  {availableTables.map((table) => (
+                    <MenuItem key={table.value} value={table.value}>
+                      {table.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+
+            <TextField
+              label="Search"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
               sx={{
-                minWidth: 160,
+                minWidth: 200,
+                fontSize: { xs: 16, sm: 18 },
                 width: { xs: "100%", sm: "auto" },
                 mb: { xs: 1, sm: 0 },
                 "& .MuiInputLabel-root": {
                   color: theme.palette.mode === "dark" ? "#fff" : "#000",
                 },
-                "& .MuiSelect-select": {
+                "& .MuiInputBase-input": {
                   color: theme.palette.mode === "dark" ? "#fff" : "#000",
                 },
                 "& .MuiOutlinedInput-notchedOutline": {
@@ -99,116 +154,129 @@ const FilterControls: React.FC<FilterControlsProps> = ({
                   borderColor: theme.palette.primary.main,
                 },
               }}
-            >
-              <InputLabel id="table-select-label">Table</InputLabel>
-              <Select
-                labelId="table-select-label"
-                value={activeTable}
-                label="Table"
-                onChange={(e) => onTableChange(e.target.value)}
+              InputProps={{ style: { fontSize: 16 } }}
+              InputLabelProps={{ style: { fontSize: 16 } }}
+            />
+
+            {/* Only show date inputs for non-food tables */}
+            {!isFoodTable && (
+              <>
+                <TextField
+                  label="Start Date"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => onStartDateChange(e.target.value)}
+                  InputLabelProps={{ shrink: true, style: { fontSize: 16 } }}
+                  sx={{
+                    minWidth: 150,
+                    fontSize: { xs: 16, sm: 18 },
+                    width: { xs: "100%", sm: "auto" },
+                    mb: { xs: 1, sm: 0 },
+                    "& .MuiInputLabel-root": {
+                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor:
+                        theme.palette.mode === "dark" ? "#666" : "#ccc",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor:
+                        theme.palette.mode === "dark" ? "#888" : "#999",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: theme.palette.primary.main,
+                    },
+                  }}
+                  InputProps={{ style: { fontSize: 16 } }}
+                />
+
+                <TextField
+                  label="End Date"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => onEndDateChange(e.target.value)}
+                  InputLabelProps={{ shrink: true, style: { fontSize: 16 } }}
+                  sx={{
+                    minWidth: 150,
+                    fontSize: { xs: 16, sm: 18 },
+                    width: { xs: "100%", sm: "auto" },
+                    mb: { xs: 1, sm: 0 },
+                    "& .MuiInputLabel-root": {
+                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                    },
+                    "& .MuiInputBase-input": {
+                      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor:
+                        theme.palette.mode === "dark" ? "#666" : "#ccc",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor:
+                        theme.palette.mode === "dark" ? "#888" : "#999",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: theme.palette.primary.main,
+                    },
+                  }}
+                  InputProps={{ style: { fontSize: 16 } }}
+                />
+              </>
+            )}
+
+            {activeTable === "reservations" && (
+              <FormControl
+                sx={{
+                  minWidth: 140,
+                  fontSize: { xs: 16, sm: 18 },
+                  width: { xs: "100%", sm: "auto" },
+                  mb: { xs: 1, sm: 0 },
+                  "& .MuiInputLabel-root": {
+                    color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                  },
+                  "& .MuiSelect-select": {
+                    color: theme.palette.mode === "dark" ? "#fff" : "#000",
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor:
+                      theme.palette.mode === "dark" ? "#666" : "#ccc",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor:
+                      theme.palette.mode === "dark" ? "#888" : "#999",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: theme.palette.primary.main,
+                  },
+                }}
               >
-                {availableTables.map((table) => (
-                  <MenuItem key={table.value} value={table.value}>
-                    {table.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
+                <InputLabel id="status-filter-label">Status</InputLabel>
+                <Select
+                  labelId="status-filter-label"
+                  value={statusFilter}
+                  label="Status"
+                  onChange={(e) =>
+                    onStatusFilterChange(
+                      e.target.value as ReservationStatus | "all"
+                    )
+                  }
+                  sx={{ fontSize: { xs: 16, sm: 18 } }}
+                >
+                  <MenuItem value="all">All</MenuItem>
+                  <MenuItem value="pending">Pending</MenuItem>
+                  <MenuItem value="confirmed">Confirmed</MenuItem>
+                  <MenuItem value="completed">Completed</MenuItem>
+                  <MenuItem value="cancelled">Cancelled</MenuItem>
+                </Select>
+              </FormControl>
+            )}
 
-          <TextField
-            label="Search"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            sx={{
-              minWidth: 200,
-              fontSize: { xs: 16, sm: 18 },
-              width: { xs: "100%", sm: "auto" },
-              mb: { xs: 1, sm: 0 },
-              "& .MuiInputLabel-root": {
-                color: theme.palette.mode === "dark" ? "#fff" : "#000",
-              },
-              "& .MuiInputBase-input": {
-                color: theme.palette.mode === "dark" ? "#fff" : "#000",
-              },
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.mode === "dark" ? "#666" : "#ccc",
-              },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.mode === "dark" ? "#888" : "#999",
-              },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.primary.main,
-              },
-            }}
-            InputProps={{ style: { fontSize: 16 } }}
-            InputLabelProps={{ style: { fontSize: 16 } }}
-          />
-
-          <TextField
-            label="Start Date"
-            type="date"
-            value={startDate}
-            onChange={(e) => onStartDateChange(e.target.value)}
-            InputLabelProps={{ shrink: true, style: { fontSize: 16 } }}
-            sx={{
-              minWidth: 150,
-              fontSize: { xs: 16, sm: 18 },
-              width: { xs: "100%", sm: "auto" },
-              mb: { xs: 1, sm: 0 },
-              "& .MuiInputLabel-root": {
-                color: theme.palette.mode === "dark" ? "#fff" : "#000",
-              },
-              "& .MuiInputBase-input": {
-                color: theme.palette.mode === "dark" ? "#fff" : "#000",
-              },
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.mode === "dark" ? "#666" : "#ccc",
-              },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.mode === "dark" ? "#888" : "#999",
-              },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.primary.main,
-              },
-            }}
-            InputProps={{ style: { fontSize: 16 } }}
-          />
-
-          <TextField
-            label="End Date"
-            type="date"
-            value={endDate}
-            onChange={(e) => onEndDateChange(e.target.value)}
-            InputLabelProps={{ shrink: true, style: { fontSize: 16 } }}
-            sx={{
-              minWidth: 150,
-              fontSize: { xs: 16, sm: 18 },
-              width: { xs: "100%", sm: "auto" },
-              mb: { xs: 1, sm: 0 },
-              "& .MuiInputLabel-root": {
-                color: theme.palette.mode === "dark" ? "#fff" : "#000",
-              },
-              "& .MuiInputBase-input": {
-                color: theme.palette.mode === "dark" ? "#fff" : "#000",
-              },
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.mode === "dark" ? "#666" : "#ccc",
-              },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.mode === "dark" ? "#888" : "#999",
-              },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.primary.main,
-              },
-            }}
-            InputProps={{ style: { fontSize: 16 } }}
-          />
-
-          {activeTable === "reservations" && (
             <FormControl
               sx={{
-                minWidth: 140,
+                minWidth: 120,
                 fontSize: { xs: 16, sm: 18 },
                 width: { xs: "100%", sm: "auto" },
                 mb: { xs: 1, sm: 0 },
@@ -229,68 +297,54 @@ const FilterControls: React.FC<FilterControlsProps> = ({
                 },
               }}
             >
-              <InputLabel id="status-filter-label">Status</InputLabel>
+              <InputLabel id="items-per-page-label">Items per page</InputLabel>
               <Select
-                labelId="status-filter-label"
-                value={statusFilter}
-                label="Status"
-                onChange={(e) =>
-                  onStatusFilterChange(
-                    e.target.value as ReservationStatus | "all"
-                  )
-                }
+                labelId="items-per-page-label"
+                value={itemsPerPage}
+                label="Items per page"
+                onChange={(e) => {
+                  onItemsPerPageChange(Number(e.target.value));
+                }}
                 sx={{ fontSize: { xs: 16, sm: 18 } }}
               >
-                <MenuItem value="all">All</MenuItem>
-                <MenuItem value="pending">Pending</MenuItem>
-                <MenuItem value="confirmed">Confirmed</MenuItem>
-                <MenuItem value="completed">Completed</MenuItem>
-                <MenuItem value="cancelled">Cancelled</MenuItem>
+                <MenuItem value={5}>5</MenuItem>
+                <MenuItem value={10}>10</MenuItem>
+                <MenuItem value={25}>25</MenuItem>
+                <MenuItem value={50}>50</MenuItem>
+                <MenuItem value={100}>100</MenuItem>
               </Select>
             </FormControl>
-          )}
+          </Box>
 
-          <FormControl
-            sx={{
-              minWidth: 120,
-              fontSize: { xs: 16, sm: 18 },
-              width: { xs: "100%", sm: "auto" },
-              mb: { xs: 1, sm: 0 },
-              "& .MuiInputLabel-root": {
-                color: theme.palette.mode === "dark" ? "#fff" : "#000",
-              },
-              "& .MuiSelect-select": {
-                color: theme.palette.mode === "dark" ? "#fff" : "#000",
-              },
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.mode === "dark" ? "#666" : "#ccc",
-              },
-              "&:hover .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.mode === "dark" ? "#888" : "#999",
-              },
-              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                borderColor: theme.palette.primary.main,
-              },
-            }}
-          >
-            <InputLabel id="items-per-page-label">Items per page</InputLabel>
-            <Select
-              labelId="items-per-page-label"
-              value={itemsPerPage}
-              label="Items per page"
-              onChange={(e) => {
-                onItemsPerPageChange(Number(e.target.value));
+          {/* Second row - Action buttons for food table */}
+          {isFoodTable && onAddNewFood && (
+            <Box
+              display="flex"
+              justifyContent="flex-start"
+              sx={{
+                flexDirection: { xs: "column", sm: "row" },
+                gap: { xs: 1, sm: 2 },
               }}
-              sx={{ fontSize: { xs: 16, sm: 18 } }}
             >
-              <MenuItem value={5}>5</MenuItem>
-              <MenuItem value={10}>10</MenuItem>
-              <MenuItem value={25}>25</MenuItem>
-              <MenuItem value={50}>50</MenuItem>
-              <MenuItem value={100}>100</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
+              <Button
+                variant="contained"
+                onClick={onAddNewFood}
+                sx={{
+                  fontSize: { xs: 16, sm: 18 },
+                  minHeight: 44,
+                  minWidth: 120,
+                  backgroundColor: theme.palette.primary.main,
+                  color: theme.palette.primary.contrastText,
+                  "&:hover": {
+                    backgroundColor: theme.palette.primary.dark,
+                  },
+                }}
+              >
+                Add New Food
+              </Button>
+            </Box>
+          )}
+        </>
       )}
     </Box>
   );

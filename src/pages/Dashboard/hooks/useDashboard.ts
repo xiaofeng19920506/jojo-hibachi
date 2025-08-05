@@ -10,10 +10,14 @@ import {
   useGetAdminEmployeesQuery,
 } from "../../../services/api";
 import type { ReservationEntry, Employee, ReservationStatus } from "../types";
-import type { SortableEntry } from "../../../components/DataTable/types";
+import type {
+  SortableEntry,
+  FoodEntry,
+} from "../../../components/DataTable/types";
 import { useCustomersData } from "./useCustomersData";
 import { useEmployeesData } from "./useEmployeesData";
 import { useReservationsData } from "./useReservationsData";
+import { useFoodData } from "./useFoodData";
 import { useDashboardDialog } from "./useDashboardDialog";
 import { useDashboardTableNavigation } from "./useDashboardTableNavigation";
 import { getAvailableActions, getGreeting } from "./dashboardUtils";
@@ -75,6 +79,18 @@ export const useDashboard = () => {
     error: allReservationsError,
   } = useReservationsData(activeTable, userRole);
 
+  const {
+    foodData,
+    isLoading: foodLoading,
+    error: foodError,
+    handleUpdateFood,
+    handleDeleteFood,
+    handleCreateFood,
+    isUpdateLoading,
+    isDeleteLoading,
+    isCreateLoading,
+  } = useFoodData();
+
   // All employees for assignment dropdowns (always available for admins)
   const { data: allEmployeesData } = useGetAdminEmployeesQuery(undefined, {
     skip: userRole !== "admin",
@@ -103,6 +119,8 @@ export const useDashboard = () => {
         return customersData || [];
       case "employees":
         return (employeesData as SortableEntry[]) || [];
+      case "food":
+        return (foodData as SortableEntry[]) || [];
       default:
         return [];
     }
@@ -112,11 +130,21 @@ export const useDashboard = () => {
   const getLoadingState = (): boolean => {
     switch (activeTable) {
       case "reservations":
-        return allReservationsLoading;
+        return (
+          allReservationsLoading ||
+          updateStatusLoading ||
+          assignChefLoading ||
+          cancelReservationLoading ||
+          updateReservationLoading
+        );
       case "customers":
-        return customersLoading;
+        return customersLoading || changeRoleLoading;
       case "employees":
-        return employeesLoading;
+        return employeesLoading || changeEmployeeStatusLoading;
+      case "food":
+        return (
+          foodLoading || isUpdateLoading || isDeleteLoading || isCreateLoading
+        );
       default:
         return false;
     }
@@ -130,90 +158,77 @@ export const useDashboard = () => {
         return customersError ? "Failed to fetch customers" : null;
       case "employees":
         return employeesError ? "Failed to fetch employees" : null;
+      case "food":
+        return foodError ? "Failed to fetch food items" : null;
       default:
         return null;
     }
   };
 
   const handleActionClick = (action: string, item: SortableEntry) => {
-    const normalizedAction = action.toLowerCase().replace(/\s/g, "");
-    if (activeTable === "reservations") {
-      const reservation = item as ReservationEntry;
-      setSelectedReservation(reservation);
-
-      switch (normalizedAction) {
-        case "edit":
-          setEditFormData({
-            date: reservation.date,
-            time: reservation.time,
-            price: reservation.price,
-            notes: reservation.notes || "",
-          });
-          setDialogType("edit");
-          setDialogOpen(true);
-          break;
-        case "assignchef":
-        case "assignemployee":
-          setSelectedEmployeeId(reservation.employeeId || "");
-          setDialogType("assign");
-          setDialogOpen(true);
-          break;
-        case "changestatus":
-        case "updatestatus":
-        case "status":
-          setSelectedStatus(reservation.status);
-          setDialogType("status");
-          setDialogOpen(true);
-          break;
-        case "cancel":
-          setSelectedReservation(reservation);
-          setDialogType("cancel");
-          setDialogOpen(true);
-          break;
-        case "selectmenu":
-          // Navigate to menu page
-          window.location.href = `/reservation/${reservation.id}/menu`;
-          break;
-        default:
-          break;
-      }
-    } else if (activeTable === "employees") {
-      const employee = item as any;
-      setSelectedReservation(employee as any);
-
-      switch (action) {
-        case "Change Status":
-          setSelectedStatus(employee.status as any);
-          setDialogType("status");
-          setDialogOpen(true);
-          break;
-        case "Change Role":
-          setEditFormData({
-            role: employee.role as string,
-          } as Partial<ReservationEntry> & { role: string });
-          setDialogType("role");
-          setDialogOpen(true);
-          break;
-        default:
-          break;
-      }
-    } else if (activeTable === "customers") {
-      const customer = item as any;
-      setSelectedReservation(customer as any);
-
-      switch (normalizedAction) {
-        case "changerole":
-          setEditFormData({
-            role: customer.role as string,
-          } as Partial<ReservationEntry> & { role: string });
-          setDialogType("role");
-          setDialogOpen(true);
-          break;
-        default:
-          break;
-      }
-    } else {
-      // No-op
+    switch (activeTable) {
+      case "reservations":
+        const reservation = item as ReservationEntry;
+        switch (action.toLowerCase()) {
+          case "edit":
+            setDialogType("edit");
+            setEditFormData({
+              date: reservation.date,
+              time: reservation.time,
+              price: reservation.price,
+              notes: reservation.notes || "",
+            });
+            setDialogOpen(true);
+            break;
+          case "cancel":
+            setDialogType("cancel");
+            setSelectedReservation(reservation);
+            setDialogOpen(true);
+            break;
+          case "assign employee":
+            setDialogType("assign");
+            setSelectedReservation(reservation);
+            setDialogOpen(true);
+            break;
+          case "update status":
+            setDialogType("status");
+            setSelectedReservation(reservation);
+            setSelectedStatus(reservation.status || "pending");
+            setDialogOpen(true);
+            break;
+          default:
+            console.log(`Action ${action} not implemented for reservations`);
+        }
+        break;
+      case "food":
+        const food = item as FoodEntry;
+        switch (action.toLowerCase()) {
+          case "update":
+            setDialogType("edit");
+            setEditFormData({
+              name: food.name,
+              description: food.description,
+              price: food.price,
+              category: food.category,
+              status: food.status,
+              preparationTime: food.preparationTime,
+              calories: food.calories,
+            });
+            setDialogOpen(true);
+            break;
+          case "delete":
+            setDialogType("delete");
+            setSelectedReservation(food as any);
+            setDialogOpen(true);
+            break;
+          default:
+            console.log(`Action ${action} not implemented for food`);
+        }
+        break;
+      default:
+        console.log(
+          `Action ${action} not implemented for table ${activeTable}`
+        );
     }
   };
 
@@ -226,7 +241,15 @@ export const useDashboard = () => {
   };
 
   const handleDialogSave = async () => {
-    if (!selectedReservation) return;
+    console.log("[handleDialogSave] Function called with:", {
+      dialogType,
+      activeTable,
+      editFormData,
+      selectedReservation,
+    });
+
+    // Allow add dialog to proceed without selectedReservation
+    if (!selectedReservation && dialogType !== "add") return;
     if (dialogType === "assign" && userRole !== "admin") {
       console.error("Only admins can assign employees");
       return;
@@ -273,26 +296,112 @@ export const useDashboard = () => {
           // Assuming the intent was to update the employee status if it were still available.
           // Since updateEmployee is removed, this block will now only update the status
           // if the employee is the currently logged-in user.
-          if (userRole === "admin" && user?.id === selectedReservation.id) {
+          if (
+            userRole === "admin" &&
+            selectedReservation &&
+            user?.id === selectedReservation.id
+          ) {
             await updateReservationStatus({
               id: selectedReservation.id,
               status: selectedStatus,
             }).unwrap();
           }
         } else if (activeTable === "customers") {
+        } else if (activeTable === "food") {
+          // Update food item
+          if (!selectedReservation) {
+            console.error("No food item selected for update");
+            return;
+          }
+
+          try {
+            await handleUpdateFood(
+              selectedReservation.id,
+              editFormData as Partial<FoodEntry>
+            );
+            console.log("[handleDialogSave] Food item update successful");
+          } catch (error) {
+            console.error("[handleDialogSave] Food item update failed:", error);
+            throw error;
+          }
         } else {
-          if (userRole === "admin") {
+          if (userRole === "admin" && selectedReservation) {
             await updateReservationStatus({
               id: selectedReservation.id,
               status: selectedStatus,
             }).unwrap();
           }
         }
+      } else if (dialogType === "add" && activeTable === "food") {
+        // Add new food item
+        try {
+          const foodData = editFormData as Partial<FoodEntry>;
+
+          console.log("[handleDialogSave] Food data for validation:", foodData);
+
+          // Validate required fields
+          if (!foodData.name || foodData.name.trim() === "") {
+            console.error("Name is required");
+            throw new Error("Name is required");
+          }
+          if (!foodData.description || foodData.description.trim() === "") {
+            console.error("Description is required");
+            throw new Error("Description is required");
+          }
+          if (
+            foodData.price === undefined ||
+            foodData.price === null ||
+            foodData.price < 0
+          ) {
+            console.error(
+              "Price is required and must be greater than or equal to 0"
+            );
+            throw new Error(
+              "Price is required and must be greater than or equal to 0"
+            );
+          }
+          if (!foodData.category || foodData.category.trim() === "") {
+            console.error("Category is required");
+            throw new Error("Category is required");
+          }
+
+          const newFoodData = {
+            name: foodData.name.trim(),
+            description: foodData.description.trim(),
+            price: Number(foodData.price),
+            category: foodData.category,
+          };
+
+          console.log("[handleDialogSave] Sending food data:", newFoodData);
+          await handleCreateFood(newFoodData);
+          console.log("[handleDialogSave] Food item creation successful");
+        } catch (error) {
+          console.error("[handleDialogSave] Food item creation failed:", error);
+          throw error;
+        }
+      } else if (dialogType === "delete" && activeTable === "food") {
+        // Delete food item
+        if (!selectedReservation) {
+          console.error("No food item selected for deletion");
+          return;
+        }
+
+        try {
+          await handleDeleteFood(selectedReservation.id);
+          console.log("[handleDialogSave] Food item deletion successful");
+        } catch (error) {
+          console.error("[handleDialogSave] Food item deletion failed:", error);
+          throw error;
+        }
       } else if (
         dialogType === "role" &&
         (activeTable === "customers" || activeTable === "employees")
       ) {
         // Change user role (for customers or employees)
+        if (!selectedReservation) {
+          console.error("No user selected for role change");
+          return;
+        }
         await changeUserRole({
           userId: selectedReservation.id,
           role: (editFormData as { role: string }).role,
@@ -300,6 +409,10 @@ export const useDashboard = () => {
       } else if (dialogType === "status" && activeTable === "employees") {
         if (userRole !== "admin") {
           console.error("Only admins can change employee status");
+          return;
+        }
+        if (!selectedReservation) {
+          console.error("No employee selected for status change");
           return;
         }
         // Use the correct mutation for employee status
@@ -316,6 +429,10 @@ export const useDashboard = () => {
         }
         if (!selectedStatus) {
           console.error("No status selected for update");
+          return;
+        }
+        if (!selectedReservation) {
+          console.error("No reservation selected for status update");
           return;
         }
 
@@ -335,6 +452,10 @@ export const useDashboard = () => {
         }
         if (!selectedEmployeeId) {
           console.error("No employee selected for assignment");
+          return;
+        }
+        if (!selectedReservation) {
+          console.error("No reservation selected for assignment");
           return;
         }
 
@@ -390,6 +511,7 @@ export const useDashboard = () => {
           { value: "reservations", label: "All Reservations" },
           { value: "customers", label: "Customers" },
           { value: "employees", label: "Employees" },
+          { value: "food", label: "Food Menu" },
         ];
       default:
         return [];
@@ -483,7 +605,8 @@ export const useDashboard = () => {
 
   // Memoize the getAvailableActions function to prevent unnecessary re-renders
   const memoizedGetAvailableActions = useMemo(() => {
-    return (_item: SortableEntry) => getAvailableActions(userRole, activeTable);
+    return (item: SortableEntry) =>
+      getAvailableActions(item, userRole, activeTable);
   }, [userRole, activeTable]);
 
   return {
@@ -502,6 +625,7 @@ export const useDashboard = () => {
     setDialogType,
     selectedReservation,
     editFormData,
+    setEditFormData,
     selectedEmployeeId,
     selectedStatus,
     loading:

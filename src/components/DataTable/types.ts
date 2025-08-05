@@ -42,10 +42,30 @@ export interface ReservationEntry extends BaseEntry {
   notes?: string;
 }
 
-export type TableType = "customers" | "orders" | "employees" | "reservations";
+export interface FoodEntry extends BaseEntry {
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  status: "active" | "inactive";
+  image?: string;
+  allergens?: string[];
+  preparationTime?: number;
+  calories?: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type TableType =
+  | "customers"
+  | "orders"
+  | "employees"
+  | "reservations"
+  | "food";
 
 export type SortableEntry =
   | CustomerEntry
   | OrderEntry
   | EmployeeEntry
-  | ReservationEntry;
+  | ReservationEntry
+  | FoodEntry;

@@ -1,26 +1,48 @@
-export function getAvailableActions(userRole: string, activeTable: string) {
-  const actions: string[] = [];
-  switch (userRole) {
-    case "user":
-      if (activeTable === "reservations")
-        actions.push("Edit", "Cancel", "Select Menu");
-      break;
-    case "employee":
-      if (activeTable === "reservations")
-        actions.push("Edit", "Update Status", "Select Menu");
-      break;
-    case "admin":
-      if (activeTable === "reservations") {
-        actions.push("Edit", "Assign Employee", "Update Status");
-      } else if (activeTable === "employees") {
-        actions.push("Update Status", "Change Role");
-      } else if (activeTable === "customers") {
-        actions.push("Change Role");
+export const getAvailableActions = (
+  item: any,
+  userRole: string,
+  activeTable: string
+): string[] => {
+  if (!item) return [];
+
+  switch (activeTable) {
+    case "customers":
+      return userRole === "admin"
+        ? ["View Details", "Change Role"]
+        : ["View Details"];
+    case "employees":
+      return userRole === "admin"
+        ? [
+            "Change Role",
+            "Update Status",
+            "View Profile",
+            "Edit Employee",
+            "Reset Password",
+          ]
+        : ["View Profile"];
+    case "orders":
+      return userRole === "admin"
+        ? [
+            "Assign Employee",
+            "Update Status",
+            "View Details",
+            "Edit Order",
+            "Cancel Order",
+          ]
+        : ["View Details"];
+    case "reservations":
+      if (userRole === "admin") {
+        return ["Edit", "Cancel", "Assign Employee", "Update Status"];
+      } else if (userRole === "employee") {
+        return ["Edit", "Cancel", "Update Status"];
       }
-      break;
+      return ["Edit", "Cancel"];
+    case "food":
+      return userRole === "admin" ? ["Update", "Delete"] : [];
+    default:
+      return [];
   }
-  return actions;
-}
+};
 
 export function getGreeting(user: any) {
   if (!user) return "Welcome";

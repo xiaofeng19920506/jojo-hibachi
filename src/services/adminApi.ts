@@ -118,4 +118,51 @@ export const adminApiEndpoints = (
     }),
     invalidatesTags: ["Employees"],
   }),
+  // Food/Menu Management Endpoints
+  getMenuItems: builder.query<any[], void>({
+    query: () => "/admin/food",
+    transformResponse: (response: {
+      status: string;
+      data: { foodItems: any[] };
+    }) => {
+      if (response.status === "success") {
+        return response.data.foodItems || [];
+      }
+      return [];
+    },
+    providesTags: ["MenuItems"],
+  }),
+  getMenuItemById: builder.query<any, string>({
+    query: (id: string) => `/admin/food/${id}`,
+    transformResponse: (response: { status: string; data: any }) => {
+      if (response.status === "success" && response.data) {
+        return response.data;
+      }
+      return null;
+    },
+    providesTags: ["MenuItems"],
+  }),
+  createMenuItem: builder.mutation<any, any>({
+    query: (menuItem: any) => ({
+      url: "/admin/food",
+      method: "POST",
+      body: menuItem,
+    }),
+    invalidatesTags: ["MenuItems"],
+  }),
+  updateMenuItem: builder.mutation<any, { id: string; [key: string]: any }>({
+    query: ({ id, ...updates }: { id: string; [key: string]: any }) => ({
+      url: `/admin/food/${id}`,
+      method: "PUT",
+      body: updates,
+    }),
+    invalidatesTags: ["MenuItems"],
+  }),
+  deleteMenuItem: builder.mutation<any, string>({
+    query: (id: string) => ({
+      url: `/admin/food/${id}`,
+      method: "DELETE",
+    }),
+    invalidatesTags: ["MenuItems"],
+  }),
 });
