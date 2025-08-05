@@ -6,6 +6,7 @@ import {
   useChangeUserRoleMutation,
   useGetAdminEmployeesQuery,
   useAssignChefToReservationMutation,
+  useChangeEmployeeStatusMutation,
 } from "../../../services/api";
 import type { Employee } from "../types";
 import type {
@@ -102,6 +103,7 @@ export const useDashboard = () => {
     useChangeUserRoleMutation();
   const [updateReservation] = useUpdateReservationMutation();
   const [assignChefToReservation] = useAssignChefToReservationMutation();
+  const [changeEmployeeStatus] = useChangeEmployeeStatusMutation();
 
   // Get loading state
   const getLoadingState = (): boolean => {
@@ -161,6 +163,7 @@ export const useDashboard = () => {
     updateReservationStatus,
     assignChefToReservation,
     changeUserRole,
+    changeEmployeeStatus,
     editFormData,
     selectedReservation,
     dialogType,

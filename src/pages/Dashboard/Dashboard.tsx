@@ -90,10 +90,10 @@ const Dashboard: React.FC = () => {
         color: theme.palette.mode === "dark" ? "#fff" : "#000",
       }}
     >
-      <Box sx={{ flex: 1, p: { xs: 1, sm: 3 }, overflow: "auto" }}>
+      <Box sx={{ flex: 1, p: { xs: 2, sm: 4, md: 6 }, overflow: "auto" }}>
         <Typography
           variant="h4"
-          mb={3}
+          mb={4}
           sx={{
             fontSize: { xs: 22, sm: 32 },
             color: theme.palette.mode === "dark" ? "#fff" : "#000",
@@ -145,6 +145,8 @@ const Dashboard: React.FC = () => {
             : {})}
         />
 
+        <Box sx={{ my: 3 }} />
+
         {loading ? (
           <Box
             display="flex"
@@ -176,7 +178,11 @@ const Dashboard: React.FC = () => {
               }}
             >
               <Box
-                sx={{ width: "100%", overflowX: { xs: "auto", sm: "visible" } }}
+                sx={{
+                  width: "100%",
+                  overflowX: { xs: "auto", sm: "visible" },
+                  p: { xs: 1, sm: 2 },
+                }}
               >
                 <DataTable
                   tableType={activeTable as TableType}

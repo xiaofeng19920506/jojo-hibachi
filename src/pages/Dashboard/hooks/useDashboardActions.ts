@@ -43,6 +43,9 @@ interface UseDashboardActionsProps {
   changeUserRole: (args: { userId: string; role: string }) => {
     unwrap: () => Promise<unknown>;
   };
+  changeEmployeeStatus: (args: { userId: string; isActive: boolean }) => {
+    unwrap: () => Promise<unknown>;
+  };
   editFormData: Partial<ReservationEntry> | Partial<FoodEntry>;
   selectedReservation: ReservationEntry | null;
   dialogType: string;
@@ -67,6 +70,7 @@ export function useDashboardActions({
   updateReservationStatus,
   assignChefToReservation,
   changeUserRole,
+  changeEmployeeStatus,
   editFormData,
   selectedReservation,
   dialogType,
@@ -250,12 +254,13 @@ export function useDashboardActions({
   };
 
   const handleDialogSave = async () => {
-    // Allow add dialog and food edit/delete to proceed without selectedReservation
+    // Allow add dialog, food edit/delete, and employee status updates to proceed without selectedReservation
     if (
       !selectedReservation &&
       dialogType !== "add" &&
       !(dialogType === "edit" && activeTable === "food") &&
-      !(dialogType === "delete" && activeTable === "food")
+      !(dialogType === "delete" && activeTable === "food") &&
+      !(dialogType === "status" && activeTable === "employees")
     ) {
       return;
     }
@@ -287,7 +292,21 @@ export function useDashboardActions({
         }).unwrap();
         handleDialogClose(); // Close modal after successful update
       } else if (activeTable === "employees") {
-        // Handle employee status updates if needed
+        // Handle employee status updates
+        const employeeId = (editFormData as Record<string, unknown>)
+          .id as string;
+        if (!employeeId) {
+          throw new Error("No employee selected for status update");
+        }
+
+        // Convert status to boolean (assuming "active" = true, "inactive" = false)
+        const isActive = selectedStatus === "active";
+
+        await changeEmployeeStatus({
+          userId: employeeId,
+          isActive: isActive,
+        }).unwrap();
+        handleDialogClose(); // Close modal after successful update
       } else if (activeTable === "orders") {
         // Handle order status updates if needed
       }
