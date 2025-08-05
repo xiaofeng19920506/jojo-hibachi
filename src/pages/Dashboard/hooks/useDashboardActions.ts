@@ -132,7 +132,8 @@ export function useDashboardActions({
               id: customer.id as string,
               name: customer.name as string,
               email: customer.email as string,
-            });
+              role: "user", // Set default role
+            } as any);
             setDialogOpen(true);
             break;
           default:
@@ -187,7 +188,8 @@ export function useDashboardActions({
               id: employee.id as string,
               name: employee.name as string,
               email: employee.email as string,
-            });
+              role: "employee", // Set default role
+            } as any);
             setDialogOpen(true);
             break;
           case "update status":
@@ -254,13 +256,17 @@ export function useDashboardActions({
   };
 
   const handleDialogSave = async () => {
-    // Allow add dialog, food edit/delete, and employee status updates to proceed without selectedReservation
+    // Allow add dialog, food edit/delete, employee status updates, and role changes to proceed without selectedReservation
     if (
       !selectedReservation &&
       dialogType !== "add" &&
       !(dialogType === "edit" && activeTable === "food") &&
       !(dialogType === "delete" && activeTable === "food") &&
-      !(dialogType === "status" && activeTable === "employees")
+      !(dialogType === "status" && activeTable === "employees") &&
+      !(
+        dialogType === "role" &&
+        (activeTable === "customers" || activeTable === "employees")
+      )
     ) {
       return;
     }
@@ -452,9 +458,15 @@ export function useDashboardActions({
       if (!userId) {
         throw new Error("No user selected for role change");
       }
+      const selectedRole = (editFormData as Record<string, unknown>)
+        .role as string;
+      if (!selectedRole) {
+        throw new Error("No role selected for user");
+      }
+
       await changeUserRole({
         userId: userId,
-        role: (editFormData as { role: string }).role,
+        role: selectedRole,
       }).unwrap();
       handleDialogClose(); // Close modal after successful update
     }
