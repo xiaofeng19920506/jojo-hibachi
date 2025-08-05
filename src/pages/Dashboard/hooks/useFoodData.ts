@@ -20,7 +20,7 @@ export const useFoodData = () => {
   const transformedFoodData = useMemo(() => {
     if (!foodItems) return [];
 
-    return foodItems.map((item: any) => ({
+    return foodItems.map((item: Record<string, unknown>) => ({
       id: item.id,
       name: item.name,
       description: item.description,
@@ -40,35 +40,20 @@ export const useFoodData = () => {
     foodId: string,
     updates: Partial<FoodEntry>
   ) => {
-    try {
-      await updateMenuItem({ id: foodId, ...updates }).unwrap();
-      refetch();
-    } catch (error) {
-      console.error("Failed to update food item:", error);
-      throw error;
-    }
+    await updateMenuItem({ id: foodId, ...updates }).unwrap();
+    refetch();
   };
 
   const handleDeleteFood = async (foodId: string) => {
-    try {
-      await deleteMenuItem(foodId).unwrap();
-      refetch();
-    } catch (error) {
-      console.error("Failed to delete food item:", error);
-      throw error;
-    }
+    await deleteMenuItem(foodId).unwrap();
+    refetch();
   };
 
   const handleCreateFood = async (
     newFood: Omit<FoodEntry, "id" | "createdAt" | "updatedAt" | "status">
   ) => {
-    try {
-      await createMenuItem(newFood).unwrap();
-      refetch();
-    } catch (error) {
-      console.error("Failed to create food item:", error);
-      throw error;
-    }
+    await createMenuItem(newFood).unwrap();
+    refetch();
   };
 
   return {

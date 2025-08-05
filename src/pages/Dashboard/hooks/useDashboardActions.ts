@@ -108,7 +108,8 @@ export function useDashboardActions({
             window.location.href = `/reservation/${reservation.id}/menu`;
             break;
           default:
-            console.log(`Action ${action} not implemented for reservations`);
+            // Action not implemented for reservations
+            break;
         }
         break;
       }
@@ -142,14 +143,14 @@ export function useDashboardActions({
             setDialogOpen(true);
             break;
           default:
-            console.log(`Action ${action} not implemented for food`);
+            // Action not implemented for food
+            break;
         }
         break;
       }
       default:
-        console.log(
-          `Action ${action} not implemented for table ${activeTable}`
-        );
+        // Action not implemented for table ${activeTable}
+        break;
     }
   };
 
@@ -162,15 +163,6 @@ export function useDashboardActions({
   };
 
   const handleDialogSave = async () => {
-    // The full logic from useDashboard.ts
-    console.log("[handleDialogSave] Function called with:", {
-      dialogType,
-      activeTable,
-      editFormData,
-      selectedReservation,
-      userRole,
-    });
-
     // Allow add dialog and food edit/delete to proceed without selectedReservation
     if (
       !selectedReservation &&
@@ -178,13 +170,11 @@ export function useDashboardActions({
       !(dialogType === "edit" && activeTable === "food") &&
       !(dialogType === "delete" && activeTable === "food")
     ) {
-      console.log("[handleDialogSave] Early return - no selectedReservation");
       return;
     }
 
     if (dialogType === "assign" && userRole !== "admin") {
-      console.error("Only admins can assign employees");
-      return;
+      throw new Error("Only admins can assign employees");
     }
     if (
       dialogType === "status" &&
@@ -192,163 +182,99 @@ export function useDashboardActions({
       userRole !== "admin" &&
       userRole !== "employee"
     ) {
-      console.error("Only admins and employees can change reservation status");
-      return;
+      throw new Error("Only admins and employees can change reservation status");
     }
 
-    try {
-      if (dialogType === "edit") {
-        console.log("[handleDialogSave] Processing edit dialog");
-        if (activeTable === "orders") {
-          console.log("[handleDialogSave] Orders table - not implemented");
-        } else if (activeTable === "reservations") {
-          console.log("[handleDialogSave] Processing reservation edit");
-          // Update reservation for users and employees
-          if (!selectedReservation) {
-            console.error("No reservation selected for update");
-            return;
-          }
-
-          console.log("[handleDialogSave] Calling updateReservation with:", {
-            id: selectedReservation.id,
-            data: editFormData,
-          });
-
-          try {
-            // Use admin mutation for admin users, regular mutation for others
-            await updateReservation({
-              id: selectedReservation.id,
-              data: editFormData as Partial<ReservationEntry>,
-            }).unwrap();
-            console.log("[handleDialogSave] Reservation update successful");
-            handleDialogClose(); // Close modal after successful update
-          } catch (error) {
-            console.error(
-              "[handleDialogSave] Reservation update failed:",
-              error
-            );
-            throw error;
-          }
-        } else if (activeTable === "employees") {
-          // ... (keep as in original)
-        } else if (activeTable === "customers") {
-          // Handle customer updates if needed
-          console.log("[handleDialogSave] Customer updates not implemented");
-        } else if (activeTable === "food") {
-          // Update food item
-          const foodId = (editFormData as Record<string, unknown>).id as string;
-          if (!foodId) {
-            console.error("No food item ID found for update");
-            return;
-          }
-
-          try {
-            console.log("[handleDialogSave] Updating food item:", {
-              foodId: foodId,
-              updates: editFormData,
-            });
-
-            await handleUpdateFood(foodId, editFormData as Partial<FoodEntry>);
-            console.log("[handleDialogSave] Food item update successful");
-            handleDialogClose(); // Close modal after successful update
-          } catch (error) {
-            console.error("[handleDialogSave] Food item update failed:", error);
-            throw error;
-          }
-        } else {
-          if (userRole === "admin" && selectedReservation) {
-            await updateReservationStatus({
-              id: selectedReservation.id,
-              status: selectedStatus,
-            }).unwrap();
-          }
-        }
-      } else if (dialogType === "add" && activeTable === "food") {
-        // Add new food item
-        try {
-          const foodData = editFormData as Partial<FoodEntry>;
-
-          console.log("[handleDialogSave] Food data for validation:", foodData);
-
-          // Validate required fields
-          if (!foodData.name || foodData.name.trim() === "") {
-            console.error("Name is required");
-            throw new Error("Name is required");
-          }
-          if (!foodData.description || foodData.description.trim() === "") {
-            console.error("Description is required");
-            throw new Error("Description is required");
-          }
-          if (
-            foodData.price === undefined ||
-            foodData.price === null ||
-            foodData.price < 0
-          ) {
-            console.error(
-              "Price is required and must be greater than or equal to 0"
-            );
-            throw new Error(
-              "Price is required and must be greater than or equal to 0"
-            );
-          }
-          if (!foodData.category || foodData.category.trim() === "") {
-            console.error("Category is required");
-            throw new Error("Category is required");
-          }
-
-          const newFoodData = {
-            name: foodData.name.trim(),
-            description: foodData.description.trim(),
-            price: Number(foodData.price),
-            category: foodData.category,
-          };
-
-          console.log("[handleDialogSave] Sending food data:", newFoodData);
-          await handleCreateFood(newFoodData);
-          console.log("[handleDialogSave] Food item creation successful");
-          handleDialogClose(); // Close modal after successful update
-        } catch (error) {
-          console.error("[handleDialogSave] Food item creation failed:", error);
-          throw error;
-        }
-      } else if (dialogType === "delete" && activeTable === "food") {
-        // Delete food item
-        const foodId = (editFormData as Record<string, unknown>).id as string;
-        if (!foodId) {
-          console.error("No food item ID found for deletion");
-          return;
-        }
-
-        try {
-          console.log("[handleDialogSave] Deleting food item:", {
-            foodId: foodId,
-          });
-
-          await handleDeleteFood(foodId);
-          console.log("[handleDialogSave] Food item deletion successful");
-          handleDialogClose(); // Close modal after successful update
-        } catch (error) {
-          console.error("[handleDialogSave] Food item deletion failed:", error);
-          throw error;
-        }
-      } else if (
-        dialogType === "role" &&
-        (activeTable === "customers" || activeTable === "employees")
-      ) {
-        // Change user role (for customers or employees)
+    if (dialogType === "edit") {
+      if (activeTable === "orders") {
+        // Orders table - not implemented
+      } else if (activeTable === "reservations") {
+        // Update reservation for users and employees
         if (!selectedReservation) {
-          console.error("No user selected for role change");
-          return;
+          throw new Error("No reservation selected for update");
         }
-        await changeUserRole({
-          userId: selectedReservation.id,
-          role: (editFormData as { role: string }).role,
+
+        await updateReservation({
+          id: selectedReservation.id,
+          data: editFormData as Partial<ReservationEntry>,
         }).unwrap();
         handleDialogClose(); // Close modal after successful update
+      } else if (activeTable === "employees") {
+        // Handle employee updates if needed
+      } else if (activeTable === "customers") {
+        // Handle customer updates if needed
+      } else if (activeTable === "food") {
+        // Update food item
+        const foodId = (editFormData as Record<string, unknown>).id as string;
+        if (!foodId) {
+          throw new Error("No food item ID found for update");
+        }
+
+        await handleUpdateFood(foodId, editFormData as Partial<FoodEntry>);
+        handleDialogClose(); // Close modal after successful update
+      } else {
+        if (userRole === "admin" && selectedReservation) {
+          await updateReservationStatus({
+            id: selectedReservation.id,
+            status: selectedStatus,
+          }).unwrap();
+        }
       }
-    } catch (error) {
-      console.error("[handleDialogSave] Error:", error);
-      throw error;
+    } else if (dialogType === "add" && activeTable === "food") {
+      // Add new food item
+      const foodData = editFormData as Partial<FoodEntry>;
+
+      // Validate required fields
+      if (!foodData.name || foodData.name.trim() === "") {
+        throw new Error("Name is required");
+      }
+      if (!foodData.description || foodData.description.trim() === "") {
+        throw new Error("Description is required");
+      }
+      if (
+        foodData.price === undefined ||
+        foodData.price === null ||
+        foodData.price < 0
+      ) {
+        throw new Error(
+          "Price is required and must be greater than or equal to 0"
+        );
+      }
+      if (!foodData.category || foodData.category.trim() === "") {
+        throw new Error("Category is required");
+      }
+
+      const newFoodData = {
+        name: foodData.name.trim(),
+        description: foodData.description.trim(),
+        price: Number(foodData.price),
+        category: foodData.category,
+      };
+
+      await handleCreateFood(newFoodData);
+      handleDialogClose(); // Close modal after successful update
+    } else if (dialogType === "delete" && activeTable === "food") {
+      // Delete food item
+      const foodId = (editFormData as Record<string, unknown>).id as string;
+      if (!foodId) {
+        throw new Error("No food item ID found for deletion");
+      }
+
+      await handleDeleteFood(foodId);
+      handleDialogClose(); // Close modal after successful deletion
+    } else if (
+      dialogType === "role" &&
+      (activeTable === "customers" || activeTable === "employees")
+    ) {
+      // Change user role (for customers or employees)
+      if (!selectedReservation) {
+        throw new Error("No user selected for role change");
+      }
+      await changeUserRole({
+        userId: selectedReservation.id,
+        role: (editFormData as { role: string }).role,
+      }).unwrap();
+      handleDialogClose(); // Close modal after successful update
     }
   };
 

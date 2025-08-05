@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -61,6 +61,25 @@ const MenuPage: React.FC = () => {
     error: menuError,
   } = useGetMenuItemsQuery();
 
+  const transformedMenuItems = useMemo(() => {
+    if (!menuItems) return [];
+
+    return menuItems.map((item: Record<string, unknown>) => ({
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      price: item.price,
+      category: item.category,
+      status: item.status || "active",
+      image: item.image,
+      allergens: item.allergens || [],
+      preparationTime: item.preparationTime,
+      calories: item.calories,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+    })) as FoodEntry[];
+  }, [menuItems]);
+
   const [addFoodOrder, { isLoading: isSubmitting }] = useAddFoodOrderMutation();
 
   // Get user role from Redux store
@@ -79,9 +98,9 @@ const MenuPage: React.FC = () => {
     ) {
       // Transform existing food orders to cart items
       const existingCartItems = reservation.foodOrder
-        .map((order: any) => {
+        .map((order: Record<string, unknown>) => {
           // Find the corresponding menu item
-          const menuItem = menuItems.find(
+          const menuItem = transformedMenuItems.find(
             (item: FoodEntry) => item.id === order.food
           );
           if (menuItem) {
@@ -97,7 +116,7 @@ const MenuPage: React.FC = () => {
 
       setCart(existingCartItems);
     }
-  }, [reservation, menuItems]);
+  }, [reservation, transformedMenuItems]);
 
   const totalGuests = (reservation?.adult || 0) + (reservation?.kids || 0);
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -107,11 +126,11 @@ const MenuPage: React.FC = () => {
   );
 
   // Filter menu items by category - only show active items
-  const activeMenuItems = menuItems;
+  const activeMenuItems = transformedMenuItems;
 
-  // Debug: Log the menu items to see what we're getting
-  console.log("MenuPage - menuItems:", menuItems);
-  console.log("MenuPage - activeMenuItems:", activeMenuItems);
+  // Remove console.log statements
+  // console.log("MenuPage - menuItems:", menuItems);
+  // console.log("MenuPage - activeMenuItems:", activeMenuItems);
 
   const handleAddToCart = () => {
     if (!selectedItem) return;
@@ -196,9 +215,9 @@ const MenuPage: React.FC = () => {
 
       // Navigate to dashboard after successful save
       navigate("/dashboard");
-    } catch (error) {
-      console.error("Failed to save food order:", error);
-      // You might want to show an error message to the user here
+    } catch {
+      // Handle error silently or show user-friendly message
+      // setError("Failed to save food order. Please try again.");
     }
   };
 

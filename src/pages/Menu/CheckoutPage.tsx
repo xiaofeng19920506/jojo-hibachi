@@ -124,8 +124,8 @@ const CheckoutPage: React.FC = () => {
       }
 
       setActiveStep(2);
-    } catch (error) {
-      console.error("Failed to submit order:", error);
+    } catch {
+      // Handle error silently or show user-friendly message
     } finally {
       setIsSubmitting(false);
     }
