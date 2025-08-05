@@ -123,6 +123,26 @@ export function useDashboardActions({
         }
         break;
       }
+      case "pending-reservations": {
+        const reservation = item as ReservationEntry;
+        switch (action.toLowerCase()) {
+          case "assign employee":
+            setDialogType("assign");
+            setSelectedReservation(reservation);
+            setDialogOpen(true);
+            break;
+          case "update status":
+            setDialogType("status");
+            setSelectedReservation(reservation);
+            setSelectedStatus(reservation.status || "pending");
+            setDialogOpen(true);
+            break;
+          default:
+            // Action not implemented for pending reservations
+            break;
+        }
+        break;
+      }
       case "customers": {
         const customer = item as unknown as Record<string, unknown>;
         switch (action.toLowerCase()) {
@@ -256,7 +276,7 @@ export function useDashboardActions({
   };
 
   const handleDialogSave = async () => {
-    // Allow add dialog, food edit/delete, employee status updates, and role changes to proceed without selectedReservation
+    // Allow add dialog, food edit/delete, employee status updates, role changes, and pending reservations to proceed without selectedReservation
     if (
       !selectedReservation &&
       dialogType !== "add" &&
@@ -266,7 +286,8 @@ export function useDashboardActions({
       !(
         dialogType === "role" &&
         (activeTable === "customers" || activeTable === "employees")
-      )
+      ) &&
+      !(activeTable === "pending-reservations")
     ) {
       return;
     }
@@ -286,7 +307,10 @@ export function useDashboardActions({
     }
 
     if (dialogType === "status") {
-      if (activeTable === "reservations") {
+      if (
+        activeTable === "reservations" ||
+        activeTable === "pending-reservations"
+      ) {
         // Update reservation status for admins and employees
         if (!selectedReservation) {
           throw new Error("No reservation selected for status update");
@@ -342,7 +366,10 @@ export function useDashboardActions({
         handleDialogClose(); // Close modal after successful update
       }
     } else if (dialogType === "assign") {
-      if (activeTable === "reservations") {
+      if (
+        activeTable === "reservations" ||
+        activeTable === "pending-reservations"
+      ) {
         // Assign employee to reservation
         if (!selectedReservation) {
           throw new Error("No reservation selected for employee assignment");

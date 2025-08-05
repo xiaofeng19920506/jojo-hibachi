@@ -50,6 +50,7 @@ export const {
   useGetEmployeeAssignedQuery,
   useGetEmployeeAssignedByIdQuery,
   useGetEmployeeAssignedByDateQuery,
+  useGetEmployeePendingReservationsQuery,
   useGetAdminCustomersQuery,
   useGetAdminEmployeesQuery,
   useGetAdminReservationsQuery,

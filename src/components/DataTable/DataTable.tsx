@@ -126,6 +126,18 @@ const DataTable: React.FC<DataTableProps> = ({
             "foodOrders",
             "actions",
           ],
+    "pending-reservations": [
+      "id",
+      "customerName",
+      "address",
+      "date",
+      "time",
+      "status",
+      "price",
+      "notes",
+      "foodOrders",
+      "actions",
+    ],
     orders: [
       "customerName",
       "service",
@@ -153,10 +165,11 @@ const DataTable: React.FC<DataTableProps> = ({
       if (!dateValue) return "-";
       // Use dayjs if available, fallback to Date
       try {
-        return dayjs(dateValue).isValid()
+        const formattedDate = dayjs(dateValue).isValid()
           ? dayjs(dateValue).format("YYYY-MM-DD")
           : new Date(dateValue).toLocaleDateString();
-      } catch {
+        return formattedDate;
+      } catch (error) {
         return dateValue;
       }
     }

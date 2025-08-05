@@ -10,6 +10,7 @@ interface UseDashboardFilteringProps {
   activeTable: string;
   statusFilter: string;
   allReservationsData: SortableEntry[];
+  pendingReservationsData: SortableEntry[];
   customersData: SortableEntry[];
   employeesData: SortableEntry[];
   foodData: SortableEntry[];
@@ -25,6 +26,7 @@ export function useDashboardFiltering({
   activeTable,
   statusFilter,
   allReservationsData,
+  pendingReservationsData,
   customersData,
   employeesData,
   foodData,
@@ -35,6 +37,8 @@ export function useDashboardFiltering({
     switch (activeTable) {
       case "reservations":
         return allReservationsData || [];
+      case "pending-reservations":
+        return pendingReservationsData || [];
       case "customers":
         return customersData || [];
       case "employees":

@@ -17,6 +17,7 @@ import { getAvailableActions } from "./dashboardUtils";
 import { useCustomersData } from "./useCustomersData";
 import { useEmployeesData } from "./useEmployeesData";
 import { useReservationsData } from "./useReservationsData";
+import { usePendingReservationsData } from "./usePendingReservationsData";
 import { useFoodData } from "./useFoodData";
 import { useDashboardDialog } from "./useDashboardDialog";
 import { useDashboardTableNavigation } from "./useDashboardTableNavigation";
@@ -80,6 +81,12 @@ export const useDashboard = () => {
   } = useReservationsData(activeTable, userRole);
 
   const {
+    data: pendingReservationsData,
+    isLoading: pendingReservationsLoading,
+    error: pendingReservationsError,
+  } = usePendingReservationsData(activeTable, userRole);
+
+  const {
     foodData,
     isLoading: foodLoading,
     error: foodError,
@@ -110,6 +117,8 @@ export const useDashboard = () => {
     switch (activeTable) {
       case "reservations":
         return allReservationsLoading || updateStatusLoading;
+      case "pending-reservations":
+        return pendingReservationsLoading || updateStatusLoading;
       case "customers":
         return customersLoading || changeRoleLoading;
       case "employees":
@@ -127,6 +136,10 @@ export const useDashboard = () => {
     switch (activeTable) {
       case "reservations":
         return allReservationsError ? "Failed to fetch reservations" : null;
+      case "pending-reservations":
+        return pendingReservationsError
+          ? "Failed to fetch pending reservations"
+          : null;
       case "customers":
         return customersError ? "Failed to fetch customers" : null;
       case "employees":
@@ -178,7 +191,10 @@ export const useDashboard = () => {
       case "user":
         return [{ value: "reservations", label: "My Reservations" }];
       case "employee":
-        return [{ value: "reservations", label: "My Reservations" }];
+        return [
+          { value: "reservations", label: "My Reservations" },
+          { value: "pending-reservations", label: "Pending Reservations" },
+        ];
       case "admin":
         return [
           { value: "reservations", label: "All Reservations" },
@@ -212,6 +228,7 @@ export const useDashboard = () => {
       activeTable,
       statusFilter,
       allReservationsData: allReservationsData || [],
+      pendingReservationsData: pendingReservationsData || [],
       customersData: customersData || [],
       employeesData: employeesData || [],
       foodData: foodData || [],

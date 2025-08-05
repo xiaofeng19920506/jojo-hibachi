@@ -46,6 +46,19 @@ export const employeeApiEndpoints = (
     },
     providesTags: ["Reservations"],
   }),
+  getEmployeePendingReservations: builder.query<any[], void>({
+    query: () => "/employee/pending",
+    transformResponse: (response: {
+      status: string;
+      data: { reservations: any[] };
+    }) => {
+      if (response.status === "success" && response.data?.reservations) {
+        return transformApiData(response.data.reservations || []);
+      }
+      return [];
+    },
+    providesTags: ["Reservations"],
+  }),
   cancelReservation: builder.mutation<any, { id: string }>({
     query: ({ id }: { id: string }) => ({
       url: `/reservation/${id}/cancel`,

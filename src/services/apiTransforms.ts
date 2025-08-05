@@ -31,19 +31,68 @@ export const transformApiData = (
         employeeName = "Unassigned"; // Better fallback name
       }
     }
+    // Handle customer name properly
+    let customerName = "";
+
+    // Use customerFullName if available, otherwise combine firstName and lastName
+    if ((item as any).customerFullName) {
+      customerName = (item as any).customerFullName;
+    } else {
+      // Check for firstName and lastName with more robust checking
+      const firstName = item.firstName || (item as any).firstName || "";
+      const lastName = item.lastName || (item as any).lastName || "";
+
+      if (firstName && lastName) {
+        customerName = `${firstName} ${lastName}`.trim();
+      } else if (firstName) {
+        customerName = firstName;
+      } else if (lastName) {
+        customerName = lastName;
+      } else {
+        // Try alternative field names
+        const name = (item as any).name || (item as any).customerName || "";
+        if (name) {
+          customerName = name;
+        } else {
+          customerName = "Unknown Customer";
+        }
+      }
+    }
+
     const result = {
-      id: item._id,
-      customerId: item._id,
-      customerName: `${item.firstName} ${item.lastName}`,
+      id: item._id || (item as any).id,
+      customerId: item._id || (item as any).id,
+      customerName,
       employeeId,
       employeeName,
       service: item.eventType || "Dining",
-      date: item.reservationDate
-        ? `${item.reservationDate.year}-${item.reservationDate.month.padStart(
-            2,
-            "0"
-          )}-${item.reservationDate.day.padStart(2, "0")}`
-        : "",
+      date: (() => {
+        // Try reservationDate object first with more robust checking
+        const reservationDate =
+          item.reservationDate || (item as any).reservationDate;
+        if (
+          reservationDate &&
+          reservationDate.year &&
+          reservationDate.month &&
+          reservationDate.day
+        ) {
+          // Convert to YYYY-MM-DD format
+          const year = reservationDate.year;
+          const month = reservationDate.month.padStart(2, "0");
+          const day = reservationDate.day.padStart(2, "0");
+          return `${year}-${month}-${day}`;
+        }
+
+        // Try reservationDateString as fallback
+        if ((item as any).reservationDateString) {
+          return (item as any).reservationDateString;
+        }
+
+        // Fallback to createdAt or empty string
+        return (item as any).createdAt
+          ? new Date((item as any).createdAt).toISOString().split("T")[0]
+          : "";
+      })(),
       time: item.time,
       status: item.status,
       price: item.price || 0,

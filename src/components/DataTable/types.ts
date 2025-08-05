@@ -67,6 +67,7 @@ export type TableType =
   | "orders"
   | "employees"
   | "reservations"
+  | "pending-reservations"
   | "food";
 
 export type SortableEntry =

@@ -99,7 +99,11 @@ const Dashboard: React.FC = () => {
             color: theme.palette.mode === "dark" ? "#fff" : "#000",
           }}
         >
-          {userRole === "admin" ? getGreeting() : "Reservations"}
+          {userRole === "admin"
+            ? getGreeting()
+            : userRole === "employee"
+            ? "Employee Dashboard"
+            : "Reservations"}
         </Typography>
 
         <FilterControls
@@ -134,7 +138,7 @@ const Dashboard: React.FC = () => {
             });
             setDialogOpen(true);
           }}
-          {...(userRole === "admin"
+          {...(userRole === "admin" || userRole === "employee"
             ? {
                 availableTables: getAvailableTables(),
                 onTableChange: (value: string) => {
