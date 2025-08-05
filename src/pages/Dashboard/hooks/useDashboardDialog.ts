@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ReservationEntry, ReservationStatus } from "../types";
 import type { FoodEntry } from "../../../components/DataTable/types";
+import type { SelectChangeEvent } from "@mui/material";
 
 export function useDashboardDialog() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -25,7 +26,9 @@ export function useDashboardDialog() {
   };
 
   const handleEditFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | SelectChangeEvent<string>
   ) => {
     const { name, value } = e.target;
     setEditFormData((prev) => ({
