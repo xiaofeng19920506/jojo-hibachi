@@ -30,9 +30,16 @@ interface UseDashboardActionsProps {
   handleCreateFood: (
     data: Omit<FoodEntry, "id" | "createdAt" | "updatedAt" | "status">
   ) => Promise<void>;
-  updateReservation: any;
-  updateReservationStatus: any;
-  changeUserRole: any;
+  updateReservation: (args: {
+    id: string;
+    data: Partial<ReservationEntry>;
+  }) => { unwrap: () => Promise<unknown> };
+  updateReservationStatus: (args: { id: string; status: string }) => {
+    unwrap: () => Promise<unknown>;
+  };
+  changeUserRole: (args: { userId: string; role: string }) => {
+    unwrap: () => Promise<unknown>;
+  };
   editFormData: Partial<ReservationEntry> | Partial<FoodEntry>;
   selectedReservation: ReservationEntry | null;
   dialogType: string;
@@ -211,7 +218,7 @@ export function useDashboardActions({
             // Use admin mutation for admin users, regular mutation for others
             await updateReservation({
               id: selectedReservation.id,
-              data: editFormData,
+              data: editFormData as Partial<ReservationEntry>,
             }).unwrap();
             console.log("[handleDialogSave] Reservation update successful");
             handleDialogClose(); // Close modal after successful update
