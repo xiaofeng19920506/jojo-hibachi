@@ -120,13 +120,18 @@ export const adminApiEndpoints = (
   }),
   // Food/Menu Management Endpoints
   getMenuItems: builder.query<any[], void>({
-    query: () => "/admin/food",
+    query: () => "/reservation/food",
     transformResponse: (response: {
       status: string;
+      message: string;
       data: { foodItems: any[] };
     }) => {
-      if (response.status === "success") {
-        return response.data.foodItems || [];
+      if (response.status === "success" && response.data?.foodItems) {
+        // Map the food items to ensure consistent id field
+        return response.data.foodItems.map((item) => ({
+          ...item,
+          id: item.id || item._id, // Use id if available, fallback to _id
+        }));
       }
       return [];
     },
@@ -164,5 +169,22 @@ export const adminApiEndpoints = (
       method: "DELETE",
     }),
     invalidatesTags: ["MenuItems"],
+  }),
+  addFoodOrderAdmin: builder.mutation<
+    any,
+    { reservationId: string; foodOrder: any }
+  >({
+    query: ({
+      reservationId,
+      foodOrder,
+    }: {
+      reservationId: string;
+      foodOrder: any;
+    }) => ({
+      url: `/reservations/${reservationId}/food-order/admin`,
+      method: "POST",
+      body: foodOrder,
+    }),
+    invalidatesTags: ["Reservations"],
   }),
 });

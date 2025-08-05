@@ -68,4 +68,7 @@ export const {
   useCreateMenuItemMutation,
   useUpdateMenuItemMutation,
   useDeleteMenuItemMutation,
+  // Food Order Management
+  useAddFoodOrderMutation,
+  useAddFoodOrderAdminMutation,
 } = api;

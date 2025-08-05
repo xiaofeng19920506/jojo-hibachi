@@ -23,7 +23,13 @@ import {
   ShoppingCart as ShoppingCartIcon,
 } from "@mui/icons-material";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useGetUserReservationByIdQuery } from "../../services/api";
+import {
+  useGetUserReservationByIdQuery,
+  useAddFoodOrderMutation,
+  useAddFoodOrderAdminMutation,
+} from "../../services/api";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store";
 
 interface MenuItem {
   id: string;
@@ -51,6 +57,15 @@ const CheckoutPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [additionalNotes, setAdditionalNotes] = useState("");
   const [deliveryInstructions, setDeliveryInstructions] = useState("");
+
+  // Get user role from Redux store
+  const userRole = useSelector(
+    (state: RootState) => state.user.user?.role || "user"
+  );
+
+  // Food order mutations
+  const [addFoodOrder] = useAddFoodOrderMutation();
+  const [addFoodOrderAdmin] = useAddFoodOrderAdminMutation();
 
   const { cart } = location.state || {
     cart: [],
@@ -87,17 +102,27 @@ const CheckoutPage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // In a real app, you would save the menu selections to the reservation
-      // await updateReservationMenu({
-      //   reservationId,
-      //   menuItems: cart,
-      //   additionalNotes,
-      //   deliveryInstructions,
-      //   totalAmount: total,
-      // });
+      // Both admin and regular users use the same structured food order format
+      const foodOrderData = {
+        foodOrder: cart.map((item: CartItem) => ({
+          food: item.menuItem.id,
+          quantity: item.quantity,
+          specialInstructions: item.specialInstructions || "",
+          price: item.menuItem.price * item.quantity,
+        })),
+      };
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      if (userRole === "admin") {
+        await addFoodOrderAdmin({
+          reservationId: reservationId!,
+          foodOrder: foodOrderData,
+        }).unwrap();
+      } else {
+        await addFoodOrder({
+          reservationId: reservationId!,
+          foodOrder: foodOrderData,
+        }).unwrap();
+      }
 
       setActiveStep(2);
     } catch (error) {

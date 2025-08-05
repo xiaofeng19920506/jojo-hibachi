@@ -114,7 +114,7 @@ export const publicApiEndpoints = (
     }),
   }),
   getMenuItems: builder.query<any[], void>({
-    query: () => "/menu/items",
+    query: () => "/reservation/food",
     providesTags: ["Menu"],
   }),
   updateReservationMenu: builder.mutation<

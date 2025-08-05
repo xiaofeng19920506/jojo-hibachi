@@ -40,6 +40,12 @@ export interface ReservationEntry extends BaseEntry {
   time: string;
   status: "pending" | "confirmed" | "completed" | "cancelled";
   notes?: string;
+  foodOrder?: Array<{
+    food: string;
+    quantity: number;
+    specialInstructions?: string;
+    price: number;
+  }>;
 }
 
 export interface FoodEntry extends BaseEntry {

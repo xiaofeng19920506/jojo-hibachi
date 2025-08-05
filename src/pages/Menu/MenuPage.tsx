@@ -26,16 +26,14 @@ import {
   Check as CheckIcon,
 } from "@mui/icons-material";
 import { useParams, useNavigate } from "react-router-dom";
-import { useGetUserReservationByIdQuery } from "../../services/api";
 import {
-  menuItems,
-  getBaseProteins,
-  getAdditionalProteins,
-} from "../../services/menuData";
-import type { MenuItem as MenuItemType } from "../../services/menuData";
+  useGetUserReservationByIdQuery,
+  useGetMenuItemsQuery,
+} from "../../services/api";
+import type { FoodEntry } from "../../components/DataTable/types";
 
 interface CartItem {
-  menuItem: MenuItemType;
+  menuItem: FoodEntry;
   quantity: number;
   specialInstructions?: string;
 }
@@ -44,39 +42,22 @@ const MenuPage: React.FC = () => {
   const { reservationId } = useParams<{ reservationId: string }>();
   const navigate = useNavigate();
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [selectedItem, setSelectedItem] = useState<MenuItemType | null>(null);
+  const [selectedItem, setSelectedItem] = useState<FoodEntry | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [specialInstructions, setSpecialInstructions] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  // Hibachi combo building state
-  const [hibachiComboDialogOpen, setHibachiComboDialogOpen] = useState(false);
-  const [selectedBaseProtein, setSelectedBaseProtein] =
-    useState<MenuItemType | null>(null);
-  const [selectedAdditionalProteins, setSelectedAdditionalProteins] = useState<
-    MenuItemType[]
-  >([]);
-  const [comboSpecialInstructions, setComboSpecialInstructions] = useState("");
-  const [comboQuantity, setComboQuantity] = useState(1);
-
-  // Appetizer and protein selection modals
-  const [appetizerModalOpen, setAppetizerModalOpen] = useState(false);
-  const [proteinModalOpen, setProteinModalOpen] = useState(false);
-  const [selectedAppetizer, setSelectedAppetizer] =
-    useState<MenuItemType | null>(null);
-  const [selectedProtein, setSelectedProtein] = useState<MenuItemType | null>(
-    null
-  );
-  const [appetizerQuantity, setAppetizerQuantity] = useState(1);
-  const [proteinQuantity, setProteinQuantity] = useState(1);
-  const [appetizerInstructions, setAppetizerInstructions] = useState("");
-  const [proteinInstructions, setProteinInstructions] = useState("");
-
   const {
     data: reservation,
-    isLoading,
-    error,
+    isLoading: reservationLoading,
+    error: reservationError,
   } = useGetUserReservationByIdQuery(reservationId || "");
+
+  const {
+    data: menuItems = [],
+    isLoading: menuLoading,
+    error: menuError,
+  } = useGetMenuItemsQuery();
 
   const totalGuests = (reservation?.adult || 0) + (reservation?.kids || 0);
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -85,15 +66,12 @@ const MenuPage: React.FC = () => {
     0
   );
 
-  const baseProteins = getBaseProteins();
-  const additionalProteins = getAdditionalProteins();
-  const appetizers = menuItems.filter((item) => item.category === "Appetizer");
+  // Filter menu items by category - only show active items
+  const activeMenuItems = menuItems;
 
-  // Fallback to ensure proteins are always available
-  const displayProteins =
-    baseProteins.length > 0
-      ? baseProteins
-      : menuItems.filter((item) => item.category === "Base Protein");
+  // Debug: Log the menu items to see what we're getting
+  console.log("MenuPage - menuItems:", menuItems);
+  console.log("MenuPage - activeMenuItems:", activeMenuItems);
 
   const handleAddToCart = () => {
     if (!selectedItem) return;
@@ -152,170 +130,14 @@ const MenuPage: React.FC = () => {
     });
   };
 
-  // Hibachi combo handlers
-  const handleAddAdditionalProtein = (additionalProtein: MenuItemType) => {
-    setSelectedAdditionalProteins([
-      ...selectedAdditionalProteins,
-      additionalProtein,
-    ]);
+  const handleItemSelect = (item: FoodEntry) => {
+    setSelectedItem(item);
+    setQuantity(1);
+    setSpecialInstructions("");
+    setDialogOpen(true);
   };
 
-  const handleRemoveAdditionalProtein = (proteinId: string) => {
-    setSelectedAdditionalProteins(
-      selectedAdditionalProteins.filter((protein) => protein.id !== proteinId)
-    );
-  };
-
-  const handleAddHibachiComboToCart = () => {
-    if (!selectedBaseProtein) return;
-
-    // Calculate total price for the combo
-    const basePrice = selectedBaseProtein.price;
-    const additionalPrice = selectedAdditionalProteins.reduce(
-      (sum, protein) => sum + protein.price,
-      0
-    );
-    const totalComboPrice = basePrice + additionalPrice;
-
-    // Create a custom combo name
-    const comboName =
-      selectedAdditionalProteins.length > 0
-        ? `${selectedBaseProtein.name} + ${selectedAdditionalProteins
-            .map((p) => p.name.replace("Add ", ""))
-            .join(", ")}`
-        : selectedBaseProtein.name;
-
-    // Create a custom menu item for the combo
-    const comboItem: MenuItemType = {
-      id: `combo-${Date.now()}`,
-      name: comboName,
-      description: `${selectedBaseProtein.description}${
-        selectedAdditionalProteins.length > 0
-          ? ` with additional ${selectedAdditionalProteins
-              .map((p) => p.name.replace("Add ", ""))
-              .join(", ")}`
-          : ""
-      }`,
-      price: totalComboPrice,
-      category: "Hibachi Combo",
-      image: selectedBaseProtein.image,
-      allergens: [
-        ...(selectedBaseProtein.allergens || []),
-        ...selectedAdditionalProteins.flatMap((p) => p.allergens || []),
-      ],
-      isVegetarian:
-        selectedBaseProtein.isVegetarian &&
-        selectedAdditionalProteins.every((p) => p.isVegetarian),
-      isSpicy:
-        selectedBaseProtein.isSpicy ||
-        selectedAdditionalProteins.some((p) => p.isSpicy),
-      preparationTime: Math.max(
-        selectedBaseProtein.preparationTime || 0,
-        ...selectedAdditionalProteins.map((p) => p.preparationTime || 0)
-      ),
-    };
-
-    // Add to cart
-    setCart([
-      ...cart,
-      {
-        menuItem: comboItem,
-        quantity: comboQuantity,
-        specialInstructions: comboSpecialInstructions || undefined,
-      },
-    ]);
-
-    // Reset combo state
-    setHibachiComboDialogOpen(false);
-    setSelectedBaseProtein(null);
-    setSelectedAdditionalProteins([]);
-    setComboSpecialInstructions("");
-    setComboQuantity(1);
-  };
-
-  // Appetizer selection handlers
-  const handleAppetizerSelect = (appetizer: MenuItemType) => {
-    setSelectedAppetizer(appetizer);
-    setAppetizerQuantity(1);
-    setAppetizerInstructions("");
-  };
-
-  const handleAddAppetizerToCart = () => {
-    if (!selectedAppetizer) return;
-
-    const existingItemIndex = cart.findIndex(
-      (item) => item.menuItem.id === selectedAppetizer.id
-    );
-
-    if (existingItemIndex >= 0) {
-      // Update existing item
-      const updatedCart = [...cart];
-      updatedCart[existingItemIndex].quantity += appetizerQuantity;
-      if (appetizerInstructions) {
-        updatedCart[existingItemIndex].specialInstructions =
-          appetizerInstructions;
-      }
-      setCart(updatedCart);
-    } else {
-      // Add new item
-      setCart([
-        ...cart,
-        {
-          menuItem: selectedAppetizer,
-          quantity: appetizerQuantity,
-          specialInstructions: appetizerInstructions || undefined,
-        },
-      ]);
-    }
-
-    setAppetizerModalOpen(false);
-    setSelectedAppetizer(null);
-    setAppetizerQuantity(1);
-    setAppetizerInstructions("");
-  };
-
-  // Protein selection handlers
-  const handleProteinSelect = (protein: MenuItemType) => {
-    setSelectedProtein(protein);
-    setProteinQuantity(1);
-    setProteinInstructions("");
-  };
-
-  const handleAddProteinToCart = () => {
-    if (!selectedProtein) return;
-
-    const existingItemIndex = cart.findIndex(
-      (item) => item.menuItem.id === selectedProtein.id
-    );
-
-    if (existingItemIndex >= 0) {
-      // Update existing item
-      const updatedCart = [...cart];
-      updatedCart[existingItemIndex].quantity += proteinQuantity;
-      if (proteinInstructions) {
-        updatedCart[existingItemIndex].specialInstructions =
-          proteinInstructions;
-      }
-      setCart(updatedCart);
-    } else {
-      // Add new item
-      setCart([
-        ...cart,
-        {
-          menuItem: selectedProtein,
-          quantity: proteinQuantity,
-          specialInstructions: proteinInstructions || undefined,
-        },
-      ]);
-    }
-
-    setProteinModalOpen(false);
-    setSelectedProtein(null);
-    setProteinQuantity(1);
-    setProteinInstructions("");
-  };
-
-  if (isLoading) {
+  if (reservationLoading || menuLoading) {
     return (
       <Box
         display="flex"
@@ -328,7 +150,7 @@ const MenuPage: React.FC = () => {
     );
   }
 
-  if (error || !reservation) {
+  if (reservationError || menuError || !reservation) {
     return (
       <Box
         display="flex"
@@ -336,7 +158,9 @@ const MenuPage: React.FC = () => {
         alignItems="center"
         minHeight="100vh"
       >
-        <Alert severity="error">Failed to load reservation details.</Alert>
+        <Alert severity="error">
+          Failed to load reservation or menu details.
+        </Alert>
       </Box>
     );
   }
@@ -344,14 +168,27 @@ const MenuPage: React.FC = () => {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        height: "100vh",
         bgcolor: "background.default",
         pt: { xs: "56px", sm: "64px" },
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        position: "relative",
       }}
     >
-      <Container maxWidth="xl" sx={{ py: 3 }}>
+      <Container
+        maxWidth="xl"
+        sx={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          py: 2,
+        }}
+      >
         {/* Header */}
-        <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+        <Paper elevation={2} sx={{ p: 3, mb: 3, flexShrink: 0 }}>
           <Box
             display="flex"
             justifyContent="space-between"
@@ -379,126 +216,101 @@ const MenuPage: React.FC = () => {
         </Paper>
 
         {/* Main Content - Menu and Cart Side by Side */}
-        <Box sx={{ display: "flex", gap: 3, height: "calc(100vh - 200px)" }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 3,
+            flex: 1,
+            minHeight: 0,
+            maxHeight: "100%", // Ensure it doesn't exceed container height
+            overflow: "hidden",
+          }}
+        >
           {/* Menu Section */}
-          <Box sx={{ flex: 1, overflowY: "auto" }}>
-            {/* Hibachi Proteins Section */}
-            <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
+          <Box
+            sx={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              minHeight: 0,
+              maxHeight: "100%", // Ensure it doesn't exceed parent height
+            }}
+          >
+            <Paper elevation={2} sx={{ p: 3, mb: 3, flexShrink: 0 }}>
               <Typography variant="h5" gutterBottom>
-                Hibachi Proteins
+                All Menu Items
               </Typography>
               <Typography variant="body2" color="text.secondary" mb={3}>
-                Choose your base protein and add additional proteins to create
-                your perfect combo
+                Browse through our entire menu to build your perfect hibachi
+                combo.
               </Typography>
-
-              <Card
-                sx={{
-                  height: "300px",
-                  display: "flex",
-                  flexDirection: "column",
-                  cursor: "pointer",
-                  transition: "transform 0.2s",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                  },
-                }}
-                onClick={() => {
-                  setProteinModalOpen(true);
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image="https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
-                  alt="Hibachi Proteins"
-                  sx={{ objectFit: "cover" }}
-                />
-                <CardContent
-                  sx={{
-                    flexGrow: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    textAlign: "center",
-                  }}
-                >
-                  <Typography variant="h4" component="h3" gutterBottom>
-                    Hibachi Proteins
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" mb={2}>
-                    Build your perfect hibachi combo with our selection of
-                    proteins
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    size="large"
-                    startIcon={<AddIcon />}
-                    sx={{ mt: 2 }}
-                  >
-                    Browse Proteins
-                  </Button>
-                </CardContent>
-              </Card>
             </Paper>
 
-            {/* Appetizers Section */}
-            <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-              <Typography variant="h5" gutterBottom>
-                Appetizers
-              </Typography>
-              <Typography variant="body2" color="text.secondary" mb={3}>
-                Start your meal with our delicious appetizers
-              </Typography>
-
-              <Card
+            {/* Scrollable Grid Container */}
+            <Box
+              sx={{
+                flex: 1,
+                overflowY: "auto",
+                overflowX: "hidden",
+                pr: 1, // Add some padding for scrollbar
+                minHeight: 0,
+              }}
+            >
+              <Box
                 sx={{
-                  height: "300px",
-                  display: "flex",
-                  flexDirection: "column",
-                  cursor: "pointer",
-                  transition: "transform 0.2s",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                  },
-                }}
-                onClick={() => {
-                  setAppetizerModalOpen(true);
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                  gap: 3, // Changed from 1.5 to 3
+                  pb: 2, // Add bottom padding for last row
+                  m: 1, // Added margin of 1rem
                 }}
               >
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
-                  alt="Appetizers"
-                  sx={{ objectFit: "cover" }}
-                />
-                <CardContent
-                  sx={{
-                    flexGrow: 1,
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    textAlign: "center",
-                  }}
-                >
-                  <Typography variant="h4" component="h3" gutterBottom>
-                    Appetizers
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary" mb={2}>
-                    Start your meal with our delicious appetizers and sides
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    size="large"
-                    startIcon={<AddIcon />}
-                    sx={{ mt: 2 }}
+                {activeMenuItems.map((item) => (
+                  <Card
+                    key={item.id}
+                    sx={{
+                      cursor: "pointer",
+                      border:
+                        selectedItem?.id === item.id
+                          ? "2px solid primary.main"
+                          : "1px solid grey.300", // Added subtle border for better visibility
+                      height: "150px", // Reduced from 200px
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      boxShadow: 3, // Increased shadow for better visibility
+                      "&:hover": {
+                        boxShadow: 6, // Increased hover shadow
+                        transform: "translateY(-2px)",
+                        border: "1px solid primary.main", // Enhanced hover border
+                      },
+                    }}
+                    onClick={() => handleItemSelect(item)}
                   >
-                    Browse Appetizers
-                  </Button>
-                </CardContent>
-              </Card>
-            </Paper>
+                    <CardContent
+                      sx={{
+                        flexGrow: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        textAlign: "center",
+                        p: 2, // Reduced padding from 3
+                      }}
+                    >
+                      <Typography variant="h6" component="h3" gutterBottom>
+                        {item.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" mb={1}>
+                        {item.description}
+                      </Typography>
+                      <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
+                        ${item.price}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Box>
+            </Box>
           </Box>
 
           {/* Cart Section */}
@@ -527,9 +339,6 @@ const MenuPage: React.FC = () => {
                     justifyContent: "center",
                   }}
                 >
-                  <ShoppingCartIcon
-                    sx={{ fontSize: 64, color: "text.secondary", mb: 2 }}
-                  />
                   <Typography variant="body1" color="text.secondary">
                     Your cart is empty
                   </Typography>
@@ -688,12 +497,6 @@ const MenuPage: React.FC = () => {
                 </Typography>
 
                 <Box display="flex" gap={1} flexWrap="wrap" mb={3}>
-                  {selectedItem.isVegetarian && (
-                    <Chip label="Vegetarian" size="small" color="success" />
-                  )}
-                  {selectedItem.isSpicy && (
-                    <Chip label="Spicy" size="small" color="error" />
-                  )}
                   {selectedItem.allergens?.map((allergen) => (
                     <Chip
                       key={allergen}
@@ -744,438 +547,6 @@ const MenuPage: React.FC = () => {
               Add to Order ($
               {selectedItem
                 ? (selectedItem.price * quantity).toFixed(2)
-                : "0.00"}
-              )
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Hibachi Combo Builder Dialog */}
-        <Dialog
-          open={hibachiComboDialogOpen}
-          onClose={() => setHibachiComboDialogOpen(false)}
-          maxWidth="md"
-          fullWidth
-        >
-          <DialogTitle>
-            <Typography variant="h6">
-              Build Your Hibachi Combo: {selectedBaseProtein?.name}
-            </Typography>
-          </DialogTitle>
-          <DialogContent>
-            {selectedBaseProtein && (
-              <Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: { xs: "column", md: "row" },
-                    gap: 3,
-                  }}
-                >
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="h6" gutterBottom>
-                      Base Protein
-                    </Typography>
-                    <Card>
-                      <CardMedia
-                        component="img"
-                        height="150"
-                        image={selectedBaseProtein.image}
-                        alt={selectedBaseProtein.name}
-                        sx={{ objectFit: "cover" }}
-                      />
-                      <CardContent>
-                        <Typography variant="h6">
-                          {selectedBaseProtein.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {selectedBaseProtein.description}
-                        </Typography>
-                        <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
-                          ${selectedBaseProtein.price}
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Box>
-
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="h6" gutterBottom>
-                      Add Additional Proteins
-                    </Typography>
-                    <Box display="flex" flexDirection="column" gap={2}>
-                      {additionalProteins.map((protein) => (
-                        <Card
-                          key={protein.id}
-                          sx={{
-                            cursor: "pointer",
-                            border: selectedAdditionalProteins.some(
-                              (p) => p.id === protein.id
-                            )
-                              ? "2px solid primary.main"
-                              : "2px solid transparent",
-                          }}
-                          onClick={() => {
-                            if (
-                              selectedAdditionalProteins.some(
-                                (p) => p.id === protein.id
-                              )
-                            ) {
-                              handleRemoveAdditionalProtein(protein.id);
-                            } else {
-                              handleAddAdditionalProtein(protein);
-                            }
-                          }}
-                        >
-                          <CardContent sx={{ py: 2 }}>
-                            <Box
-                              display="flex"
-                              justifyContent="space-between"
-                              alignItems="center"
-                            >
-                              <Box>
-                                <Typography
-                                  variant="subtitle1"
-                                  fontWeight="bold"
-                                >
-                                  {protein.name}
-                                </Typography>
-                                <Typography
-                                  variant="body2"
-                                  color="text.secondary"
-                                >
-                                  {protein.description}
-                                </Typography>
-                              </Box>
-                              <Typography variant="h6" color="primary">
-                                +${protein.price}
-                              </Typography>
-                            </Box>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </Box>
-                  </Box>
-                </Box>
-
-                <Divider sx={{ my: 3 }} />
-
-                <Box display="flex" alignItems="center" gap={2} mb={3}>
-                  <Typography variant="subtitle1">Quantity:</Typography>
-                  <IconButton
-                    onClick={() =>
-                      setComboQuantity(Math.max(1, comboQuantity - 1))
-                    }
-                  >
-                    <RemoveIcon />
-                  </IconButton>
-                  <Typography
-                    variant="h6"
-                    sx={{ minWidth: 40, textAlign: "center" }}
-                  >
-                    {comboQuantity}
-                  </Typography>
-                  <IconButton
-                    onClick={() => setComboQuantity(comboQuantity + 1)}
-                  >
-                    <AddIcon />
-                  </IconButton>
-                </Box>
-
-                <TextField
-                  fullWidth
-                  label="Special Instructions (Optional)"
-                  multiline
-                  rows={3}
-                  value={comboSpecialInstructions}
-                  onChange={(e) => setComboSpecialInstructions(e.target.value)}
-                  placeholder="e.g., No onions, extra spicy, etc."
-                />
-
-                <Box sx={{ mt: 2, p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
-                  <Typography variant="h6" gutterBottom>
-                    Combo Summary
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Base: {selectedBaseProtein.name} ($
-                    {selectedBaseProtein.price})
-                  </Typography>
-                  {selectedAdditionalProteins.map((protein) => (
-                    <Typography
-                      key={protein.id}
-                      variant="body2"
-                      color="text.secondary"
-                    >
-                      + {protein.name} (+${protein.price})
-                    </Typography>
-                  ))}
-                  <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
-                    Total: $
-                    {(
-                      selectedBaseProtein.price +
-                      selectedAdditionalProteins.reduce(
-                        (sum, p) => sum + p.price,
-                        0
-                      )
-                    ).toFixed(2)}
-                  </Typography>
-                </Box>
-              </Box>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setHibachiComboDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleAddHibachiComboToCart}
-              startIcon={<AddIcon />}
-            >
-              Add Combo to Order ($
-              {selectedBaseProtein
-                ? (
-                    (selectedBaseProtein.price +
-                      selectedAdditionalProteins.reduce(
-                        (sum, p) => sum + p.price,
-                        0
-                      )) *
-                    comboQuantity
-                  ).toFixed(2)
-                : "0.00"}
-              )
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Appetizer Selection Dialog */}
-        <Dialog
-          open={appetizerModalOpen}
-          onClose={() => setAppetizerModalOpen(false)}
-          maxWidth="md"
-          fullWidth
-        >
-          <DialogTitle>Select Appetizer</DialogTitle>
-          <DialogContent>
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                gap: 2,
-              }}
-            >
-              {appetizers.map((appetizer) => (
-                <Card
-                  key={appetizer.id}
-                  sx={{
-                    cursor: "pointer",
-                    border:
-                      selectedAppetizer?.id === appetizer.id
-                        ? "2px solid primary.main"
-                        : "2px solid transparent",
-                  }}
-                  onClick={() => handleAppetizerSelect(appetizer)}
-                >
-                  <CardMedia
-                    component="img"
-                    height="150"
-                    image={appetizer.image}
-                    alt={appetizer.name}
-                    sx={{ objectFit: "cover" }}
-                  />
-                  <CardContent>
-                    <Typography variant="h6">{appetizer.name}</Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {appetizer.description}
-                    </Typography>
-                    <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
-                      ${appetizer.price}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              ))}
-            </Box>
-
-            {selectedAppetizer && (
-              <Box sx={{ mt: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                  {selectedAppetizer.name}
-                </Typography>
-
-                <Box display="flex" alignItems="center" gap={2} mb={3}>
-                  <Typography variant="subtitle1">Quantity:</Typography>
-                  <IconButton
-                    onClick={() =>
-                      setAppetizerQuantity(Math.max(1, appetizerQuantity - 1))
-                    }
-                  >
-                    <RemoveIcon />
-                  </IconButton>
-                  <Typography
-                    variant="h6"
-                    sx={{ minWidth: 40, textAlign: "center" }}
-                  >
-                    {appetizerQuantity}
-                  </Typography>
-                  <IconButton
-                    onClick={() => setAppetizerQuantity(appetizerQuantity + 1)}
-                  >
-                    <AddIcon />
-                  </IconButton>
-                </Box>
-
-                <TextField
-                  fullWidth
-                  label="Special Instructions (Optional)"
-                  multiline
-                  rows={3}
-                  value={appetizerInstructions}
-                  onChange={(e) => setAppetizerInstructions(e.target.value)}
-                  placeholder="e.g., No onions, extra spicy, etc."
-                />
-              </Box>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setAppetizerModalOpen(false)}>Cancel</Button>
-            <Button
-              variant="contained"
-              onClick={handleAddAppetizerToCart}
-              startIcon={<AddIcon />}
-              disabled={!selectedAppetizer}
-            >
-              Add to Order ($
-              {selectedAppetizer
-                ? (selectedAppetizer.price * appetizerQuantity).toFixed(2)
-                : "0.00"}
-              )
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Protein Selection Dialog */}
-        <Dialog
-          open={proteinModalOpen}
-          onClose={() => setProteinModalOpen(false)}
-          maxWidth="md"
-          fullWidth
-        >
-          <DialogTitle>Select Protein</DialogTitle>
-          <DialogContent>
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                gap: 2,
-                maxWidth: "100%",
-              }}
-            >
-              {displayProteins.map((protein) => (
-                <Card
-                  key={protein.id}
-                  sx={{
-                    cursor: "pointer",
-                    border:
-                      selectedProtein?.id === protein.id
-                        ? "2px solid primary.main"
-                        : "2px solid transparent",
-                    height: "320px",
-                    width: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                  onClick={() => handleProteinSelect(protein)}
-                >
-                  <CardMedia
-                    component="img"
-                    height="180"
-                    image={protein.image}
-                    alt={protein.name}
-                    sx={{ objectFit: "cover" }}
-                  />
-                  <CardContent
-                    sx={{
-                      flexGrow: 1,
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "space-between",
-                      p: 2,
-                    }}
-                  >
-                    <Box>
-                      <Typography variant="h6" gutterBottom sx={{ mb: 1 }}>
-                        {protein.name}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mb: 2, lineHeight: 1.4 }}
-                      >
-                        {protein.description}
-                      </Typography>
-                    </Box>
-                    <Typography
-                      variant="h6"
-                      color="primary"
-                      sx={{ mt: "auto", textAlign: "right" }}
-                    >
-                      ${protein.price}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              ))}
-            </Box>
-
-            {selectedProtein && (
-              <Box sx={{ mt: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                  {selectedProtein.name}
-                </Typography>
-
-                <Box display="flex" alignItems="center" gap={2} mb={3}>
-                  <Typography variant="subtitle1">Quantity:</Typography>
-                  <IconButton
-                    onClick={() =>
-                      setProteinQuantity(Math.max(1, proteinQuantity - 1))
-                    }
-                  >
-                    <RemoveIcon />
-                  </IconButton>
-                  <Typography
-                    variant="h6"
-                    sx={{ minWidth: 40, textAlign: "center" }}
-                  >
-                    {proteinQuantity}
-                  </Typography>
-                  <IconButton
-                    onClick={() => setProteinQuantity(proteinQuantity + 1)}
-                  >
-                    <AddIcon />
-                  </IconButton>
-                </Box>
-
-                <TextField
-                  fullWidth
-                  label="Special Instructions (Optional)"
-                  multiline
-                  rows={3}
-                  value={proteinInstructions}
-                  onChange={(e) => setProteinInstructions(e.target.value)}
-                  placeholder="e.g., No onions, extra spicy, etc."
-                />
-              </Box>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setProteinModalOpen(false)}>Cancel</Button>
-            <Button
-              variant="contained"
-              onClick={handleAddProteinToCart}
-              startIcon={<AddIcon />}
-              disabled={!selectedProtein}
-            >
-              Add to Order ($
-              {selectedProtein
-                ? (selectedProtein.price * proteinQuantity).toFixed(2)
                 : "0.00"}
               )
             </Button>

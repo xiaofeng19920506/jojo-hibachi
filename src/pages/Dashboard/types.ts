@@ -33,6 +33,12 @@ export interface ReservationEntry extends BaseEntry {
   eventType?: string;
   assignedChef?: string;
   timeStamp?: string;
+  foodOrder?: Array<{
+    food: string;
+    quantity: number;
+    specialInstructions?: string;
+    price: number;
+  }>;
 }
 
 // Employee object structure from API
@@ -70,6 +76,12 @@ export interface ApiReservationData {
   price?: number;
   assignedChef?: ApiEmployeeData | string | null;
   timeStamp: string;
+  foodOrder?: Array<{
+    food: string;
+    quantity: number;
+    specialInstructions?: string;
+    price: number;
+  }>;
 }
 
 // Employee interface

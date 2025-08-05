@@ -111,6 +111,7 @@ const DataTable: React.FC<DataTableProps> = ({
             "status",
             "price",
             "notes",
+            "foodOrders",
             "actions",
           ]
         : [
@@ -122,6 +123,7 @@ const DataTable: React.FC<DataTableProps> = ({
             "employeeName",
             "price",
             "notes",
+            "foodOrders",
             "actions",
           ],
     orders: [
@@ -206,6 +208,19 @@ const DataTable: React.FC<DataTableProps> = ({
     if ("calories" in item && col === "calories") {
       const calories = item.calories;
       return calories ? `${calories} cal` : "-";
+    }
+    // Food orders for reservations
+    if ("foodOrder" in item && col === "foodOrders") {
+      const foodOrder = item.foodOrder;
+      if (!foodOrder || foodOrder.length === 0) {
+        return "No food orders";
+      }
+      const totalItems = foodOrder.reduce(
+        (sum, order) => sum + order.quantity,
+        0
+      );
+      const totalPrice = foodOrder.reduce((sum, order) => sum + order.price, 0);
+      return `${totalItems} items - $${totalPrice.toFixed(2)}`;
     }
     return "-";
   };

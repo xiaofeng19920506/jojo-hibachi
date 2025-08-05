@@ -130,7 +130,7 @@ const Dashboard: React.FC = () => {
               name: "",
               description: "",
               price: 0,
-              category: "appetizer",
+              category: "protein",
             });
             setDialogOpen(true);
           }}

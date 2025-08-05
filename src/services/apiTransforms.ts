@@ -56,6 +56,7 @@ export const transformApiData = (
       eventType: item.eventType,
       assignedChef: employeeId ?? "Unassigned",
       timeStamp: item.timeStamp,
+      foodOrder: item.foodOrder || [],
     };
 
     return result;

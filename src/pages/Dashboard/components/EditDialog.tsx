@@ -216,6 +216,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
                   >
                     <MenuItem value="appetizer">Appetizer</MenuItem>
                     <MenuItem value="protein">Protein</MenuItem>
+                    <MenuItem value="combo">Combo</MenuItem>
                   </Select>
                 </FormControl>
               </>
