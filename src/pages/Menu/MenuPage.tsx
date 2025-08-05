@@ -505,14 +505,6 @@ const MenuPage: React.FC = () => {
                           ${totalPrice.toFixed(2)}
                         </Typography>
                       </Box>
-                      <Box display="flex" justifyContent="space-between" mb={1}>
-                        <Typography variant="body2" color="text.secondary">
-                          Tax (8%):
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          ${(totalPrice * 0.08).toFixed(2)}
-                        </Typography>
-                      </Box>
                       <Divider sx={{ my: 1 }} />
                       <Box display="flex" justifyContent="space-between">
                         <Typography variant="h6" fontWeight="bold">
@@ -523,7 +515,7 @@ const MenuPage: React.FC = () => {
                           fontWeight="bold"
                           color="primary"
                         >
-                          ${(totalPrice * 1.08).toFixed(2)}
+                          ${totalPrice.toFixed(2)}
                         </Typography>
                       </Box>
                     </Box>
