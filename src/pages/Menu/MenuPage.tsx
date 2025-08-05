@@ -281,10 +281,6 @@ const MenuPage: React.FC = () => {
                 {reservation.kids} kids)
               </Typography>
             </Box>
-            <Box display="flex" alignItems="center" gap={2}>
-              <ShoppingCartIcon sx={{ fontSize: 32 }} />
-              <Typography variant="h6">${totalPrice.toFixed(2)}</Typography>
-            </Box>
           </Box>
         </Paper>
 
