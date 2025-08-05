@@ -32,7 +32,13 @@ export const getAvailableActions = (
         : ["View Details"];
     case "reservations":
       if (userRole === "admin") {
-        return ["Edit", "Cancel", "Assign Employee", "Update Status"];
+        return [
+          "Edit",
+          "Cancel",
+          "Assign Employee",
+          "Update Status",
+          "Selection Menu",
+        ];
       } else if (userRole === "employee") {
         return ["Edit", "Cancel", "Update Status"];
       }

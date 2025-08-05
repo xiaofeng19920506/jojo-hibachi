@@ -196,6 +196,10 @@ export const useDashboard = () => {
             setSelectedStatus(reservation.status || "pending");
             setDialogOpen(true);
             break;
+          case "selection menu":
+            // Navigate to menu page with reservation context
+            window.location.href = `/reservation/${reservation.id}/menu`;
+            break;
           default:
             console.log(`Action ${action} not implemented for reservations`);
         }

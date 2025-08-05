@@ -322,11 +322,20 @@ const DataTable: React.FC<DataTableProps> = ({
                 {columnMap[tableType].map((col) => (
                   <TableCell key={col} sx={{ whiteSpace: "nowrap" }}>
                     {col === "actions" ? (
-                      availableActions && availableActions(item).length > 0 ? (
-                        <IconButton onClick={(e) => handleMenuClick(e, item)}>
-                          <MoreVertIcon />
-                        </IconButton>
-                      ) : null
+                      (() => {
+                        const actions = availableActions
+                          ? availableActions(item)
+                          : [];
+                        return availableActions && actions.length > 0 ? (
+                          <IconButton
+                            onClick={(e) => {
+                              handleMenuClick(e, item);
+                            }}
+                          >
+                            <MoreVertIcon />
+                          </IconButton>
+                        ) : null;
+                      })()
                     ) : col === "status" && "status" in item ? (
                       <Chip
                         label={item.status}
@@ -358,11 +367,14 @@ const DataTable: React.FC<DataTableProps> = ({
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
       >
-        {getMenuItems().map((action) => (
-          <MenuItem key={action} onClick={() => handleAction(action)}>
-            <ListItemText primary={action} />
-          </MenuItem>
-        ))}
+        {(() => {
+          const menuItems = getMenuItems();
+          return menuItems.map((action) => (
+            <MenuItem key={action} onClick={() => handleAction(action)}>
+              <ListItemText primary={action} />
+            </MenuItem>
+          ));
+        })()}
       </Menu>
     </Box>
   );
