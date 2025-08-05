@@ -206,6 +206,7 @@ export const useDashboard = () => {
           case "update":
             setDialogType("edit");
             setEditFormData({
+              id: food.id,
               name: food.name,
               description: food.description,
               price: food.price,
@@ -218,7 +219,14 @@ export const useDashboard = () => {
             break;
           case "delete":
             setDialogType("delete");
-            setSelectedReservation(food as any);
+            setEditFormData({
+              id: food.id,
+              name: food.name,
+              description: food.description,
+              price: food.price,
+              category: food.category,
+              status: food.status,
+            });
             setDialogOpen(true);
             break;
           default:
@@ -248,8 +256,14 @@ export const useDashboard = () => {
       selectedReservation,
     });
 
-    // Allow add dialog to proceed without selectedReservation
-    if (!selectedReservation && dialogType !== "add") return;
+    // Allow add dialog and food edit/delete to proceed without selectedReservation
+    if (
+      !selectedReservation &&
+      dialogType !== "add" &&
+      !(dialogType === "edit" && activeTable === "food") &&
+      !(dialogType === "delete" && activeTable === "food")
+    )
+      return;
     if (dialogType === "assign" && userRole !== "admin") {
       console.error("Only admins can assign employees");
       return;
@@ -309,16 +323,19 @@ export const useDashboard = () => {
         } else if (activeTable === "customers") {
         } else if (activeTable === "food") {
           // Update food item
-          if (!selectedReservation) {
-            console.error("No food item selected for update");
+          const foodId = (editFormData as any).id;
+          if (!foodId) {
+            console.error("No food item ID found for update");
             return;
           }
 
           try {
-            await handleUpdateFood(
-              selectedReservation.id,
-              editFormData as Partial<FoodEntry>
-            );
+            console.log("[handleDialogSave] Updating food item:", {
+              foodId: foodId,
+              updates: editFormData,
+            });
+
+            await handleUpdateFood(foodId, editFormData as Partial<FoodEntry>);
             console.log("[handleDialogSave] Food item update successful");
           } catch (error) {
             console.error("[handleDialogSave] Food item update failed:", error);
@@ -381,13 +398,18 @@ export const useDashboard = () => {
         }
       } else if (dialogType === "delete" && activeTable === "food") {
         // Delete food item
-        if (!selectedReservation) {
-          console.error("No food item selected for deletion");
+        const foodId = (editFormData as any).id;
+        if (!foodId) {
+          console.error("No food item ID found for deletion");
           return;
         }
 
         try {
-          await handleDeleteFood(selectedReservation.id);
+          console.log("[handleDialogSave] Deleting food item:", {
+            foodId: foodId,
+          });
+
+          await handleDeleteFood(foodId);
           console.log("[handleDialogSave] Food item deletion successful");
         } catch (error) {
           console.error("[handleDialogSave] Food item deletion failed:", error);
