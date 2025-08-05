@@ -181,7 +181,7 @@ export const adminApiEndpoints = (
       reservationId: string;
       foodOrder: any;
     }) => ({
-      url: `/reservations/${reservationId}/food-order/admin`,
+      url: `/reservation/${reservationId}/food-order/admin`,
       method: "POST",
       body: foodOrder,
     }),

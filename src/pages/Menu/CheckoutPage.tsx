@@ -85,8 +85,7 @@ const CheckoutPage: React.FC = () => {
     (sum: number, item: CartItem) => sum + item.menuItem.price * item.quantity,
     0
   );
-  const tax = subtotal * 0.08; // 8% tax
-  const total = subtotal + tax;
+  const total = subtotal;
 
   const steps = ["Review Order", "Additional Details", "Confirmation"];
 
@@ -324,10 +323,6 @@ const CheckoutPage: React.FC = () => {
                       <Box display="flex" justifyContent="space-between" mb={1}>
                         <Typography>Subtotal:</Typography>
                         <Typography>${subtotal.toFixed(2)}</Typography>
-                      </Box>
-                      <Box display="flex" justifyContent="space-between" mb={1}>
-                        <Typography>Tax (8%):</Typography>
-                        <Typography>${tax.toFixed(2)}</Typography>
                       </Box>
                       <Divider sx={{ my: 1 }} />
                       <Box display="flex" justifyContent="space-between" mb={2}>

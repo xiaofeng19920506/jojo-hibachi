@@ -110,22 +110,6 @@ export const useDashboard = () => {
   const [updateReservation, { isLoading: updateReservationLoading }] =
     useUpdateReservationMutation();
 
-  // Get current data based on active table
-  const getCurrentData = (): SortableEntry[] => {
-    switch (activeTable) {
-      case "reservations":
-        return allReservationsData || [];
-      case "customers":
-        return customersData || [];
-      case "employees":
-        return (employeesData as SortableEntry[]) || [];
-      case "food":
-        return (foodData as SortableEntry[]) || [];
-      default:
-        return [];
-    }
-  };
-
   // Get loading state
   const getLoadingState = (): boolean => {
     switch (activeTable) {
@@ -167,11 +151,12 @@ export const useDashboard = () => {
 
   const handleActionClick = (action: string, item: SortableEntry) => {
     switch (activeTable) {
-      case "reservations":
+      case "reservations": {
         const reservation = item as ReservationEntry;
         switch (action.toLowerCase()) {
           case "edit":
             setDialogType("edit");
+            setSelectedReservation(reservation);
             setEditFormData({
               date: reservation.date,
               time: reservation.time,
@@ -204,7 +189,8 @@ export const useDashboard = () => {
             console.log(`Action ${action} not implemented for reservations`);
         }
         break;
-      case "food":
+      }
+      case "food": {
         const food = item as FoodEntry;
         switch (action.toLowerCase()) {
           case "update":
@@ -237,6 +223,7 @@ export const useDashboard = () => {
             console.log(`Action ${action} not implemented for food`);
         }
         break;
+      }
       default:
         console.log(
           `Action ${action} not implemented for table ${activeTable}`
@@ -244,11 +231,13 @@ export const useDashboard = () => {
     }
   };
 
-  const handleAssignEmployeeChange = (e: any) => {
+  const handleAssignEmployeeChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     setSelectedEmployeeId(e.target.value);
   };
 
-  const handleStatusChange = (e: any) => {
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedStatus(e.target.value);
   };
 
@@ -258,6 +247,7 @@ export const useDashboard = () => {
       activeTable,
       editFormData,
       selectedReservation,
+      userRole,
     });
 
     // Allow add dialog and food edit/delete to proceed without selectedReservation
@@ -266,8 +256,11 @@ export const useDashboard = () => {
       dialogType !== "add" &&
       !(dialogType === "edit" && activeTable === "food") &&
       !(dialogType === "delete" && activeTable === "food")
-    )
+    ) {
+      console.log("[handleDialogSave] Early return - no selectedReservation");
       return;
+    }
+
     if (dialogType === "assign" && userRole !== "admin") {
       console.error("Only admins can assign employees");
       return;
@@ -284,19 +277,35 @@ export const useDashboard = () => {
 
     try {
       if (dialogType === "edit") {
+        console.log("[handleDialogSave] Processing edit dialog");
         if (activeTable === "orders") {
+          console.log("[handleDialogSave] Orders table - not implemented");
         } else if (activeTable === "reservations") {
+          console.log("[handleDialogSave] Processing reservation edit");
           // Update reservation for users and employees
           if (!selectedReservation) {
             console.error("No reservation selected for update");
             return;
           }
 
+          console.log("[handleDialogSave] Calling updateReservation with:", {
+            id: selectedReservation.id,
+            data: editFormData,
+          });
+
           try {
-            await updateReservation({
-              id: selectedReservation.id,
-              data: editFormData,
-            }).unwrap();
+            // Use admin mutation for admin users, regular mutation for others
+            if (userRole === "admin") {
+              await updateReservation({
+                id: selectedReservation.id,
+                data: editFormData,
+              }).unwrap();
+            } else {
+              await updateReservation({
+                id: selectedReservation.id,
+                data: editFormData,
+              }).unwrap();
+            }
             console.log("[handleDialogSave] Reservation update successful");
           } catch (error) {
             console.error(
@@ -325,9 +334,11 @@ export const useDashboard = () => {
             }).unwrap();
           }
         } else if (activeTable === "customers") {
+          // Handle customer updates if needed
+          console.log("[handleDialogSave] Customer updates not implemented");
         } else if (activeTable === "food") {
           // Update food item
-          const foodId = (editFormData as any).id;
+          const foodId = (editFormData as Record<string, unknown>).id as string;
           if (!foodId) {
             console.error("No food item ID found for update");
             return;
@@ -402,7 +413,7 @@ export const useDashboard = () => {
         }
       } else if (dialogType === "delete" && activeTable === "food") {
         // Delete food item
-        const foodId = (editFormData as any).id;
+        const foodId = (editFormData as Record<string, unknown>).id as string;
         if (!foodId) {
           console.error("No food item ID found for deletion");
           return;
@@ -511,7 +522,7 @@ export const useDashboard = () => {
       }
 
       handleDialogClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       const tableType =
         activeTable === "orders"
           ? "order"
@@ -557,6 +568,22 @@ export const useDashboard = () => {
 
   // Computed data
   const filteredSortedData = useMemo(() => {
+    // Get current data based on active table
+    const getCurrentData = (): SortableEntry[] => {
+      switch (activeTable) {
+        case "reservations":
+          return allReservationsData || [];
+        case "customers":
+          return customersData || [];
+        case "employees":
+          return (employeesData as SortableEntry[]) || [];
+        case "food":
+          return (foodData as SortableEntry[]) || [];
+        default:
+          return [];
+      }
+    };
+
     let result = [...getCurrentData()];
 
     // Search filtering for all table types
@@ -573,17 +600,21 @@ export const useDashboard = () => {
     // Status filtering for reservations and orders
     if (activeTable === "reservations" && statusFilter !== "all") {
       result = result.filter(
-        (entry) => (entry as ReservationEntry | any).status === statusFilter
+        (entry) =>
+          (entry as ReservationEntry | Record<string, unknown>).status ===
+          statusFilter
       );
     }
 
     // Date filtering for all table types that have date fields
     if (startDate || endDate) {
       result = result.filter((entry) => {
-        const dateField = (entry as any).date || (entry as any).joinDate;
+        const dateField =
+          (entry as unknown as Record<string, unknown>).date ||
+          (entry as unknown as Record<string, unknown>).joinDate;
         if (!dateField) return true; // Skip filtering if no date field
 
-        const entryDate = new Date(dateField);
+        const entryDate = new Date(dateField as string);
         const start = startDate ? new Date(startDate) : null;
         const end = endDate ? new Date(endDate) : null;
 
@@ -593,12 +624,12 @@ export const useDashboard = () => {
 
     // Sorting
     result.sort((a, b) => {
-      const aVal = (a as any)[sortConfig.key];
-      const bVal = (b as any)[sortConfig.key];
+      const aVal = (a as unknown as Record<string, unknown>)[sortConfig.key];
+      const bVal = (b as unknown as Record<string, unknown>)[sortConfig.key];
 
       if (sortConfig.key === "date" || sortConfig.key === "joinDate") {
-        const dateA = new Date(aVal).getTime();
-        const dateB = new Date(bVal).getTime();
+        const dateA = new Date(aVal as string).getTime();
+        const dateB = new Date(bVal as string).getTime();
         return sortConfig.direction === "asc" ? dateA - dateB : dateB - dateA;
       }
 
@@ -613,14 +644,16 @@ export const useDashboard = () => {
 
     return result;
   }, [
-    getCurrentData,
     searchQuery,
     startDate,
     endDate,
     sortConfig,
     activeTable,
     statusFilter,
-    userRole,
+    allReservationsData,
+    customersData,
+    employeesData,
+    foodData,
   ]);
 
   const totalPages = Math.ceil(filteredSortedData.length / itemsPerPage);
@@ -654,14 +687,7 @@ export const useDashboard = () => {
     setEditFormData,
     selectedEmployeeId,
     selectedStatus,
-    loading:
-      getLoadingState() ||
-      updateStatusLoading ||
-      changeRoleLoading ||
-      changeEmployeeStatusLoading ||
-      assignChefLoading ||
-      cancelReservationLoading ||
-      updateReservationLoading,
+    loading: getLoadingState(),
     error: getErrorState(),
     userRole,
     user,

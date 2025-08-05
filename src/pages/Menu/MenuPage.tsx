@@ -5,7 +5,6 @@ import {
   Container,
   Card,
   CardContent,
-  CardMedia,
   Button,
   Chip,
   IconButton,
@@ -26,11 +25,15 @@ import {
   Check as CheckIcon,
 } from "@mui/icons-material";
 import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import {
   useGetUserReservationByIdQuery,
   useGetMenuItemsQuery,
+  useAddFoodOrderMutation,
+  useAddFoodOrderAdminMutation,
 } from "../../services/api";
 import type { FoodEntry } from "../../components/DataTable/types";
+import type { RootState } from "../../store";
 
 interface CartItem {
   menuItem: FoodEntry;
@@ -58,6 +61,44 @@ const MenuPage: React.FC = () => {
     isLoading: menuLoading,
     error: menuError,
   } = useGetMenuItemsQuery();
+
+  const [addFoodOrder, { isLoading: isSubmitting }] = useAddFoodOrderMutation();
+
+  // Get user role from Redux store
+  const userRole = useSelector(
+    (state: RootState) => state.user.user?.role || "user"
+  );
+
+  const [addFoodOrderAdmin] = useAddFoodOrderAdminMutation();
+
+  // Load existing food orders from reservation into cart
+  React.useEffect(() => {
+    if (
+      reservation &&
+      reservation.foodOrder &&
+      reservation.foodOrder.length > 0
+    ) {
+      // Transform existing food orders to cart items
+      const existingCartItems = reservation.foodOrder
+        .map((order: any) => {
+          // Find the corresponding menu item
+          const menuItem = menuItems.find(
+            (item: FoodEntry) => item.id === order.food
+          );
+          if (menuItem) {
+            return {
+              menuItem,
+              quantity: order.quantity,
+              specialInstructions: order.specialInstructions || "",
+            };
+          }
+          return null;
+        })
+        .filter(Boolean) as CartItem[];
+
+      setCart(existingCartItems);
+    }
+  }, [reservation, menuItems]);
 
   const totalGuests = (reservation?.adult || 0) + (reservation?.kids || 0);
   const totalCartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -124,10 +165,42 @@ const MenuPage: React.FC = () => {
     );
   };
 
-  const handleProceedToCheckout = () => {
-    navigate(`/reservation/${reservationId}/checkout`, {
-      state: { cart, reservation },
-    });
+  const handleProceedToCheckout = async () => {
+    if (!reservationId || cart.length === 0) return;
+
+    try {
+      // Transform cart items to match the API payload format
+      const foodOrder = cart.map((item) => ({
+        food: item.menuItem.id,
+        quantity: item.quantity,
+        specialInstructions: item.specialInstructions || "",
+        price: item.menuItem.price * item.quantity,
+      }));
+
+      // Create the payload structure
+      const foodOrderData = {
+        foodOrder,
+      };
+
+      // Use appropriate API based on user role
+      if (userRole === "admin") {
+        await addFoodOrderAdmin({
+          reservationId,
+          foodOrder: foodOrderData,
+        }).unwrap();
+      } else {
+        await addFoodOrder({
+          reservationId,
+          foodOrder: foodOrderData,
+        }).unwrap();
+      }
+
+      // Navigate to dashboard after successful save
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Failed to save food order:", error);
+      // You might want to show an error message to the user here
+    }
   };
 
   const handleItemSelect = (item: FoodEntry) => {
@@ -460,10 +533,18 @@ const MenuPage: React.FC = () => {
                       size="large"
                       fullWidth
                       onClick={handleProceedToCheckout}
-                      startIcon={<CheckIcon />}
-                      disabled={cart.length === 0}
+                      startIcon={
+                        isSubmitting ? (
+                          <CircularProgress size={20} />
+                        ) : (
+                          <CheckIcon />
+                        )
+                      }
+                      disabled={cart.length === 0 || isSubmitting}
                     >
-                      Proceed to Checkout
+                      {isSubmitting
+                        ? "Saving Order..."
+                        : "Save Order & Go to Dashboard"}
                     </Button>
                   </Box>
                 </Box>
@@ -485,13 +566,6 @@ const MenuPage: React.FC = () => {
           <DialogContent>
             {selectedItem && (
               <Box>
-                <CardMedia
-                  component="img"
-                  height="200"
-                  image={selectedItem.image}
-                  alt={selectedItem.name}
-                  sx={{ objectFit: "cover", borderRadius: 1, mb: 2 }}
-                />
                 <Typography variant="body1" color="text.secondary" mb={2}>
                   {selectedItem.description}
                 </Typography>

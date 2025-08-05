@@ -52,9 +52,18 @@ export const userApiEndpoints = (
     }),
     invalidatesTags: ["Reservations"],
   }),
-  addFoodOrder: builder.mutation<any, { reservationId: string; foodOrder: any }>({
-    query: ({ reservationId, foodOrder }: { reservationId: string; foodOrder: any }) => ({
-      url: `/reservations/${reservationId}/food-order`,
+  addFoodOrder: builder.mutation<
+    any,
+    { reservationId: string; foodOrder: any }
+  >({
+    query: ({
+      reservationId,
+      foodOrder,
+    }: {
+      reservationId: string;
+      foodOrder: any;
+    }) => ({
+      url: `/reservation/${reservationId}/food-order`,
       method: "POST",
       body: foodOrder,
     }),

@@ -446,16 +446,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
         ) : (
           <Button
             variant="contained"
-            onClick={() => {
-              console.log("[EditDialog] Save button clicked");
-              console.log("[EditDialog] Current state:", {
-                dialogType,
-                activeTable,
-                loading,
-                editFormData,
-              });
-              onSave();
-            }}
+            onClick={onSave}
             disabled={
               loading ||
               (dialogType === "edit" &&
