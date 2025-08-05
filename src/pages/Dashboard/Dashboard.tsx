@@ -208,7 +208,16 @@ const Dashboard: React.FC = () => {
         open={dialogOpen}
         onClose={handleDialogClose}
         onSave={handleDialogSave}
-        dialogType={dialogType as any}
+        dialogType={
+          dialogType as
+            | "edit"
+            | "assign"
+            | "status"
+            | "cancel"
+            | "role"
+            | "delete"
+            | "add"
+        }
         activeTable={activeTable}
         userRole={userRole}
         loading={loading}

@@ -67,43 +67,43 @@ const EmployeeCalendar: React.FC = () => {
   const hasAuthToken = !!localStorage.getItem("authToken");
   const shouldFetch = hasAuthToken && !!weekStartStr && !!weekEndStr;
 
-  if (!hasAuthToken) {
-    return <div>Loading user info...</div>;
-  }
-
   // For admin, use the admin endpoint; for others, use the employee endpoint
-  const { data: weekReservations = [] } =
-    userRole === "admin"
-      ? useGetAdminEmployeeAssignedReservationsQuery(
-          shouldFetch && selectedEmployeeId
-            ? {
-                employeeId: selectedEmployeeId,
-                startDate: weekStartStr,
-                endDate: weekEndStr,
-              }
-            : skipToken
-        )
-      : useGetEmployeeAssignedByDateQuery(
-          shouldFetch
-            ? {
-                startDate: weekStartStr,
-                endDate: weekEndStr,
-              }
-            : skipToken
-        );
+  const adminQuery = useGetAdminEmployeeAssignedReservationsQuery(
+    shouldFetch && selectedEmployeeId && userRole === "admin"
+      ? {
+          employeeId: selectedEmployeeId,
+          startDate: weekStartStr,
+          endDate: weekEndStr,
+        }
+      : skipToken
+  );
 
-  const events: CalendarEvent[] = weekReservations.map((r: any) => {
-    const start = new Date(r.date + "T" + (r.time || "00:00"));
-    const end = new Date(start.getTime() + 90 * 60000); // 90 minutes in ms
-    return {
-      id: r.id,
-      title: r.customerName || "Reservation",
-      start,
-      end,
-      reservationId: r.id,
-      notes: r.notes,
-    };
-  });
+  const employeeQuery = useGetEmployeeAssignedByDateQuery(
+    shouldFetch && userRole !== "admin"
+      ? {
+          startDate: weekStartStr,
+          endDate: weekEndStr,
+        }
+      : skipToken
+  );
+
+  const weekReservations =
+    userRole === "admin" ? adminQuery.data || [] : employeeQuery.data || [];
+
+  const events: CalendarEvent[] = weekReservations.map(
+    (r: Record<string, unknown>) => {
+      const start = new Date((r.date as string) + "T" + ((r.time as string) || "00:00"));
+      const end = new Date(start.getTime() + 90 * 60000); // 90 minutes in ms
+      return {
+        id: r.id as string,
+        title: (r.customerName as string) || "Reservation",
+        start,
+        end,
+        reservationId: r.id as string,
+        notes: r.notes as string,
+      };
+    }
+  );
 
   useEffect(() => {
     if (
@@ -134,7 +134,7 @@ const EmployeeCalendar: React.FC = () => {
       }
     }, 100);
   }, [calendarDate]);
-  1;
+
   useEffect(() => {
     // Auto-scroll to closest current time slot on mount
     setTimeout(() => {
@@ -241,6 +241,10 @@ const EmployeeCalendar: React.FC = () => {
 
   const datePickerRef = useRef<DatePickerRef>(null);
 
+  if (!hasAuthToken) {
+    return <div>Loading user info...</div>;
+  }
+
   return (
     <>
       {/* Removed inline styles since we're now using styled-components with theme props */}
@@ -301,9 +305,9 @@ const EmployeeCalendar: React.FC = () => {
                     },
                   }}
                 >
-                  {allEmployees.map((emp: any) => (
-                    <MenuItem key={emp.id} value={emp.id}>
-                      {emp.name}
+                  {allEmployees.map((emp: Record<string, unknown>) => (
+                    <MenuItem key={emp.id as string} value={emp.id as string}>
+                      {emp.name as string}
                     </MenuItem>
                   ))}
                 </Select>

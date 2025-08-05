@@ -182,14 +182,14 @@ const DataTable: React.FC<DataTableProps> = ({
     if ("employeeName" in item && col === "employeeName") {
       const employeeName = item.employeeName;
       if (!employeeName || employeeName.trim() === "") {
-        return "Unassigned";
+        return "";
       }
       return employeeName.trim();
     }
     if ("assignedEmployee" in item && col === "assignedEmployee") {
       const assignedEmployee = item.assignedEmployee;
       if (!assignedEmployee || assignedEmployee.trim() === "") {
-        return "Unassigned";
+        return "";
       }
       return assignedEmployee.trim();
     }

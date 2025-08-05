@@ -192,7 +192,7 @@ export const useDashboard = () => {
     }
     if (employee.firstName) return employee.firstName;
     if (employee.lastName) return employee.lastName;
-    return employee.email || "Unknown Employee";
+    return employee.email || "";
   };
 
   // Filtering, sorting, and pagination
@@ -215,7 +215,7 @@ export const useDashboard = () => {
   // Memoize the getAvailableActions function to prevent unnecessary re-renders
   const memoizedGetAvailableActions = useMemo(() => {
     return (item: SortableEntry) =>
-      getAvailableActions(item, userRole, activeTable);
+      getAvailableActions(item as unknown as Record<string, unknown>, userRole, activeTable);
   }, [userRole, activeTable]);
 
   return {
@@ -257,7 +257,7 @@ export const useDashboard = () => {
     handleDialogSave,
     getAvailableTables,
     getAvailableActions: memoizedGetAvailableActions,
-    getGreeting: () => getGreeting(user),
+    getGreeting: () => getGreeting(user as unknown as Record<string, unknown>),
     // Add missing navigation/pagination
     currentPage,
     setCurrentPage,

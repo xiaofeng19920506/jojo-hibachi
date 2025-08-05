@@ -12,14 +12,14 @@ export const transformApiData = (
     let employeeName: string | undefined;
     if (item.assignedChef) {
       if (typeof item.assignedChef === "object" && item.assignedChef !== null) {
-        const chefData = item.assignedChef as any;
+        const chefData = item.assignedChef as Record<string, unknown>;
         // Handle the new API structure with 'id' and 'fullName'
-        employeeId = chefData.id || chefData._id;
+        employeeId = (chefData.id as string) || (chefData._id as string);
         employeeName =
-          chefData.fullName ||
+          (chefData.fullName as string) ||
           (chefData.firstName && chefData.lastName
-            ? `${chefData.firstName} ${chefData.lastName}`.trim()
-            : chefData.firstName || chefData.lastName || "Unknown Employee");
+            ? `${chefData.firstName as string} ${chefData.lastName as string}`.trim()
+            : (chefData.firstName as string) || (chefData.lastName as string) || "");
       } else {
         // If assignedChef is a string, it's likely just the ID
         // We should not use it as the name
@@ -63,7 +63,7 @@ export const transformApiData = (
   });
 };
 
-export const transformCustomerData = (apiData: any[]) => {
+export const transformCustomerData = (apiData: Record<string, unknown>[]) => {
   return apiData.map((item) => {
     const addressParts = [
       item.address,
@@ -75,15 +75,15 @@ export const transformCustomerData = (apiData: any[]) => {
     // Handle different name formats
     let name = "";
     if (item.fullName) {
-      name = item.fullName;
+      name = item.fullName as string;
     } else if (item.firstName && item.lastName) {
-      name = `${item.firstName} ${item.lastName}`.trim();
+      name = `${item.firstName as string} ${item.lastName as string}`.trim();
     } else if (item.firstName) {
-      name = item.firstName;
+      name = item.firstName as string;
     } else if (item.lastName) {
-      name = item.lastName;
+      name = item.lastName as string;
     } else if (item.name) {
-      name = item.name;
+      name = item.name as string;
     } else {
       name = "Unknown Customer";
     }
@@ -101,18 +101,18 @@ export const transformCustomerData = (apiData: any[]) => {
   });
 };
 
-export const transformOrderData = (apiData: any[]) => {
+export const transformOrderData = (apiData: Record<string, unknown>[]) => {
   return apiData.map((item) => {
     // Handle customer name
     let customerName = "";
     if (item.customerName) {
-      customerName = item.customerName;
+      customerName = item.customerName as string;
     } else if (item.firstName && item.lastName) {
-      customerName = `${item.firstName} ${item.lastName}`.trim();
+      customerName = `${item.firstName as string} ${item.lastName as string}`.trim();
     } else if (item.firstName) {
-      customerName = item.firstName;
+      customerName = item.firstName as string;
     } else if (item.lastName) {
-      customerName = item.lastName;
+      customerName = item.lastName as string;
     } else {
       customerName = "Unknown Customer";
     }
@@ -120,16 +120,16 @@ export const transformOrderData = (apiData: any[]) => {
     // Handle assigned employee
     let assignedEmployee = "";
     if (item.assignedEmployee) {
-      assignedEmployee = item.assignedEmployee;
+      assignedEmployee = item.assignedEmployee as string;
     } else if (item.assignedChef) {
       if (typeof item.assignedChef === "object" && item.assignedChef !== null) {
-        const chefData = item.assignedChef as any;
+        const chefData = item.assignedChef as Record<string, unknown>;
         // Handle the new API structure with 'id' and 'fullName'
         assignedEmployee =
-          chefData.fullName ||
+          (chefData.fullName as string) ||
           (chefData.firstName && chefData.lastName
-            ? `${chefData.firstName} ${chefData.lastName}`.trim()
-            : chefData.firstName || chefData.lastName || "Unknown Employee");
+            ? `${chefData.firstName as string} ${chefData.lastName as string}`.trim()
+            : (chefData.firstName as string) || (chefData.lastName as string) || "");
       } else {
         assignedEmployee = "Unassigned";
       }
@@ -150,22 +150,22 @@ export const transformOrderData = (apiData: any[]) => {
   });
 };
 
-export const transformEmployeeData = (apiData: any[]) => {
+export const transformEmployeeData = (apiData: Record<string, unknown>[]) => {
   return apiData.map((item) => {
     // Handle different name formats
     let name = "";
     if (item.fullName) {
-      name = item.fullName;
+      name = item.fullName as string;
     } else if (item.firstName && item.lastName) {
-      name = `${item.firstName} ${item.lastName}`.trim();
+      name = `${item.firstName as string} ${item.lastName as string}`.trim();
     } else if (item.firstName) {
-      name = item.firstName;
+      name = item.firstName as string;
     } else if (item.lastName) {
-      name = item.lastName;
+      name = item.lastName as string;
     } else if (item.name) {
-      name = item.name;
+      name = item.name as string;
     } else {
-      name = "Unknown Employee";
+      name = "";
     }
 
     const result = {
