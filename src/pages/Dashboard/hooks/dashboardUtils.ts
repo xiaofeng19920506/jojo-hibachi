@@ -1,5 +1,5 @@
 export const getAvailableActions = (
-  item: any,
+  item: Record<string, unknown>,
   userRole: string,
   activeTable: string
 ): string[] => {
@@ -41,6 +41,15 @@ export const getAvailableActions = (
         ];
       } else if (userRole === "employee") {
         return ["Edit", "Cancel", "Update Status", "Selection Menu"];
+      } else if (userRole === "user") {
+        // For users, check if reservation is cancelled
+        const reservation = item as Record<string, unknown>;
+        if (reservation.status === "cancelled") {
+          // If cancelled, disable all actions (no three dots menu)
+          return [];
+        }
+        // If not cancelled, allow normal actions
+        return ["Edit", "Cancel", "Selection Menu"];
       }
       return ["Edit", "Cancel", "Selection Menu"];
     case "food":
@@ -50,7 +59,7 @@ export const getAvailableActions = (
   }
 };
 
-export function getGreeting(user: any) {
+export function getGreeting(user: Record<string, unknown> | null) {
   if (!user) return "Welcome";
   const name = user.firstName || user.lastName || user.email || "User";
   const hour = new Date().getHours();
