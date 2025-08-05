@@ -2,18 +2,24 @@ import { useGetEmployeePendingReservationsQuery } from "../../../services/api";
 
 export const usePendingReservationsData = (
   activeTable: string,
-  userRole: string
+  userRole: string,
+  currentPage: number = 1,
+  itemsPerPage: number = 10
 ) => {
   const {
-    data: pendingReservationsData,
+    data: pendingReservationsResponse,
     isLoading: pendingReservationsLoading,
     error: pendingReservationsError,
-  } = useGetEmployeePendingReservationsQuery(undefined, {
-    skip: activeTable !== "pending-reservations" || userRole !== "employee",
-  });
+  } = useGetEmployeePendingReservationsQuery(
+    { page: currentPage, limit: itemsPerPage },
+    {
+      skip: activeTable !== "pending-reservations" || userRole !== "employee",
+    }
+  );
 
   return {
-    data: pendingReservationsData || [],
+    data: pendingReservationsResponse?.reservations || [],
+    pagination: pendingReservationsResponse?.pagination || {},
     isLoading: pendingReservationsLoading,
     error: pendingReservationsError,
   };

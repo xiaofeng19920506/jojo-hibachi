@@ -11,6 +11,7 @@ interface UseDashboardFilteringProps {
   statusFilter: string;
   allReservationsData: SortableEntry[];
   pendingReservationsData: SortableEntry[];
+  pendingReservationsPagination?: any;
   customersData: SortableEntry[];
   employeesData: SortableEntry[];
   foodData: SortableEntry[];
@@ -27,6 +28,7 @@ export function useDashboardFiltering({
   statusFilter,
   allReservationsData,
   pendingReservationsData,
+  pendingReservationsPagination,
   customersData,
   employeesData,
   foodData,
@@ -123,11 +125,22 @@ export function useDashboardFiltering({
     foodData,
   ]);
 
-  const totalPages = Math.ceil(filteredSortedData.length / itemsPerPage);
-  const paginatedData = filteredSortedData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // Handle server-side pagination for pending reservations
+  let totalPages: number;
+  let paginatedData: SortableEntry[];
+
+  if (activeTable === "pending-reservations" && pendingReservationsPagination) {
+    // Use server-side pagination data
+    totalPages = pendingReservationsPagination.totalPages || 1;
+    paginatedData = filteredSortedData; // Data is already paginated from server
+  } else {
+    // Use client-side pagination for other tables
+    totalPages = Math.ceil(filteredSortedData.length / itemsPerPage);
+    paginatedData = filteredSortedData.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  }
 
   return { filteredSortedData, totalPages, paginatedData };
 }

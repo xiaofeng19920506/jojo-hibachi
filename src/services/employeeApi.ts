@@ -46,16 +46,23 @@ export const employeeApiEndpoints = (
     },
     providesTags: ["Reservations"],
   }),
-  getEmployeePendingReservations: builder.query<any[], void>({
-    query: () => "/employee/pending",
+  getEmployeePendingReservations: builder.query<
+    { reservations: any[]; pagination: any },
+    { page?: number; limit?: number }
+  >({
+    query: ({ page = 1, limit = 10 }) =>
+      `/employee/pending?page=${page}&limit=${limit}`,
     transformResponse: (response: {
       status: string;
-      data: { reservations: any[] };
+      data: { reservations: any[]; pagination: any };
     }) => {
-      if (response.status === "success" && response.data?.reservations) {
-        return transformApiData(response.data.reservations || []);
+      if (response.status === "success" && response.data) {
+        return {
+          reservations: transformApiData(response.data.reservations || []),
+          pagination: response.data.pagination || {},
+        };
       }
-      return [];
+      return { reservations: [], pagination: {} };
     },
     providesTags: ["Reservations"],
   }),

@@ -82,9 +82,15 @@ export const useDashboard = () => {
 
   const {
     data: pendingReservationsData,
+    pagination: pendingReservationsPagination,
     isLoading: pendingReservationsLoading,
     error: pendingReservationsError,
-  } = usePendingReservationsData(activeTable, userRole);
+  } = usePendingReservationsData(
+    activeTable,
+    userRole,
+    currentPage,
+    itemsPerPage
+  );
 
   const {
     foodData,
@@ -229,6 +235,7 @@ export const useDashboard = () => {
       statusFilter,
       allReservationsData: allReservationsData || [],
       pendingReservationsData: pendingReservationsData || [],
+      pendingReservationsPagination: pendingReservationsPagination,
       customersData: customersData || [],
       employeesData: employeesData || [],
       foodData: foodData || [],
