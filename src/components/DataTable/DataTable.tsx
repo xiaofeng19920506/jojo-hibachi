@@ -56,10 +56,13 @@ const DataTable: React.FC<DataTableProps> = ({
   };
 
   const handleAction = (action: string) => {
+    // Close menu immediately to prevent showing other actions
+    handleMenuClose();
+
+    // Then handle the action
     if (selectedItem) {
       onActionClick(action, selectedItem);
     }
-    handleMenuClose();
   };
 
   const getStatusColor = (status: string) => {
@@ -195,33 +198,39 @@ const DataTable: React.FC<DataTableProps> = ({
   };
 
   const getMenuItems = () => {
+    // Only return menu items if we have both availableActions and selectedItem
     if (availableActions && selectedItem) {
-      return availableActions(selectedItem);
+      const items = availableActions(selectedItem);
+      return items;
     }
-    switch (tableType) {
-      case "customers":
-        return ["View Details"];
-      case "orders":
-        return [
-          "Assign Employee",
-          "Update Status",
-          "View Details",
-          "Edit Order",
-          "Cancel Order",
-        ];
-      case "employees":
-        return [
-          "Change Role",
-          "Update Status",
-          "View Profile",
-          "Edit Employee",
-          "Reset Password",
-        ];
-      case "reservations":
-        return ["Edit", "Cancel", "Assign Employee", "Update Status"];
-      default:
-        return [];
+    // Only use fallback if no availableActions function is provided
+    if (!availableActions) {
+      switch (tableType) {
+        case "customers":
+          return ["View Details"];
+        case "orders":
+          return [
+            "Assign Employee",
+            "Update Status",
+            "View Details",
+            "Edit Order",
+            "Cancel Order",
+          ];
+        case "employees":
+          return [
+            "Change Role",
+            "Update Status",
+            "View Profile",
+            "Edit Employee",
+            "Reset Password",
+          ];
+        case "reservations":
+          return ["Edit", "Cancel", "Assign Employee", "Update Status"];
+        default:
+          return [];
+      }
     }
+    return [];
   };
 
   return (

@@ -2,17 +2,13 @@ import React, { useState } from "react";
 import {
   Box,
   Typography,
-  Grid,
+  Container,
   Card,
   CardContent,
   CardMedia,
   Button,
   Chip,
-  Container,
-  Paper,
-  Divider,
   IconButton,
-  Badge,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -20,7 +16,8 @@ import {
   TextField,
   Alert,
   CircularProgress,
-  Fab,
+  Paper,
+  Divider,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -41,13 +38,6 @@ interface CartItem {
   menuItem: MenuItemType;
   quantity: number;
   specialInstructions?: string;
-}
-
-interface HibachiCombo {
-  baseProtein: MenuItemType;
-  additionalProteins: MenuItemType[];
-  specialInstructions?: string;
-  totalPrice: number;
 }
 
 const MenuPage: React.FC = () => {
@@ -163,14 +153,6 @@ const MenuPage: React.FC = () => {
   };
 
   // Hibachi combo handlers
-  const handleHibachiComboStart = (baseProtein: MenuItemType) => {
-    setSelectedBaseProtein(baseProtein);
-    setSelectedAdditionalProteins([]);
-    setComboSpecialInstructions("");
-    setComboQuantity(1);
-    setHibachiComboDialogOpen(true);
-  };
-
   const handleAddAdditionalProtein = (additionalProtein: MenuItemType) => {
     setSelectedAdditionalProteins([
       ...selectedAdditionalProteins,
@@ -390,9 +372,7 @@ const MenuPage: React.FC = () => {
               </Typography>
             </Box>
             <Box display="flex" alignItems="center" gap={2}>
-              <Badge badgeContent={totalCartItems} color="primary">
-                <ShoppingCartIcon sx={{ fontSize: 32 }} />
-              </Badge>
+              <ShoppingCartIcon sx={{ fontSize: 32 }} />
               <Typography variant="h6">${totalPrice.toFixed(2)}</Typography>
             </Box>
           </Box>
@@ -785,8 +765,14 @@ const MenuPage: React.FC = () => {
           <DialogContent>
             {selectedBaseProtein && (
               <Box>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} md={6}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", md: "row" },
+                    gap: 3,
+                  }}
+                >
+                  <Box sx={{ flex: 1 }}>
                     <Typography variant="h6" gutterBottom>
                       Base Protein
                     </Typography>
@@ -810,9 +796,9 @@ const MenuPage: React.FC = () => {
                         </Typography>
                       </CardContent>
                     </Card>
-                  </Grid>
+                  </Box>
 
-                  <Grid item xs={12} md={6}>
+                  <Box sx={{ flex: 1 }}>
                     <Typography variant="h6" gutterBottom>
                       Add Additional Proteins
                     </Typography>
@@ -868,8 +854,8 @@ const MenuPage: React.FC = () => {
                         </Card>
                       ))}
                     </Box>
-                  </Grid>
-                </Grid>
+                  </Box>
+                </Box>
 
                 <Divider sx={{ my: 3 }} />
 
@@ -970,39 +956,44 @@ const MenuPage: React.FC = () => {
         >
           <DialogTitle>Select Appetizer</DialogTitle>
           <DialogContent>
-            <Grid container spacing={2}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                gap: 2,
+              }}
+            >
               {appetizers.map((appetizer) => (
-                <Grid item xs={12} sm={6} key={appetizer.id}>
-                  <Card
-                    sx={{
-                      cursor: "pointer",
-                      border:
-                        selectedAppetizer?.id === appetizer.id
-                          ? "2px solid primary.main"
-                          : "2px solid transparent",
-                    }}
-                    onClick={() => handleAppetizerSelect(appetizer)}
-                  >
-                    <CardMedia
-                      component="img"
-                      height="150"
-                      image={appetizer.image}
-                      alt={appetizer.name}
-                      sx={{ objectFit: "cover" }}
-                    />
-                    <CardContent>
-                      <Typography variant="h6">{appetizer.name}</Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {appetizer.description}
-                      </Typography>
-                      <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
-                        ${appetizer.price}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
+                <Card
+                  key={appetizer.id}
+                  sx={{
+                    cursor: "pointer",
+                    border:
+                      selectedAppetizer?.id === appetizer.id
+                        ? "2px solid primary.main"
+                        : "2px solid transparent",
+                  }}
+                  onClick={() => handleAppetizerSelect(appetizer)}
+                >
+                  <CardMedia
+                    component="img"
+                    height="150"
+                    image={appetizer.image}
+                    alt={appetizer.name}
+                    sx={{ objectFit: "cover" }}
+                  />
+                  <CardContent>
+                    <Typography variant="h6">{appetizer.name}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {appetizer.description}
+                    </Typography>
+                    <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
+                      ${appetizer.price}
+                    </Typography>
+                  </CardContent>
+                </Card>
               ))}
-            </Grid>
+            </Box>
 
             {selectedAppetizer && (
               <Box sx={{ mt: 3 }}>

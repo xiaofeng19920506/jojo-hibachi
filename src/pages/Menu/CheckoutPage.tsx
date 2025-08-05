@@ -4,7 +4,6 @@ import {
   Typography,
   Paper,
   Container,
-  Grid,
   Card,
   CardContent,
   Divider,
@@ -196,8 +195,14 @@ const CheckoutPage: React.FC = () => {
               </Alert>
             ) : (
               <>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} md={8}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", md: "row" },
+                    gap: 3,
+                  }}
+                >
+                  <Box sx={{ flex: { xs: 1, md: 2 } }}>
                     <Typography variant="h6" gutterBottom>
                       Selected Items ({totalCartItems})
                     </Typography>
@@ -283,9 +288,9 @@ const CheckoutPage: React.FC = () => {
                         </CardContent>
                       </Card>
                     ))}
-                  </Grid>
+                  </Box>
 
-                  <Grid item xs={12} md={4}>
+                  <Box sx={{ flex: { xs: 1, md: 1 } }}>
                     <Paper elevation={1} sx={{ p: 2 }}>
                       <Typography variant="h6" gutterBottom>
                         Order Summary
@@ -322,8 +327,8 @@ const CheckoutPage: React.FC = () => {
                         Continue
                       </Button>
                     </Paper>
-                  </Grid>
-                </Grid>
+                  </Box>
+                </Box>
               </>
             )}
           </Paper>
@@ -335,8 +340,14 @@ const CheckoutPage: React.FC = () => {
               Additional Details
             </Typography>
 
-            <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", md: "row" },
+                gap: 3,
+              }}
+            >
+              <Box sx={{ flex: 1 }}>
                 <TextField
                   fullWidth
                   label="Additional Notes"
@@ -347,9 +358,9 @@ const CheckoutPage: React.FC = () => {
                   placeholder="Any special requests or notes for your order..."
                   helperText="Optional: Add any special requests or notes for your order"
                 />
-              </Grid>
+              </Box>
 
-              <Grid item xs={12} md={6}>
+              <Box sx={{ flex: 1 }}>
                 <TextField
                   fullWidth
                   label="Delivery Instructions"
@@ -360,8 +371,8 @@ const CheckoutPage: React.FC = () => {
                   placeholder="Any specific delivery instructions..."
                   helperText="Optional: Add any specific delivery instructions"
                 />
-              </Grid>
-            </Grid>
+              </Box>
+            </Box>
 
             <Box display="flex" gap={2} mt={3}>
               <Button variant="outlined" onClick={handleBack}>

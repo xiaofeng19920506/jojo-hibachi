@@ -6,11 +6,12 @@ export default defineConfig({
   plugins: [react()],
   build: {
     rollupOptions: {
+      maxParallelFileOps: 1,
       output: {
         manualChunks: {
-          react: ["react", "react-dom"],
-          mui: ["@mui/material", "@emotion/react", "@emotion/styled"],
-          date: ["dayjs", "date-fns"],
+          vendor: ["react", "react-dom"],
+          mui: ["@mui/material", "@mui/icons-material"],
+          emotion: ["@emotion/react", "@emotion/styled"],
         },
       },
     },

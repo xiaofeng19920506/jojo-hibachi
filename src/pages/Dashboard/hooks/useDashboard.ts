@@ -481,6 +481,11 @@ export const useDashboard = () => {
     currentPage * itemsPerPage
   );
 
+  // Memoize the getAvailableActions function to prevent unnecessary re-renders
+  const memoizedGetAvailableActions = useMemo(() => {
+    return (_item: SortableEntry) => getAvailableActions(userRole, activeTable);
+  }, [userRole, activeTable]);
+
   return {
     // State
     searchQuery,
@@ -525,8 +530,7 @@ export const useDashboard = () => {
     handleDialogClose,
     handleDialogSave,
     getAvailableTables,
-    getAvailableActions: (item: SortableEntry) =>
-      getAvailableActions(userRole, activeTable),
+    getAvailableActions: memoizedGetAvailableActions,
     getGreeting: () => getGreeting(user),
     // Add missing navigation/pagination
     currentPage,

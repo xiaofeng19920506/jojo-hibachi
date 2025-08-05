@@ -11,7 +11,7 @@ export function getAvailableActions(userRole: string, activeTable: string) {
       break;
     case "admin":
       if (activeTable === "reservations") {
-        actions.push("edit", "Assign Chef", "Update Status");
+        actions.push("edit", "Assign Employee", "Update Status");
       } else if (activeTable === "employees") {
         actions.push("Update Status", "Change Role");
       } else if (activeTable === "customers") {
