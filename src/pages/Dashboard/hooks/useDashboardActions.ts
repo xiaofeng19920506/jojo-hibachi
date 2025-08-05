@@ -37,6 +37,9 @@ interface UseDashboardActionsProps {
   updateReservationStatus: (args: { id: string; status: string }) => {
     unwrap: () => Promise<unknown>;
   };
+  assignChefToReservation: (args: { id: string; chefId: string }) => {
+    unwrap: () => Promise<unknown>;
+  };
   changeUserRole: (args: { userId: string; role: string }) => {
     unwrap: () => Promise<unknown>;
   };
@@ -44,6 +47,7 @@ interface UseDashboardActionsProps {
   selectedReservation: ReservationEntry | null;
   dialogType: string;
   selectedStatus: string;
+  selectedEmployeeId: string;
   handleDialogClose: () => void;
 }
 
@@ -61,11 +65,13 @@ export function useDashboardActions({
   handleCreateFood,
   updateReservation,
   updateReservationStatus,
+  assignChefToReservation,
   changeUserRole,
   editFormData,
   selectedReservation,
   dialogType,
   selectedStatus,
+  selectedEmployeeId,
   handleDialogClose,
 }: UseDashboardActionsProps) {
   const handleActionClick = (action: string, item: SortableEntry) => {
@@ -268,7 +274,80 @@ export function useDashboardActions({
       );
     }
 
-    if (dialogType === "edit") {
+    if (dialogType === "status") {
+      if (activeTable === "reservations") {
+        // Update reservation status for admins and employees
+        if (!selectedReservation) {
+          throw new Error("No reservation selected for status update");
+        }
+
+        await updateReservationStatus({
+          id: selectedReservation.id,
+          status: selectedStatus,
+        }).unwrap();
+        handleDialogClose(); // Close modal after successful update
+      } else if (activeTable === "employees") {
+        // Handle employee status updates if needed
+      } else if (activeTable === "orders") {
+        // Handle order status updates if needed
+      }
+    } else if (dialogType === "cancel") {
+      if (activeTable === "reservations") {
+        // Cancel reservation
+        if (!selectedReservation) {
+          throw new Error("No reservation selected for cancellation");
+        }
+
+        await updateReservationStatus({
+          id: selectedReservation.id,
+          status: "cancelled",
+        }).unwrap();
+        handleDialogClose(); // Close modal after successful update
+      } else if (activeTable === "orders") {
+        // Cancel order
+        const orderId = (editFormData as Record<string, unknown>).id as string;
+        if (!orderId) {
+          throw new Error("No order selected for cancellation");
+        }
+
+        await updateReservationStatus({
+          id: orderId,
+          status: "cancelled",
+        }).unwrap();
+        handleDialogClose(); // Close modal after successful update
+      }
+    } else if (dialogType === "assign") {
+      if (activeTable === "reservations") {
+        // Assign employee to reservation
+        if (!selectedReservation) {
+          throw new Error("No reservation selected for employee assignment");
+        }
+        if (!selectedEmployeeId) {
+          throw new Error("No employee selected for assignment");
+        }
+
+        await assignChefToReservation({
+          id: selectedReservation.id,
+          chefId: selectedEmployeeId,
+        }).unwrap();
+        handleDialogClose(); // Close modal after successful update
+      } else if (activeTable === "orders") {
+        // Assign employee to order
+        const orderId = (editFormData as Record<string, unknown>).id as string;
+        if (!orderId) {
+          throw new Error("No order selected for employee assignment");
+        }
+        if (!selectedEmployeeId) {
+          throw new Error("No employee selected for assignment");
+        }
+
+        await assignChefToReservation({
+          id: orderId,
+          chefId: selectedEmployeeId,
+        }).unwrap();
+        handleDialogClose(); // Close modal after successful update
+      }
+    } else if (dialogType === "edit") {
       if (activeTable === "orders") {
         // Orders table - not implemented
       } else if (activeTable === "reservations") {

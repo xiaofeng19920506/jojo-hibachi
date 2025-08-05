@@ -5,6 +5,7 @@ import {
   useUpdateReservationMutation,
   useChangeUserRoleMutation,
   useGetAdminEmployeesQuery,
+  useAssignChefToReservationMutation,
 } from "../../../services/api";
 import type { Employee } from "../types";
 import type {
@@ -100,6 +101,7 @@ export const useDashboard = () => {
   const [changeUserRole, { isLoading: changeRoleLoading }] =
     useChangeUserRoleMutation();
   const [updateReservation] = useUpdateReservationMutation();
+  const [assignChefToReservation] = useAssignChefToReservationMutation();
 
   // Get loading state
   const getLoadingState = (): boolean => {
@@ -157,11 +159,13 @@ export const useDashboard = () => {
     ) => Promise<void>,
     updateReservation,
     updateReservationStatus,
+    assignChefToReservation,
     changeUserRole,
     editFormData,
     selectedReservation,
     dialogType,
     selectedStatus,
+    selectedEmployeeId,
     handleDialogClose,
   });
 
@@ -215,7 +219,11 @@ export const useDashboard = () => {
   // Memoize the getAvailableActions function to prevent unnecessary re-renders
   const memoizedGetAvailableActions = useMemo(() => {
     return (item: SortableEntry) =>
-      getAvailableActions(item as unknown as Record<string, unknown>, userRole, activeTable);
+      getAvailableActions(
+        item as unknown as Record<string, unknown>,
+        userRole,
+        activeTable
+      );
   }, [userRole, activeTable]);
 
   return {

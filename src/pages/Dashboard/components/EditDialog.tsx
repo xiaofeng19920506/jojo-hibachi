@@ -172,6 +172,10 @@ const EditDialog: React.FC<EditDialogProps> = ({
       // This would need to be implemented with proper validation state
       return true;
     }
+    if (dialogType === "assign") {
+      // For assign dialog, require that an employee is selected
+      return selectedEmployeeId && selectedEmployeeId.trim() !== "";
+    }
     return true;
   };
 
