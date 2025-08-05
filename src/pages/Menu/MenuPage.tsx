@@ -21,7 +21,6 @@ import {
 import {
   Add as AddIcon,
   Remove as RemoveIcon,
-  ShoppingCart as ShoppingCartIcon,
   Check as CheckIcon,
 } from "@mui/icons-material";
 import { useParams, useNavigate } from "react-router-dom";

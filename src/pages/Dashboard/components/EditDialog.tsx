@@ -263,6 +263,77 @@ const EditDialog: React.FC<EditDialogProps> = ({
                     sx={{ fontSize: { xs: 16, sm: 18 } }}
                   />
                 )}
+                {activeTable === "reservations" && (
+                  <TextField
+                    label="Number of Adults"
+                    name="adult"
+                    type="number"
+                    fullWidth
+                    margin="normal"
+                    inputProps={{ min: 0, style: { fontSize: 16 } }}
+                    value={
+                      isReservationData(editFormData)
+                        ? editFormData.adult || 0
+                        : 0
+                    }
+                    onChange={onEditFormChange}
+                    sx={{ fontSize: { xs: 16, sm: 18 } }}
+                  />
+                )}
+                {activeTable === "reservations" && (
+                  <TextField
+                    label="Number of Kids"
+                    name="kids"
+                    type="number"
+                    fullWidth
+                    margin="normal"
+                    inputProps={{ min: 0, style: { fontSize: 16 } }}
+                    value={
+                      isReservationData(editFormData)
+                        ? editFormData.kids || 0
+                        : 0
+                    }
+                    onChange={onEditFormChange}
+                    sx={{ fontSize: { xs: 16, sm: 18 } }}
+                  />
+                )}
+                {activeTable === "reservations" && (
+                  <TextField
+                    label="Event Type"
+                    name="eventType"
+                    fullWidth
+                    margin="normal"
+                    value={
+                      isReservationData(editFormData)
+                        ? editFormData.eventType || ""
+                        : ""
+                    }
+                    onChange={onEditFormChange}
+                    sx={{ fontSize: { xs: 16, sm: 18 } }}
+                    InputLabelProps={{ style: { fontSize: 16 } }}
+                    inputProps={{ style: { fontSize: 16 } }}
+                  />
+                )}
+                {activeTable === "reservations" && (
+                  <TextField
+                    label="Allergies"
+                    name="allergies"
+                    fullWidth
+                    margin="normal"
+                    multiline
+                    rows={2}
+                    value={
+                      isReservationData(editFormData)
+                        ? editFormData.allergies || ""
+                        : ""
+                    }
+                    onChange={onEditFormChange}
+                    sx={{ fontSize: { xs: 16, sm: 18 } }}
+                    InputLabelProps={{ style: { fontSize: 16 } }}
+                    inputProps={{ style: { fontSize: 16 } }}
+                    placeholder="Any food allergies or dietary restrictions"
+                  />
+                )}
                 <TextField
                   label="Price"
                   name="price"
@@ -297,6 +368,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
                     sx={{ fontSize: { xs: 16, sm: 18 } }}
                     InputLabelProps={{ style: { fontSize: 16 } }}
                     inputProps={{ style: { fontSize: 16 } }}
+                    placeholder="Any special requests or additional notes"
                   />
                 )}
               </>

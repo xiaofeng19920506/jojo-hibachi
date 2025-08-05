@@ -162,6 +162,10 @@ export const useDashboard = () => {
               time: reservation.time,
               price: reservation.price,
               notes: reservation.notes || "",
+              adult: reservation.adult,
+              kids: reservation.kids,
+              allergies: reservation.allergies || "",
+              eventType: reservation.eventType || "",
             });
             setDialogOpen(true);
             break;
