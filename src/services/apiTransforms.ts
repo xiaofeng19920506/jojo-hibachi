@@ -18,8 +18,12 @@ export const transformApiData = (
         employeeName =
           (chefData.fullName as string) ||
           (chefData.firstName && chefData.lastName
-            ? `${chefData.firstName as string} ${chefData.lastName as string}`.trim()
-            : (chefData.firstName as string) || (chefData.lastName as string) || "");
+            ? `${chefData.firstName as string} ${
+                chefData.lastName as string
+              }`.trim()
+            : (chefData.firstName as string) ||
+              (chefData.lastName as string) ||
+              "");
       } else {
         // If assignedChef is a string, it's likely just the ID
         // We should not use it as the name
@@ -45,7 +49,11 @@ export const transformApiData = (
       price: item.price || 0,
       notes: item.notes,
       phoneNumber: item.phoneNumber,
-      address: item.address,
+      address:
+        (item as any).fullAddress ||
+        `${item.address}, ${item.city}, ${item.state} ${item.zipCode}`
+          .replace(/^,\s*/, "")
+          .replace(/,\s*,/g, ","),
       city: item.city,
       state: item.state,
       zipCode: item.zipCode,
@@ -108,7 +116,9 @@ export const transformOrderData = (apiData: Record<string, unknown>[]) => {
     if (item.customerName) {
       customerName = item.customerName as string;
     } else if (item.firstName && item.lastName) {
-      customerName = `${item.firstName as string} ${item.lastName as string}`.trim();
+      customerName = `${item.firstName as string} ${
+        item.lastName as string
+      }`.trim();
     } else if (item.firstName) {
       customerName = item.firstName as string;
     } else if (item.lastName) {
@@ -128,8 +138,12 @@ export const transformOrderData = (apiData: Record<string, unknown>[]) => {
         assignedEmployee =
           (chefData.fullName as string) ||
           (chefData.firstName && chefData.lastName
-            ? `${chefData.firstName as string} ${chefData.lastName as string}`.trim()
-            : (chefData.firstName as string) || (chefData.lastName as string) || "");
+            ? `${chefData.firstName as string} ${
+                chefData.lastName as string
+              }`.trim()
+            : (chefData.firstName as string) ||
+              (chefData.lastName as string) ||
+              "");
       } else {
         assignedEmployee = "Unassigned";
       }
@@ -168,10 +182,21 @@ export const transformEmployeeData = (apiData: Record<string, unknown>[]) => {
       name = "";
     }
 
+    // Handle full address
+    const addressParts = [
+      item.address,
+      item.city,
+      item.state,
+      item.zipCode,
+    ].filter(Boolean);
+    const fullAddress = addressParts.join(", ") || "";
+
     const result = {
       id: item._id || item.id,
       name,
       email: item.email || "",
+      phone: item.phone || "",
+      address: fullAddress,
       role: item.role || "employee",
       joinDate:
         item.joinDate ||

@@ -113,6 +113,87 @@ export function useDashboardActions({
         }
         break;
       }
+      case "customers": {
+        const customer = item as unknown as Record<string, unknown>;
+        switch (action.toLowerCase()) {
+          case "change role":
+            setDialogType("role");
+            setEditFormData({
+              id: customer.id as string,
+              name: customer.name as string,
+              email: customer.email as string,
+            });
+            setDialogOpen(true);
+            break;
+          default:
+            // Action not implemented for customers
+            break;
+        }
+        break;
+      }
+      case "orders": {
+        const order = item as unknown as Record<string, unknown>;
+        switch (action.toLowerCase()) {
+          case "assign employee":
+            setDialogType("assign");
+            setEditFormData({
+              id: order.id as string,
+            });
+            setDialogOpen(true);
+            break;
+          case "update status":
+            setDialogType("status");
+            setEditFormData({
+              id: order.id as string,
+            });
+            setDialogOpen(true);
+            break;
+          case "edit order":
+            setDialogType("edit");
+            setEditFormData({
+              id: order.id as string,
+            });
+            setDialogOpen(true);
+            break;
+          case "cancel order":
+            setDialogType("cancel");
+            setEditFormData({
+              id: order.id as string,
+            });
+            setDialogOpen(true);
+            break;
+          default:
+            // Action not implemented for orders
+            break;
+        }
+        break;
+      }
+      case "employees": {
+        const employee = item as unknown as Record<string, unknown>;
+        switch (action.toLowerCase()) {
+          case "change role":
+            setDialogType("role");
+            setEditFormData({
+              id: employee.id as string,
+              name: employee.name as string,
+              email: employee.email as string,
+            });
+            setDialogOpen(true);
+            break;
+          case "update status":
+            setDialogType("status");
+            setEditFormData({
+              id: employee.id as string,
+              name: employee.name as string,
+            });
+            setDialogOpen(true);
+            break;
+          default:
+            // Action not implemented for employees
+            break;
+        }
+        break;
+      }
       case "food": {
         const food = item as FoodEntry;
         switch (action.toLowerCase()) {
@@ -182,7 +263,9 @@ export function useDashboardActions({
       userRole !== "admin" &&
       userRole !== "employee"
     ) {
-      throw new Error("Only admins and employees can change reservation status");
+      throw new Error(
+        "Only admins and employees can change reservation status"
+      );
     }
 
     if (dialogType === "edit") {
@@ -267,11 +350,12 @@ export function useDashboardActions({
       (activeTable === "customers" || activeTable === "employees")
     ) {
       // Change user role (for customers or employees)
-      if (!selectedReservation) {
+      const userId = (editFormData as Record<string, unknown>).id as string;
+      if (!userId) {
         throw new Error("No user selected for role change");
       }
       await changeUserRole({
-        userId: selectedReservation.id,
+        userId: userId,
         role: (editFormData as { role: string }).role,
       }).unwrap();
       handleDialogClose(); // Close modal after successful update

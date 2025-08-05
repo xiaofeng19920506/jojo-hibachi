@@ -94,8 +94,8 @@ const DataTable: React.FC<DataTableProps> = ({
     employees: [
       "name",
       "email",
-      "role",
-      "joinDate",
+      "phone",
+      "address",
       "status",
       "ordersAssigned",
       "actions",

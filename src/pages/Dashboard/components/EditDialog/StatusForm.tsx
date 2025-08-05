@@ -6,12 +6,14 @@ interface StatusFormProps {
   selectedStatus: string;
   onStatusChange: (e: SelectChangeEvent<string>) => void;
   activeTable: string;
+  userRole?: string;
 }
 
 const StatusForm: React.FC<StatusFormProps> = ({
   selectedStatus,
   onStatusChange,
   activeTable,
+  userRole,
 }) => {
   const getStatusOptions = () => {
     if (activeTable === "employees") {
@@ -42,20 +44,34 @@ const StatusForm: React.FC<StatusFormProps> = ({
         </MenuItem>,
       ];
     } else {
-      return [
-        <MenuItem key="pending" value="pending">
-          Pending
-        </MenuItem>,
-        <MenuItem key="confirmed" value="confirmed">
-          Confirmed
-        </MenuItem>,
-        <MenuItem key="completed" value="completed">
-          Completed
-        </MenuItem>,
-        <MenuItem key="cancelled" value="cancelled">
-          Cancelled
-        </MenuItem>,
-      ];
+      // For reservations table
+      if (userRole === "employee") {
+        // Employees can only update to confirmed or completed
+        return [
+          <MenuItem key="confirmed" value="confirmed">
+            Confirmed
+          </MenuItem>,
+          <MenuItem key="completed" value="completed">
+            Completed
+          </MenuItem>,
+        ];
+      } else {
+        // Admin and users can see all status options
+        return [
+          <MenuItem key="pending" value="pending">
+            Pending
+          </MenuItem>,
+          <MenuItem key="confirmed" value="confirmed">
+            Confirmed
+          </MenuItem>,
+          <MenuItem key="completed" value="completed">
+            Completed
+          </MenuItem>,
+          <MenuItem key="cancelled" value="cancelled">
+            Cancelled
+          </MenuItem>,
+        ];
+      }
     }
   };
 

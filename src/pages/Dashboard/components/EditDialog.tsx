@@ -138,6 +138,7 @@ const EditDialog: React.FC<EditDialogProps> = ({
           selectedStatus={selectedStatus}
           onStatusChange={onStatusChange}
           activeTable={activeTable}
+          userRole={userRole}
         />
       );
     }

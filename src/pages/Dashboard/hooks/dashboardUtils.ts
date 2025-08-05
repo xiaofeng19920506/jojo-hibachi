@@ -7,29 +7,13 @@ export const getAvailableActions = (
 
   switch (activeTable) {
     case "customers":
-      return userRole === "admin"
-        ? ["View Details", "Change Role"]
-        : ["View Details"];
+      return userRole === "admin" ? ["Change Role"] : [];
     case "employees":
-      return userRole === "admin"
-        ? [
-            "Change Role",
-            "Update Status",
-            "View Profile",
-            "Edit Employee",
-            "Reset Password",
-          ]
-        : ["View Profile"];
+      return userRole === "admin" ? ["Change Role", "Update Status"] : [];
     case "orders":
       return userRole === "admin"
-        ? [
-            "Assign Employee",
-            "Update Status",
-            "View Details",
-            "Edit Order",
-            "Cancel Order",
-          ]
-        : ["View Details"];
+        ? ["Assign Employee", "Update Status", "Edit Order", "Cancel Order"]
+        : [];
     case "reservations":
       if (userRole === "admin") {
         return [
@@ -40,7 +24,7 @@ export const getAvailableActions = (
           "Selection Menu",
         ];
       } else if (userRole === "employee") {
-        return ["Edit", "Cancel", "Update Status", "Selection Menu"];
+        return ["Update Status"];
       } else if (userRole === "user") {
         // For users, check if reservation is cancelled
         const reservation = item as Record<string, unknown>;
