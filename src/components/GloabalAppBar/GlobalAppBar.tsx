@@ -147,7 +147,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
           <Box
             component="img"
             src={logo}
-            alt="JoJo Hibachi Logo"
+            alt="Fancy Hibachi Logo"
             sx={{
               height: { xs: 40, sm: 50 },
               width: "auto",
@@ -160,13 +160,31 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
             }}
             onClick={() => handleNavigation("/")}
           />
-          <Typography
-            variant="h4"
-            component="h1"
-            sx={{ fontWeight: "bold", mb: 0.5, fontSize: { xs: 20, sm: 28 } }}
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="flex-start"
+            sx={{ flex: 1 }}
           >
-            {title}
-          </Typography>
+            <Typography
+              variant="h4"
+              component="h1"
+              sx={{ fontWeight: "bold", mb: 0.5, fontSize: { xs: 20, sm: 28 } }}
+            >
+              {title}
+            </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                fontSize: { xs: 10, sm: 12 },
+                color: "rgba(255, 255, 255, 0.8)",
+                fontStyle: "italic",
+                fontWeight: 500,
+              }}
+            >
+              @Fancy Hibachi
+            </Typography>
+          </Box>
         </Box>
         <Box display="flex" alignItems="center" gap={2}>
           {!isMobile && (
@@ -281,11 +299,16 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
               onClose={handleDrawerClose}
             >
               <Box
-                sx={{ width: 220 }}
+                sx={{
+                  width: 220,
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
                 role="presentation"
                 onClick={handleDrawerClose}
               >
-                <List>
+                <List sx={{ flex: 1 }}>
                   {allActionButtons.map((button, index) => (
                     <ListItem key={index} disablePadding>
                       <ListItemButton
@@ -333,6 +356,76 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                     </ListItem>
                   )}
                 </List>
+
+                {/* Logo at the bottom of the drawer */}
+                <Box
+                  sx={{
+                    p: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 2,
+                    borderTop: 1,
+                    borderColor: "divider",
+                    backgroundColor: "background.paper",
+                  }}
+                >
+                  <Box
+                    component="img"
+                    src={logo}
+                    alt="Fancy Hibachi Logo"
+                    sx={{
+                      height: 40,
+                      width: "auto",
+                      cursor: "pointer",
+                      mixBlendMode: "multiply",
+                      filter: "contrast(1.1) brightness(1.1)",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleNavigation("/");
+                      handleDrawerClose();
+                    }}
+                  />
+                  <Box
+                    display="flex"
+                    flexDirection="column"
+                    alignItems="flex-start"
+                    sx={{ flex: 1 }}
+                  >
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: "bold",
+                        fontSize: 14,
+                        color: "text.primary",
+                      }}
+                    >
+                      Fancy Hibachi
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontSize: 10,
+                        color: "text.secondary",
+                        fontStyle: "italic",
+                        fontWeight: 500,
+                      }}
+                    >
+                      @2025 by Fancy Hibachi
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontSize: 10,
+                        color: "text.secondary",
+                        fontStyle: "italic",
+                        fontWeight: 500,
+                      }}
+                    >
+                      Version 1.0.0
+                    </Typography>
+                  </Box>
+                </Box>
               </Box>
             </Drawer>
           </>
