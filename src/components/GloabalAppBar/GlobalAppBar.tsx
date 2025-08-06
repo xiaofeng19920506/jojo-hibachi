@@ -15,6 +15,7 @@ import { useTheme } from "@mui/material/styles";
 import { useState } from "react";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
+import logo from "../../asset/logo.png";
 
 interface ActionButton {
   label: string;
@@ -142,7 +143,23 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
           flexWrap: { xs: "wrap", sm: "nowrap" },
         }}
       >
-        <Box>
+        <Box display="flex" alignItems="center" gap={2}>
+          <Box
+            component="img"
+            src={logo}
+            alt="JoJo Hibachi Logo"
+            sx={{
+              height: { xs: 40, sm: 50 },
+              width: "auto",
+              cursor: "pointer",
+              mixBlendMode: "multiply", // This removes white backgrounds
+              filter: "contrast(1.1) brightness(1.1)", // Enhances visibility
+              // Alternative blend modes if multiply doesn't work well:
+              // mixBlendMode: "screen", // For dark backgrounds
+              // mixBlendMode: "overlay", // For mixed backgrounds
+            }}
+            onClick={() => handleNavigation("/")}
+          />
           <Typography
             variant="h4"
             component="h1"
