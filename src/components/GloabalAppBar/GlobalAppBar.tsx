@@ -173,17 +173,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
             >
               {title}
             </Typography>
-            <Typography
-              variant="caption"
-              sx={{
-                fontSize: { xs: 10, sm: 12 },
-                color: "rgba(255, 255, 255, 0.8)",
-                fontStyle: "italic",
-                fontWeight: 500,
-              }}
-            >
-              @Fancy Hibachi
-            </Typography>
           </Box>
         </Box>
         <Box display="flex" alignItems="center" gap={2}>
