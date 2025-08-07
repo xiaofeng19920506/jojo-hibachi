@@ -42,7 +42,7 @@ const ForgotPassword: React.FC = () => {
           placeholder="Email"
           value={email}
           required
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
           style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
         />
         <Button

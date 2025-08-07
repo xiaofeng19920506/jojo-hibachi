@@ -63,7 +63,7 @@ const ResetPassword: React.FC = () => {
           placeholder="New Password"
           value={password}
           required
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
           style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
         />
         <Input
@@ -71,7 +71,7 @@ const ResetPassword: React.FC = () => {
           placeholder="Confirm New Password"
           value={confirmPassword}
           required
-          onChange={(e) => setConfirmPassword(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
           style={{ fontSize: 16, minHeight: 44, marginBottom: 8 }}
         />
         <Button
