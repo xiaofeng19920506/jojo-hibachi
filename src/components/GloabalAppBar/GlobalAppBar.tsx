@@ -165,7 +165,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleLogout = () => {
-    // Force disconnect SSE connection on logout
     forceDisconnectSSE();
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
@@ -181,7 +180,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const getNavigationButtons = () => {
     const buttons: ActionButton[] = [];
 
-    // Always show Book Now button for all users
     if (!isOnPasswordResetFlow) {
       buttons.push({
         label: "Book Now",
@@ -191,7 +189,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
       });
     }
 
-    // Show login/signup buttons for unauthenticated users
     if (!isAuthenticated || isOnPasswordResetFlow) {
       if (currentPath !== "/signin") {
         buttons.push({
