@@ -1,20 +1,50 @@
-import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  Snackbar,
+  Alert,
+  AlertTitle,
+  IconButton,
+  Badge,
+  Menu,
+  MenuItem,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  Divider,
+} from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import { logout } from "../../features/userSlice";
 import { api } from "../../services/api";
+import {
+  forceDisconnectSSE,
+  connectToSSE,
+  isSSEConnected,
+  type NotificationData,
+} from "../../utils/sseUtils";
+import { useEffect, useState } from "react";
 import MenuIcon from "@mui/icons-material/Menu";
 import Drawer from "@mui/material/Drawer";
-import IconButton from "@mui/material/IconButton";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
-import { useState } from "react";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
+import {
+  Notifications as NotificationsIcon,
+  Close as CloseIcon,
+  Info as InfoIcon,
+  Warning as WarningIcon,
+  CheckCircle as SuccessIcon,
+  Error as ErrorIcon,
+  MarkEmailRead as MarkReadIcon,
+} from "@mui/icons-material";
 import logo from "../../asset/logo.png";
 
 interface ActionButton {
@@ -49,6 +79,12 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [notifications, setNotifications] = useState<NotificationData[]>([]);
+  const [currentNotification, setCurrentNotification] =
+    useState<NotificationData | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [notificationMenuAnchor, setNotificationMenuAnchor] =
+    useState<null | HTMLElement>(null);
 
   const { isAuthenticated, user } = useAppSelector((state) => state.user);
   const currentPath = location.pathname;
@@ -56,7 +92,101 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     currentPath.includes("/reset-password") ||
     currentPath.includes("/forgot-password");
 
+  // SSE connection for admin users when GlobalAppBar mounts
+  useEffect(() => {
+    if (isAuthenticated && user?.role === "admin" && user?.id) {
+      // Only connect if not already connected
+      if (!isSSEConnected()) {
+        console.log(
+          "Establishing SSE connection for admin user in GlobalAppBar"
+        );
+        connectToSSE(user, {
+          onNotification: (notification) => {
+            console.log("Admin notification received:", notification);
+            // Add to notifications list
+            setNotifications((prev) => [notification, ...prev]);
+            // Show as snackbar
+            setCurrentNotification(notification);
+            setSnackbarOpen(true);
+          },
+          onConnected: () => {
+            console.log("Admin SSE connection established from GlobalAppBar");
+          },
+          onError: (error) => {
+            console.error("Admin SSE connection error:", error);
+          },
+          onDisconnect: () => {
+            console.log("Admin SSE connection disconnected from GlobalAppBar");
+          },
+        });
+      } else {
+        console.log("SSE connection already active for admin user");
+      }
+    }
+  }, [isAuthenticated, user?.id, user?.role]);
+
+  // Notification handlers
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+    setCurrentNotification(null);
+  };
+
+  const handleNotificationMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setNotificationMenuAnchor(event.currentTarget);
+  };
+
+  const handleNotificationMenuClose = () => {
+    setNotificationMenuAnchor(null);
+  };
+
+  const handleMarkAllAsRead = () => {
+    setNotifications((prev) =>
+      prev.map((notification) => ({ ...notification, read: true }))
+    );
+    handleNotificationMenuClose();
+  };
+
+  const handleMarkAsRead = (notificationId: string) => {
+    setNotifications((prev) =>
+      prev.map((notification) =>
+        notification.id === notificationId
+          ? { ...notification, read: true }
+          : notification
+      )
+    );
+  };
+
+  const getNotificationIcon = (type: string) => {
+    switch (type.toLowerCase()) {
+      case "success":
+        return <SuccessIcon color="success" />;
+      case "warning":
+        return <WarningIcon color="warning" />;
+      case "error":
+        return <ErrorIcon color="error" />;
+      default:
+        return <InfoIcon color="info" />;
+    }
+  };
+
+  const getNotificationSeverity = (type: string) => {
+    switch (type.toLowerCase()) {
+      case "success":
+        return "success";
+      case "warning":
+        return "warning";
+      case "error":
+        return "error";
+      default:
+        return "info";
+    }
+  };
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
   const handleLogout = () => {
+    // Force disconnect SSE connection on logout
+    forceDisconnectSSE();
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
     dispatch(logout());
@@ -246,6 +376,26 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                 </Button>
               )}
 
+              {/* Notification Icon - Only for admin users */}
+              {isAuthenticated && user?.role === "admin" && (
+                <IconButton
+                  color="inherit"
+                  onClick={handleNotificationMenuOpen}
+                  sx={{
+                    ml: 1,
+                    color: "#fff",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    },
+                  }}
+                  aria-label="notifications"
+                >
+                  <Badge badgeContent={unreadCount} color="error">
+                    <NotificationsIcon />
+                  </Badge>
+                </IconButton>
+              )}
+
               {/* Theme Toggle - Always visible on desktop */}
               {setThemeMode && (
                 <IconButton
@@ -420,6 +570,117 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
           </>
         )}
       </Toolbar>
+
+      {/* Notification Snackbar */}
+      {currentNotification && (
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={6000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        >
+          <Alert
+            onClose={handleSnackbarClose}
+            severity={getNotificationSeverity(currentNotification.type)}
+            action={
+              <IconButton
+                aria-label="close"
+                color="inherit"
+                size="small"
+                onClick={handleSnackbarClose}
+              >
+                <CloseIcon fontSize="inherit" />
+              </IconButton>
+            }
+          >
+            <AlertTitle>{currentNotification.type}</AlertTitle>
+            {currentNotification.message}
+          </Alert>
+        </Snackbar>
+      )}
+
+      {/* Notification Menu */}
+      <Menu
+        anchorEl={notificationMenuAnchor}
+        open={Boolean(notificationMenuAnchor)}
+        onClose={handleNotificationMenuClose}
+        PaperProps={{
+          sx: {
+            width: 350,
+            maxHeight: 400,
+            overflow: "auto",
+          },
+        }}
+      >
+        <Box sx={{ p: 2, borderBottom: 1, borderColor: "divider" }}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="h6" component="div">
+              <Badge badgeContent={unreadCount} color="primary">
+                <NotificationsIcon />
+              </Badge>{" "}
+              Notifications
+            </Typography>
+            {notifications.length > 0 && (
+              <Button
+                size="small"
+                startIcon={<MarkReadIcon />}
+                onClick={handleMarkAllAsRead}
+              >
+                Mark all read
+              </Button>
+            )}
+          </Box>
+        </Box>
+
+        {notifications.length === 0 ? (
+          <Box sx={{ p: 3, textAlign: "center" }}>
+            <Typography variant="body2" color="text.secondary">
+              No notifications yet
+            </Typography>
+          </Box>
+        ) : (
+          <List sx={{ p: 0 }}>
+            {notifications.map((notification, index) => (
+              <ListItem
+                key={notification.id || index}
+                sx={{
+                  borderBottom: index < notifications.length - 1 ? 1 : 0,
+                  borderColor: "divider",
+                  backgroundColor: notification.read
+                    ? "transparent"
+                    : "action.hover",
+                }}
+              >
+                <ListItemIcon>
+                  {getNotificationIcon(notification.type)}
+                </ListItemIcon>
+                <ListItemText
+                  primary={notification.message}
+                  secondary={new Date(notification.timestamp).toLocaleString()}
+                  sx={{
+                    "& .MuiListItemText-primary": {
+                      fontWeight: notification.read ? "normal" : "bold",
+                    },
+                  }}
+                />
+                {!notification.read && (
+                  <IconButton
+                    size="small"
+                    onClick={() => handleMarkAsRead(notification.id)}
+                    sx={{ ml: 1 }}
+                  >
+                    <MarkReadIcon fontSize="small" />
+                  </IconButton>
+                )}
+              </ListItem>
+            ))}
+          </List>
+        )}
+      </Menu>
     </AppBar>
   );
 };

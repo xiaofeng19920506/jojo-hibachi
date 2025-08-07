@@ -5,6 +5,8 @@ import HomeNav from "./components/HomeNav/HomeNav";
 import AuthInitializer from "./components/AuthInitializer/AuthInitializer";
 import LoadingSpinner from "./components/LoadingSpinner";
 import GlobalAppBar from "./components/GloabalAppBar/GlobalAppBar";
+import SSEConnection from "./components/SSEConnection/SSEConnection";
+import NotificationHandler from "./components/NotificationHandler/NotificationHandler";
 
 const SignIn = lazy(() => import("./pages/Auth/SignIn"));
 const SignUp = lazy(() => import("./pages/Auth/SignUp"));
@@ -77,6 +79,8 @@ const App: React.FC<AppProps> = ({ themeMode, setThemeMode }) => {
 
   return (
     <AuthInitializer>
+      <SSEConnection />
+      <NotificationHandler showSnackbar={true} showNotificationList={false} />
       <GlobalAppBar
         title={title}
         subtitle={subtitle}
