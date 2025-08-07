@@ -13,7 +13,6 @@ interface SSEConnectionOptions {
   onConnected?: () => void;
   onError?: (error: Event) => void;
   onDisconnect?: () => void;
-  skipForAdmin?: boolean; // Skip connection management for admin users
 }
 
 class SSEManager {
@@ -22,14 +21,31 @@ class SSEManager {
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000; // 1 second
   private _isConnecting = false;
+  private currentUserId: string | null = null;
 
   connect(userId: string, options: SSEConnectionOptions = {}) {
-    if (this.eventSource || this._isConnecting) {
-      console.log("SSE connection already exists or connecting");
+    // If already connected to the same user, don't reconnect
+    if (
+      this.eventSource &&
+      this.currentUserId === userId &&
+      this.isConnected()
+    ) {
+      console.log("SSE connection already exists for this user");
+      return;
+    }
+
+    // If connecting to a different user, disconnect first
+    if (this.eventSource && this.currentUserId !== userId) {
+      this.disconnect();
+    }
+
+    if (this._isConnecting) {
+      console.log("SSE connection already in progress");
       return;
     }
 
     this._isConnecting = true;
+    this.currentUserId = userId;
     const token = localStorage.getItem("authToken");
 
     if (!token) {
@@ -64,7 +80,7 @@ class SSEManager {
       });
 
       // Listen for connection confirmation
-      this.eventSource.addEventListener("connected", (event) => {
+      this.eventSource.addEventListener("connected", () => {
         console.log("SSE connection established");
         this.reconnectAttempts = 0;
         this._isConnecting = false;
@@ -127,6 +143,7 @@ class SSEManager {
       this.eventSource = null;
       this._isConnecting = false;
       this.reconnectAttempts = 0;
+      this.currentUserId = null;
       console.log("SSE connection disconnected");
     }
   }
@@ -137,6 +154,10 @@ class SSEManager {
 
   isConnecting(): boolean {
     return this._isConnecting;
+  }
+
+  getCurrentUserId(): string | null {
+    return this.currentUserId;
   }
 }
 
@@ -153,35 +174,12 @@ export const connectToSSE = (
     return;
   }
 
-  // Check if we should maintain existing connection for admin users
-  const shouldMaintainConnection =
-    user.role === "admin" && sseManager.isConnected();
-
-  if (shouldMaintainConnection) {
-    console.log("Maintaining existing SSE connection for admin user");
-    return;
-  }
-
-  // Disconnect any existing connection first (except for admin users)
-  if (user.role !== "admin") {
-    sseManager.disconnect();
-  }
-
   // Connect with the new user
   sseManager.connect(user.id, options);
 };
 
 // Utility function to disconnect from SSE
-export const disconnectFromSSE = (force: boolean = false) => {
-  // For admin users, only force disconnect if explicitly requested
-  if (!force) {
-    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-    if (currentUser.role === "admin" && sseManager.isConnected()) {
-      console.log("Keeping SSE connection active for admin user");
-      return;
-    }
-  }
-
+export const disconnectFromSSE = () => {
   sseManager.disconnect();
 };
 

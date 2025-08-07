@@ -55,6 +55,7 @@ const Dashboard: React.FC = () => {
     getAvailableActions,
     getEmployeeDisplayName,
     allEmployeesData,
+    sortConfig,
   } = useDashboard();
 
   // Wait for auth/user to be initialized
@@ -192,10 +193,7 @@ const Dashboard: React.FC = () => {
                   tableType={activeTable as TableType}
                   data={paginatedData || []}
                   onSort={handleSort}
-                  sortConfig={{
-                    key: "date",
-                    direction: "desc",
-                  }}
+                  sortConfig={sortConfig}
                   onActionClick={handleActionClick}
                   availableActions={getAvailableActions}
                   userRole={userRole}

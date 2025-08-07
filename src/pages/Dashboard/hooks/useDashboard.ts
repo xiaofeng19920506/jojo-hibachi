@@ -301,5 +301,6 @@ export const useDashboard = () => {
     activeTable,
     setActiveTable,
     getEmployeeDisplayName,
+    sortConfig,
   };
 };

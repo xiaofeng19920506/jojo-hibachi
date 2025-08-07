@@ -90,13 +90,14 @@ const DataTable: React.FC<DataTableProps> = ({
 
   // Fix columnMap to include all TableType keys
   const columnMap: Record<TableType, string[]> = {
-    customers: ["name", "email", "phone", "address", "actions"],
+    customers: ["name", "email", "phone", "address", "date", "actions"],
     employees: [
       "name",
       "email",
       "phone",
       "address",
       "status",
+      "joinDate",
       "ordersAssigned",
       "actions",
     ],
@@ -112,6 +113,7 @@ const DataTable: React.FC<DataTableProps> = ({
             "price",
             "notes",
             "foodOrders",
+            "createdAt",
             "actions",
           ]
         : [
@@ -124,6 +126,7 @@ const DataTable: React.FC<DataTableProps> = ({
             "price",
             "notes",
             "foodOrders",
+            "createdAt",
             "actions",
           ],
     "pending-reservations": [
@@ -136,6 +139,7 @@ const DataTable: React.FC<DataTableProps> = ({
       "price",
       "notes",
       "foodOrders",
+      "createdAt",
       "actions",
     ],
     orders: [
@@ -146,7 +150,7 @@ const DataTable: React.FC<DataTableProps> = ({
       "assignedEmployee",
       "price",
     ],
-    food: ["name", "description", "price", "category", "actions"],
+    food: ["name", "description", "price", "category", "createdAt", "actions"],
   };
 
   // Add type guard for address fields in getCellValue
@@ -171,6 +175,32 @@ const DataTable: React.FC<DataTableProps> = ({
         return formattedDate;
       } catch (error) {
         return dateValue;
+      }
+    }
+    if ("createdAt" in item && col === "createdAt") {
+      // Handle createdAt for reservations and food items
+      const createdAtValue = item.createdAt;
+      if (!createdAtValue) return "-";
+      try {
+        const formattedDate = dayjs(createdAtValue).isValid()
+          ? dayjs(createdAtValue).format("YYYY-MM-DD")
+          : new Date(createdAtValue).toLocaleDateString();
+        return formattedDate;
+      } catch (error) {
+        return createdAtValue;
+      }
+    }
+    if ("joinDate" in item && col === "joinDate") {
+      // Handle joinDate for employees
+      const joinDateValue = item.joinDate;
+      if (!joinDateValue) return "-";
+      try {
+        const formattedDate = dayjs(joinDateValue).isValid()
+          ? dayjs(joinDateValue).format("YYYY-MM-DD")
+          : new Date(joinDateValue).toLocaleDateString();
+        return formattedDate;
+      } catch (error) {
+        return joinDateValue;
       }
     }
     if ("time" in item && col === "time") return item.time;
@@ -292,7 +322,8 @@ const DataTable: React.FC<DataTableProps> = ({
                     col !== "actions" &&
                     col !== "notes" &&
                     !(col === "id" && tableType === "reservations") &&
-                    col !== "price"
+                    col !== "price" &&
+                    col !== "ordersAssigned"
                       ? () => onSort(col)
                       : undefined
                   }
@@ -301,7 +332,8 @@ const DataTable: React.FC<DataTableProps> = ({
                       col !== "actions" &&
                       col !== "notes" &&
                       !(col === "id" && tableType === "reservations") &&
-                      col !== "price"
+                      col !== "price" &&
+                      col !== "ordersAssigned"
                         ? "pointer"
                         : "default",
                     userSelect: "none",
@@ -311,11 +343,16 @@ const DataTable: React.FC<DataTableProps> = ({
                   <Box display="flex" alignItems="center" gap={0.5}>
                     {col === "id" && tableType === "reservations"
                       ? "Reservation Id"
+                      : col === "joinDate"
+                      ? "Join Date"
+                      : col === "createdAt"
+                      ? "Created Date"
                       : col.charAt(0).toUpperCase() + col.slice(1)}
                     {col !== "actions" &&
                       col !== "notes" &&
                       !(col === "id" && tableType === "reservations") &&
-                      col !== "price" && (
+                      col !== "price" &&
+                      col !== "ordersAssigned" && (
                         <Box display="flex" flexDirection="column" ml={0.25}>
                           <ArrowDropUpIcon
                             fontSize="small"

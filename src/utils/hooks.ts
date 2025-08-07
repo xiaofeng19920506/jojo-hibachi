@@ -4,7 +4,6 @@ import {
   useSelector,
 } from "react-redux";
 import type { RootState, AppDispatch } from "../store";
-import { useAppSelector } from "../store";
 import {
   connectToSSE,
   disconnectFromSSE,
@@ -22,24 +21,18 @@ export const useSSEConnection = (options: SSEConnectionOptions = {}) => {
   const { isAuthenticated, user } = useAppSelector((state) => state.user);
 
   useEffect(() => {
-    // Skip connection management for admin users if skipForAdmin is true
-    if (options.skipForAdmin && user?.role === "admin") {
-      console.log("Skipping SSE connection management for admin user");
-      return;
-    }
-
     if (isAuthenticated && user?.id) {
       // Connect to SSE when user is authenticated
       connectToSSE(user, options);
     } else {
-      // Only disconnect if user is not authenticated (not for admin users)
+      // Disconnect when user is not authenticated
       disconnectFromSSE();
     }
 
-    // Cleanup on unmount - but don't disconnect for admin users
+    // Cleanup on unmount
     return () => {
-      // Only disconnect if user is not admin or not authenticated
-      if (!isAuthenticated || user?.role !== "admin") {
+      // Only disconnect if user is not authenticated
+      if (!isAuthenticated) {
         disconnectFromSSE();
       }
     };

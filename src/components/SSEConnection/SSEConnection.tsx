@@ -17,14 +17,20 @@ const SSEConnection: React.FC<SSEConnectionProps> = ({
 }) => {
   const { isAuthenticated, user } = useAppSelector((state) => state.user);
 
-  // For admin users, we don't manage connection here since it's handled in GlobalAppBar
   const { isConnected, isConnecting } = useSSEConnection({
-    onNotification,
+    onNotification: (notification) => {
+      // Call the provided callback if any
+      onNotification?.(notification);
+
+      // Dispatch a custom event for GlobalAppBar to listen to
+      const event = new CustomEvent("sse-notification", {
+        detail: notification,
+      });
+      window.dispatchEvent(event);
+    },
     onConnected,
     onError,
     onDisconnect,
-    // Skip connection management for admin users in this component
-    skipForAdmin: true,
   });
 
   // Log connection status for debugging

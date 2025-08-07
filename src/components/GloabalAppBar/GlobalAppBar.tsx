@@ -10,13 +10,10 @@ import {
   IconButton,
   Badge,
   Menu,
-  MenuItem,
   List,
   ListItem,
   ListItemIcon,
   ListItemText,
-  Paper,
-  Divider,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
@@ -24,8 +21,6 @@ import { logout } from "../../features/userSlice";
 import { api } from "../../services/api";
 import {
   forceDisconnectSSE,
-  connectToSSE,
-  isSSEConnected,
   type NotificationData,
 } from "../../utils/sseUtils";
 import { useEffect, useState } from "react";
@@ -92,40 +87,25 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     currentPath.includes("/reset-password") ||
     currentPath.includes("/forgot-password");
 
-  // SSE connection for admin users when GlobalAppBar mounts
   useEffect(() => {
-    if (isAuthenticated && user?.role === "admin" && user?.id) {
-      // Only connect if not already connected
-      if (!isSSEConnected()) {
-        console.log(
-          "Establishing SSE connection for admin user in GlobalAppBar"
-        );
-        connectToSSE(user, {
-          onNotification: (notification) => {
-            console.log("Admin notification received:", notification);
-            // Add to notifications list
-            setNotifications((prev) => [notification, ...prev]);
-            // Show as snackbar
-            setCurrentNotification(notification);
-            setSnackbarOpen(true);
-          },
-          onConnected: () => {
-            console.log("Admin SSE connection established from GlobalAppBar");
-          },
-          onError: (error) => {
-            console.error("Admin SSE connection error:", error);
-          },
-          onDisconnect: () => {
-            console.log("Admin SSE connection disconnected from GlobalAppBar");
-          },
-        });
-      } else {
-        console.log("SSE connection already active for admin user");
-      }
-    }
-  }, [isAuthenticated, user?.id, user?.role]);
+    const handleNotification = (notification: NotificationData) => {
+      console.log("Notification received in GlobalAppBar:", notification);
+      setNotifications((prev) => [notification, ...prev]);
+      setCurrentNotification(notification);
+      setSnackbarOpen(true);
+    };
 
-  // Notification handlers
+    window.addEventListener("sse-notification", (event: any) => {
+      handleNotification(event.detail);
+    });
+
+    return () => {
+      window.removeEventListener("sse-notification", (event: any) => {
+        handleNotification(event.detail);
+      });
+    };
+  }, []);
+
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
     setCurrentNotification(null);
@@ -376,8 +356,8 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                 </Button>
               )}
 
-              {/* Notification Icon - Only for admin users */}
-              {isAuthenticated && user?.role === "admin" && (
+              {/* Notification Icon - For all authenticated users */}
+              {isAuthenticated && (
                 <IconButton
                   color="inherit"
                   onClick={handleNotificationMenuOpen}
@@ -458,6 +438,19 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                       </ListItemButton>
                     </ListItem>
                   ))}
+                  {/* Notifications - For all authenticated users */}
+                  {isAuthenticated && (
+                    <ListItem disablePadding>
+                      <ListItemButton onClick={handleNotificationMenuOpen}>
+                        <ListItemIcon>
+                          <Badge badgeContent={unreadCount} color="error">
+                            <NotificationsIcon />
+                          </Badge>
+                        </ListItemIcon>
+                        <ListItemText primary="Notifications" />
+                      </ListItemButton>
+                    </ListItem>
+                  )}
                   {showLogout && isAuthenticated && !isOnPasswordResetFlow && (
                     <ListItem disablePadding>
                       <ListItemButton onClick={handleLogout}>

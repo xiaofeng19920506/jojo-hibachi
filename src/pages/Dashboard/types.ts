@@ -77,6 +77,8 @@ export interface ApiReservationData {
   assignedChef?: ApiEmployeeData | string | null;
   timeStamp: string;
   customerFullName?: string;
+  createdAt?: string;
+  updatedAt?: string;
   foodOrder?: Array<{
     food: string;
     quantity: number;

@@ -114,6 +114,7 @@ export const transformApiData = (
       assignedChef: employeeId ?? "Unassigned",
       timeStamp: item.timeStamp,
       foodOrder: item.foodOrder || [],
+      createdAt: item.createdAt || (item as any).createdAt,
     };
 
     return result;

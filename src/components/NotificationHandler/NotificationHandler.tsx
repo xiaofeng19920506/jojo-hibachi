@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSSEConnection } from "../../utils/hooks";
 import { type NotificationData } from "../../utils/sseUtils";
 import {
@@ -38,7 +38,7 @@ const NotificationHandler: React.FC<NotificationHandlerProps> = ({
     useState<NotificationData | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  const { isConnected } = useSSEConnection({
+  useSSEConnection({
     onNotification: (notification: NotificationData) => {
       console.log("Received notification:", notification);
 
@@ -60,7 +60,6 @@ const NotificationHandler: React.FC<NotificationHandlerProps> = ({
     onDisconnect: () => {
       console.log("SSE connection disconnected");
     },
-    skipForAdmin: true, // Skip connection management for admin users
   });
 
   const handleSnackbarClose = () => {
