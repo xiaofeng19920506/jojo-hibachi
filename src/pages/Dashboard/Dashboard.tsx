@@ -1,22 +1,24 @@
+import React, { useEffect, useState } from "react";
+import { useAppDispatch } from "../../utils/hooks";
+import { api } from "../../services/api";
 import {
   Box,
+  Typography,
   CircularProgress,
   Alert,
-  Typography,
   Snackbar,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { useEffect, useState } from "react";
 import DataTable from "../../components/DataTable/DataTable";
 import type { TableType } from "../../components/DataTable/types";
+import { useDashboard } from "./hooks/useDashboard";
+import EditDialog from "./components/EditDialog";
 import FilterControls from "./components/FilterControls";
 import PaginationControls from "./components/PaginationControls";
-import EditDialog from "./components/EditDialog";
-import { useDashboard } from "./hooks/useDashboard";
 
-// Main Dashboard Component
 const Dashboard: React.FC = () => {
   const theme = useTheme();
+  const dispatch = useAppDispatch();
   const [showRefreshNotification, setShowRefreshNotification] = useState(false);
 
   const {
@@ -66,12 +68,11 @@ const Dashboard: React.FC = () => {
     allEmployeesData,
     sortConfig,
     // Refetch methods
-    refetchDashboardData,
   } = useDashboard();
 
   // Listen for SSE notifications and refresh dashboard data
   useEffect(() => {
-    const handleNotification = (event: CustomEvent<any>) => {
+    const handleNotification = () => {
       dispatch(api.util.invalidateTags(["Reservations"]));
     };
 

@@ -148,9 +148,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
 
   useEffect(() => {
     const handleNotification = (event: CustomEvent<NotificationData>) => {
-      const notificationId = event.detail.id;
-      const timestamp = new Date().toISOString();
-
       const notificationWithId = {
         ...event.detail,
         id:

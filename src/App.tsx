@@ -80,7 +80,7 @@ const App: React.FC<AppProps> = ({ themeMode, setThemeMode }) => {
   return (
     <AuthInitializer>
       <SSEConnection />
-      <NotificationHandler showSnackbar={true} showNotificationList={false} />
+      <NotificationHandler />
       <GlobalAppBar
         title={title}
         subtitle={subtitle}

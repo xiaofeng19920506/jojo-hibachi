@@ -4,13 +4,7 @@ import {
   useSelector,
 } from "react-redux";
 import type { RootState, AppDispatch } from "../store";
-import {
-  connectToSSE,
-  disconnectFromSSE,
-  isSSEConnected,
-  isSSEConnecting,
-  type SSEConnectionOptions,
-} from "./sseUtils";
+import { connectToSSE, disconnectFromSSE } from "./sseUtils";
 import { useEffect, useState } from "react";
 
 export const useAppDispatch: () => AppDispatch = useDispatch;

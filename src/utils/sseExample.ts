@@ -1,5 +1,5 @@
 // Example usage of SSE utilities
-import { connectToSSE, disconnectFromSSE, isSSEConnected } from "./sseUtils";
+import { connectToSSE, disconnectFromSSE } from "./sseUtils";
 
 const handleNotification = (notification: any) => {
   switch (notification.type) {
@@ -23,7 +23,13 @@ const handleError = (error: Event) => {
 };
 
 connectToSSE(
-  { id: "user123", email: "user@example.com", role: "user" },
+  {
+    id: "user123",
+    email: "user@example.com",
+    role: "user",
+    firstName: "John",
+    lastName: "Doe",
+  },
   {
     onNotification: handleNotification,
     onConnected: handleConnected,
@@ -32,42 +38,4 @@ connectToSSE(
   }
 );
 
-const isConnected = isSSEConnected();
-
 disconnectFromSSE();
-
-const retryConnection = (user: any, maxRetries = 3) => {
-  let retryCount = 0;
-
-  const attemptConnection = () => {
-    if (retryCount >= maxRetries) {
-      console.error("Max retry attempts reached");
-      return;
-    }
-
-    connectToSSE(user, {
-      onConnected: () => {},
-      onError: () => {
-        retryCount++;
-        setTimeout(attemptConnection, 1000 * retryCount);
-      },
-    });
-  };
-
-  attemptConnection();
-};
-
-const ReactComponent = () => {
-  const handleNotification = (notification: any) => {};
-
-  const handleConnected = () => {};
-
-  const handleDisconnected = () => {};
-
-  return null;
-};
-
-const NotificationHandlers = {
-  reservation: (notification: any) => {},
-  payment: (notification: any) => {},
-};

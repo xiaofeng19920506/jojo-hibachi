@@ -1,10 +1,6 @@
 import React, { useEffect } from "react";
 import { useAppSelector } from "../../utils/hooks";
-import {
-  connectToSSE,
-  disconnectFromSSE,
-  isSSEConnected,
-} from "../../utils/sseUtils";
+import { connectToSSE, disconnectFromSSE } from "../../utils/sseUtils";
 
 interface SSEConnectionProps {
   onNotification?: (notification: any) => void;

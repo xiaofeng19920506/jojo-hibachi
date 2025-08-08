@@ -88,9 +88,7 @@ class SSEManager {
 
       this.eventSource = new EventSource(url);
 
-      const logReadyState = () => {
-        const states = ["CONNECTING", "OPEN", "CLOSED"];
-      };
+      const logReadyState = () => {};
 
       logReadyState();
 
@@ -111,8 +109,6 @@ class SSEManager {
 
       this.handleNotification = (event: MessageEvent) => {
         try {
-          const eventId = Math.random().toString(36).substring(7);
-
           if (!event.data) {
             console.error("SSE event data is empty");
             return;
@@ -199,9 +195,9 @@ class SSEManager {
         this.handleNotification
       );
 
-      this.eventSource.onmessage = (event) => {};
+      this.eventSource.onmessage = () => {};
 
-      this.eventSource.addEventListener("connected", (event) => {
+      this.eventSource.addEventListener("connected", () => {
         this.reconnectAttempts = 0;
         this._isConnecting = false;
         options.onConnected?.();
