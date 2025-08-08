@@ -234,8 +234,8 @@ class SSEManager {
           // Log after dispatching to onNotification
           console.log(`[${eventId}] onNotification callback completed`);
         } catch (error) {
-          console.error(`[${eventId}] Error parsing notification data:`, error);
-          console.error(`[${eventId}] Raw event data:`, event.data);
+          console.error("Error parsing notification data:", error);
+          console.error("Raw event data:", event.data);
         }
       };
 

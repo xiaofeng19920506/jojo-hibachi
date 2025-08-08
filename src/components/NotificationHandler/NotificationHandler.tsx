@@ -117,7 +117,7 @@ const NotificationHandler: React.FC<NotificationHandlerProps> = ({
               </IconButton>
             }
           >
-            <AlertTitle>{currentNotification.type}</AlertTitle>
+            <AlertTitle>{currentNotification.title}</AlertTitle>
             {currentNotification.message}
           </Alert>
         </Snackbar>
@@ -158,8 +158,8 @@ const NotificationHandler: React.FC<NotificationHandlerProps> = ({
                   {getNotificationIcon(notification.type)}
                 </ListItemIcon>
                 <ListItemText
-                  primary={notification.message}
-                  secondary={new Date(notification.timestamp).toLocaleString()}
+                  primary={notification.title}
+                  secondary={new Date(notification.createdAt).toLocaleString()}
                 />
               </ListItem>
             ))}
