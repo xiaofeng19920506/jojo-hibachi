@@ -88,21 +88,24 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     currentPath.includes("/forgot-password");
 
   useEffect(() => {
-    const handleNotification = (notification: NotificationData) => {
-      console.log("Notification received in GlobalAppBar:", notification);
-      setNotifications((prev) => [notification, ...prev]);
-      setCurrentNotification(notification);
+    const handleNotification = (event: CustomEvent<NotificationData>) => {
+      console.log("Notification received in GlobalAppBar:", event.detail);
+      setNotifications((prev) => [event.detail, ...prev]);
+      setCurrentNotification(event.detail);
       setSnackbarOpen(true);
     };
 
-    window.addEventListener("sse-notification", (event: any) => {
-      handleNotification(event.detail);
-    });
+    // Cast the event listener to handle CustomEvent
+    window.addEventListener(
+      "sse-notification",
+      handleNotification as EventListener
+    );
 
     return () => {
-      window.removeEventListener("sse-notification", (event: any) => {
-        handleNotification(event.detail);
-      });
+      window.removeEventListener(
+        "sse-notification",
+        handleNotification as EventListener
+      );
     };
   }, []);
 
@@ -583,8 +586,27 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
               </IconButton>
             }
           >
-            <AlertTitle>{currentNotification.type}</AlertTitle>
-            {currentNotification.message}
+            <AlertTitle>{currentNotification.title}</AlertTitle>
+            <Box>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                {currentNotification.message}
+              </Typography>
+              {currentNotification.reservationDetails && (
+                <Typography
+                  variant="caption"
+                  component="div"
+                  color="text.secondary"
+                >
+                  Date: {currentNotification.reservationDetails.date} at{" "}
+                  {currentNotification.reservationDetails.time}
+                  <br />
+                  Guests: {currentNotification.reservationDetails.totalGuests}
+                  <br />
+                  Price: $
+                  {currentNotification.reservationDetails.price.toFixed(2)}
+                </Typography>
+              )}
+            </Box>
           </Alert>
         </Snackbar>
       )}
@@ -649,15 +671,43 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                   {getNotificationIcon(notification.type)}
                 </ListItemIcon>
                 <ListItemText
-                  primary={notification.message}
-                  secondary={new Date(notification.timestamp).toLocaleString()}
+                  primary={notification.title}
+                  secondary={
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        component="div"
+                        sx={{ mb: 0.5 }}
+                      >
+                        {notification.message}
+                      </Typography>
+                      {notification.reservationDetails && (
+                        <Typography
+                          variant="caption"
+                          component="div"
+                          color="text.secondary"
+                        >
+                          Date: {notification.reservationDetails.date} at{" "}
+                          {notification.reservationDetails.time}
+                          <br />
+                          Guests: {notification.reservationDetails.totalGuests}
+                          <br />
+                          Price: $
+                          {notification.reservationDetails.price.toFixed(2)}
+                        </Typography>
+                      )}
+                      <Typography variant="caption" color="text.secondary">
+                        {new Date(notification.createdAt).toLocaleString()}
+                      </Typography>
+                    </Box>
+                  }
                   sx={{
                     "& .MuiListItemText-primary": {
-                      fontWeight: notification.read ? "normal" : "bold",
+                      fontWeight: notification.isRead ? "normal" : "bold",
                     },
                   }}
                 />
-                {!notification.read && (
+                {!notification.isRead && (
                   <IconButton
                     size="small"
                     onClick={() => handleMarkAsRead(notification.id)}

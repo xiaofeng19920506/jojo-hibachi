@@ -10,6 +10,7 @@ export const usePendingReservationsData = (
     data: pendingReservationsResponse,
     isLoading: pendingReservationsLoading,
     error: pendingReservationsError,
+    refetch: refetchPendingReservations,
   } = useGetEmployeePendingReservationsQuery(
     { page: currentPage, limit: itemsPerPage },
     {
@@ -22,5 +23,6 @@ export const usePendingReservationsData = (
     pagination: pendingReservationsResponse?.pagination || {},
     isLoading: pendingReservationsLoading,
     error: pendingReservationsError,
+    refetch: refetchPendingReservations,
   };
 };

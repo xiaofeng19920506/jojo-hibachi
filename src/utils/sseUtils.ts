@@ -1,11 +1,31 @@
 import { type User } from "../features/types";
 
+interface CustomerInfo {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  isAnonymous: boolean;
+}
+
+interface ReservationDetails {
+  date: string;
+  time: string;
+  totalGuests: number;
+  address: string;
+  price: number;
+}
+
 interface NotificationData {
   id: string;
+  title: string;
   message: string;
   type: string;
-  timestamp: string;
-  read: boolean;
+  isRead: boolean;
+  createdAt: string;
+  reservationId?: string;
+  customerInfo?: CustomerInfo;
+  reservationDetails?: ReservationDetails;
 }
 
 interface SSEConnectionOptions {
@@ -71,11 +91,69 @@ class SSEManager {
       // Listen for notifications
       this.eventSource.addEventListener("notification", (event) => {
         try {
-          const notification = JSON.parse(event.data) as NotificationData;
-          console.log("New notification:", notification);
+          console.log("Raw SSE notification event received:", event);
+          console.log("SSE notification data:", event.data);
+
+          const rawNotification = JSON.parse(event.data) as NotificationData;
+          console.log("Parsed notification:", rawNotification);
+          console.log("Current user ID:", this.currentUserId);
+          console.log("SSE readyState:", this.eventSource?.readyState);
+
+          // Get user info from localStorage
+          const user = localStorage.getItem("user");
+          const userInfo = user ? JSON.parse(user) : null;
+          console.log("Current user info:", userInfo);
+
+          // Check if this notification is for the current user
+          if (
+            rawNotification.customerInfo &&
+            !rawNotification.customerInfo.isAnonymous
+          ) {
+            const isForCurrentUser =
+              userInfo &&
+              (userInfo.email === rawNotification.customerInfo.email ||
+                userInfo.id === this.currentUserId);
+
+            if (!isForCurrentUser) {
+              console.log("Notification is for a different user, skipping");
+              return;
+            }
+          }
+
+          // Transform notification type for UI display
+          let notificationType: "success" | "info" | "warning" | "error" =
+            "info";
+          switch (rawNotification.type) {
+            case "reservation_confirmed":
+            case "reservation_updated":
+              notificationType = "success";
+              break;
+            case "reservation_pending":
+              notificationType = "info";
+              break;
+            case "reservation_warning":
+              notificationType = "warning";
+              break;
+            case "reservation_cancelled":
+            case "reservation_rejected":
+              notificationType = "error";
+              break;
+            default:
+              notificationType = "info";
+          }
+
+          // Transform the notification for UI consumption
+          const notification: NotificationData = {
+            ...rawNotification,
+            type: notificationType,
+            isRead: false,
+          };
+
+          console.log("Processed notification:", notification);
           options.onNotification?.(notification);
         } catch (error) {
           console.error("Error parsing notification data:", error);
+          console.error("Raw event data:", event.data);
         }
       });
 

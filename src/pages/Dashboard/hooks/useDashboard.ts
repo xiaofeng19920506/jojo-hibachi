@@ -66,18 +66,21 @@ export const useDashboard = () => {
     data: customersData,
     isLoading: customersLoading,
     error: customersError,
+    refetch: refetchCustomers,
   } = useCustomersData(activeTable, userRole);
 
   const {
     data: employeesData,
     isLoading: employeesLoading,
     error: employeesError,
+    refetch: refetchEmployees,
   } = useEmployeesData(activeTable, userRole);
 
   const {
     data: allReservationsData,
     isLoading: allReservationsLoading,
     error: allReservationsError,
+    refetch: refetchAllReservations,
   } = useReservationsData(activeTable, userRole);
 
   const {
@@ -85,6 +88,7 @@ export const useDashboard = () => {
     pagination: pendingReservationsPagination,
     isLoading: pendingReservationsLoading,
     error: pendingReservationsError,
+    refetch: refetchPendingReservations,
   } = usePendingReservationsData(
     activeTable,
     userRole,
@@ -102,6 +106,7 @@ export const useDashboard = () => {
     isUpdateLoading,
     isDeleteLoading,
     isCreateLoading,
+    refetch: refetchFood,
   } = useFoodData();
 
   // All employees for assignment dropdowns (always available for admins)
@@ -117,6 +122,15 @@ export const useDashboard = () => {
   const [updateReservation] = useUpdateReservationMutation();
   const [assignChefToReservation] = useAssignChefToReservationMutation();
   const [changeEmployeeStatus] = useChangeEmployeeStatusMutation();
+
+  // Create a combined refetch function for all dashboard data
+  const refetchDashboardData = () => {
+    refetchCustomers?.();
+    refetchEmployees?.();
+    refetchAllReservations?.();
+    refetchPendingReservations?.();
+    refetchFood?.();
+  };
 
   // Get loading state
   const getLoadingState = (): boolean => {
@@ -302,5 +316,6 @@ export const useDashboard = () => {
     setActiveTable,
     getEmployeeDisplayName,
     sortConfig,
+    refetchDashboardData,
   };
 };
