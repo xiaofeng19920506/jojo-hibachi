@@ -158,9 +158,16 @@ class SSEManager {
           try {
             rawNotification = JSON.parse(event.data) as NotificationData;
             console.log("Parsed notification:", rawNotification);
+            // Ensure we have a stable id even if backend payload omits it
+            const ensuredId =
+              (rawNotification as any)._id || // Check for _id first (backend format)
+              (rawNotification as any).id || // Then check for id (SSE format)
+              event.lastEventId ||
+              `sse-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+            (rawNotification as any).id = ensuredId;
 
-            // Validate required fields
-            if (!rawNotification.id || !rawNotification.type) {
+            // Validate required fields (type is required)
+            if (!rawNotification.type) {
               throw new Error("Missing required fields in notification");
             }
           } catch (parseError) {
@@ -220,9 +227,15 @@ class SSEManager {
 
           // Transform the notification for UI consumption
           const notification: NotificationData = {
-            ...rawNotification,
+            id: rawNotification.id, // Ensure id is explicitly set
+            title: rawNotification.title,
+            message: rawNotification.message,
             type: notificationType,
             isRead: false,
+            createdAt: rawNotification.createdAt || new Date().toISOString(),
+            reservationId: rawNotification.reservationId,
+            customerInfo: rawNotification.customerInfo,
+            reservationDetails: rawNotification.reservationDetails,
           };
 
           console.log(`[${eventId}] Processed notification:`, notification);

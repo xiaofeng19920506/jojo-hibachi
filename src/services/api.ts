@@ -3,6 +3,7 @@ import { adminApiEndpoints } from "./adminApi";
 import { employeeApiEndpoints } from "./employeeApi";
 import { userApiEndpoints } from "./userApi";
 import { publicApiEndpoints } from "./publicApi";
+import { notificationApiEndpoints } from "./notificationApi";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_BACKEND_URL,
@@ -26,12 +27,14 @@ export const api = createApi({
     "Employees",
     "Auth",
     "MenuItems",
+    "Notifications",
   ],
   endpoints: (builder) => ({
     ...publicApiEndpoints(builder),
     ...userApiEndpoints(builder),
     ...employeeApiEndpoints(builder),
     ...adminApiEndpoints(builder),
+    ...notificationApiEndpoints(builder),
   }),
 });
 
@@ -72,4 +75,9 @@ export const {
   // Food Order Management
   useAddFoodOrderMutation,
   useAddFoodOrderAdminMutation,
+  // Notifications
+  useGetUserNotificationsQuery,
+  useMarkNotificationReadMutation,
+  useMarkAllNotificationsReadMutation,
+  useMarkUserNotificationsReadBatchMutation,
 } = api;

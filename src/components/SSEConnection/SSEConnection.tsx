@@ -1,6 +1,7 @@
 import { useSSEConnection } from "../../utils/hooks";
 import { useEffect } from "react";
-import { useAppSelector } from "../../utils/hooks";
+import { useAppDispatch, useAppSelector } from "../../utils/hooks";
+import { api } from "../../services/api";
 
 interface SSEConnectionProps {
   onNotification?: (notification: any) => void;
@@ -15,6 +16,7 @@ const SSEConnection: React.FC<SSEConnectionProps> = ({
   onError,
   onDisconnect,
 }) => {
+  const dispatch = useAppDispatch();
   const { isAuthenticated, user } = useAppSelector((state) => state.user);
 
   const { isConnected, isConnecting } = useSSEConnection({
@@ -28,6 +30,14 @@ const SSEConnection: React.FC<SSEConnectionProps> = ({
       });
       window.dispatchEvent(event);
       console.log("SSEConnection: Event dispatched");
+
+      // Invalidate RTK Query caches so data refreshes automatically
+      // Prefer targeted tags; most notifications relate to reservations
+      try {
+        dispatch(api.util.invalidateTags(["Reservations"]));
+      } catch (e) {
+        console.error("Failed to invalidate RTK Query tags on notification", e);
+      }
 
       // Call the provided callback if any (after dispatching event)
       if (onNotification) {
