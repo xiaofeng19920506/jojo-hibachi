@@ -11,95 +11,48 @@ import {
   isSSEConnecting,
   type SSEConnectionOptions,
 } from "./sseUtils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
 
-// Custom hook for SSE connection management
-export const useSSEConnection = (options: SSEConnectionOptions = {}) => {
+export const useSSEConnection = () => {
   const { isAuthenticated, user } = useAppSelector((state) => state.user);
+  const [isConnected, setIsConnected] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   useEffect(() => {
-    console.log("useSSEConnection: Auth state changed", {
-      isAuthenticated,
-      userId: user?.id,
-    });
-
     if (isAuthenticated && user?.id) {
-      console.log("useSSEConnection: User is authenticated, connecting to SSE");
-      // Connect to SSE when user is authenticated
+      setIsConnecting(true);
       connectToSSE(user, {
-        ...options,
         onConnected: () => {
-          console.log(
-            "useSSEConnection: SSE connection established for user",
-            user.id
-          );
-          options.onConnected?.();
-        },
-        onError: (error) => {
-          console.error("useSSEConnection: SSE connection error", error);
-          options.onError?.(error);
+          setIsConnected(true);
+          setIsConnecting(false);
         },
         onDisconnect: () => {
-          console.log(
-            "useSSEConnection: SSE connection disconnected for user",
-            user.id
-          );
-          options.onDisconnect?.();
+          setIsConnected(false);
+          setIsConnecting(false);
+        },
+        onError: () => {
+          setIsConnected(false);
+          setIsConnecting(false);
         },
       });
     } else {
-      console.log(
-        "useSSEConnection: User is not authenticated, disconnecting SSE"
-      );
-      // Disconnect when user is not authenticated
       disconnectFromSSE();
+      setIsConnected(false);
+      setIsConnecting(false);
     }
 
-    // Set up an interval to check connection status
-    const checkInterval = setInterval(() => {
-      const connected = isSSEConnected();
-      console.log("useSSEConnection: Connection status check", {
-        userId: user?.id,
-        isConnected: connected,
-      });
-
-      // If we're authenticated but not connected, try to reconnect
-      if (isAuthenticated && user?.id && !connected) {
-        console.log(
-          "useSSEConnection: Connection lost, attempting to reconnect"
-        );
-        connectToSSE(user, options);
-      }
-    }, 30000); // Check every 30 seconds
-
-    // Cleanup on unmount
     return () => {
-      clearInterval(checkInterval);
-      console.log("useSSEConnection: Cleaning up", {
-        isAuthenticated,
-        userId: user?.id,
-      });
-      // Only disconnect if user is not authenticated
-      if (!isAuthenticated) {
-        disconnectFromSSE();
-      }
+      disconnectFromSSE();
+      setIsConnected(false);
+      setIsConnecting(false);
     };
-  }, [isAuthenticated, user?.id, user?.role, options]);
-
-  const connected = isSSEConnected();
-  const connecting = isSSEConnecting();
-
-  console.log("useSSEConnection: Current state", {
-    isConnected: connected,
-    isConnecting: connecting,
-    userId: user?.id,
-  });
+  }, [isAuthenticated, user?.id]);
 
   return {
-    isConnected: connected,
-    isConnecting: connecting,
+    isConnected,
+    isConnecting,
   };
 };

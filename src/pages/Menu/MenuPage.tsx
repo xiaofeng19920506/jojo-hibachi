@@ -126,11 +126,7 @@ const MenuPage: React.FC = () => {
   );
 
   // Filter menu items by category - only show active items
-  const activeMenuItems = transformedMenuItems;
-
-  // Remove console.log statements
-  // console.log("MenuPage - menuItems:", menuItems);
-  // console.log("MenuPage - activeMenuItems:", activeMenuItems);
+  const activeMenuItems = menuItems.filter((item) => item.isActive);
 
   const handleAddToCart = () => {
     if (!selectedItem) return;

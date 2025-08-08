@@ -71,42 +71,22 @@ const Dashboard: React.FC = () => {
 
   // Listen for SSE notifications and refresh dashboard data
   useEffect(() => {
-    const handleSSENotification = (event: CustomEvent) => {
-      const notification = event.detail;
-      console.log("Dashboard received SSE notification:", notification);
-
-      // Refresh data based on notification type or always refresh all data
-      // You can customize this logic based on the notification content
-      if (notification) {
-        // Show refresh notification
-        setShowRefreshNotification(true);
-
-        // Refresh all dashboard data
-        refetchDashboardData();
-
-        console.log("Dashboard data refreshed due to new notification");
-
-        // Hide notification after 3 seconds
-        setTimeout(() => {
-          setShowRefreshNotification(false);
-        }, 3000);
-      }
+    const handleNotification = (event: CustomEvent<any>) => {
+      dispatch(api.util.invalidateTags(["Reservations"]));
     };
 
-    // Add event listener for SSE notifications
     window.addEventListener(
       "sse-notification",
-      handleSSENotification as EventListener
+      handleNotification as EventListener
     );
 
-    // Cleanup event listener on unmount
     return () => {
       window.removeEventListener(
         "sse-notification",
-        handleSSENotification as EventListener
+        handleNotification as EventListener
       );
     };
-  }, [refetchDashboardData]);
+  }, [dispatch]);
 
   // Wait for auth/user to be initialized
   if (!isInitialized) {

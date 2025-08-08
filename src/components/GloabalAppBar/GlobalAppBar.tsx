@@ -89,14 +89,12 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     useState<null | HTMLElement>(null);
 
   const { isAuthenticated, user } = useAppSelector((state) => state.user);
-  // Fetch missed notifications after login (catch-up)
   const { data: missedNotificationsData } = useGetUserNotificationsQuery(
     isAuthenticated && user?.id
       ? { userId: user.id, page: 1, limit: 20, isRead: false }
       : (skipToken as any)
   );
 
-  // Merge missed notifications into in-memory list once fetched
   useEffect(() => {
     if (!missedNotificationsData?.notifications?.length) return;
     const mapBackendToUi = (n: NotificationItem): NotificationData => {
@@ -121,7 +119,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
       }
 
       return {
-        id: n._id, // Backend uses _id, not id
+        id: n._id,
         title: n.title,
         message: n.message,
         type: uiType,
@@ -129,7 +127,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
         createdAt: n.createdAt,
         updatedAt: n.updatedAt,
         reservationId: n.reservationId,
-        // Backend returns objects that match runtime shape; cast to satisfy stricter UI types
         customerInfo: n.customerInfo as any,
         reservationDetails: n.reservationDetails as any,
         recipient: n.recipient as any,
@@ -137,23 +134,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     };
 
     const mapped = missedNotificationsData.notifications.map(mapBackendToUi);
-
-    console.log("Mapped notifications from backend:", mapped);
-    console.log("Sample notification ID:", mapped[0]?.id);
-    console.log(
-      "Raw backend notifications:",
-      missedNotificationsData.notifications
-    );
-    console.log(
-      "First backend notification:",
-      missedNotificationsData.notifications[0]
-    );
-    console.log(
-      "Backend notification keys:",
-      missedNotificationsData.notifications[0]
-        ? Object.keys(missedNotificationsData.notifications[0])
-        : []
-    );
 
     setNotifications((prev) => {
       const existingIds = new Set(prev.map((n) => n.id));
@@ -171,14 +151,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
       const notificationId = event.detail.id;
       const timestamp = new Date().toISOString();
 
-      console.log(`[${timestamp}] Notification received in GlobalAppBar:`, {
-        id: notificationId,
-        notification: event.detail,
-        hasId: !!event.detail.id,
-        notificationKeys: Object.keys(event.detail),
-      });
-
-      // Ensure we have an ID for the notification
       const notificationWithId = {
         ...event.detail,
         id:
@@ -188,19 +160,10 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
 
       const finalNotificationId = notificationWithId.id;
 
-      // Check if we already have this notification
       setNotifications((prev) => {
         if (prev.some((n) => n.id === finalNotificationId)) {
-          console.log(
-            `[${timestamp}] Duplicate notification detected, skipping:`,
-            finalNotificationId
-          );
           return prev;
         }
-        console.log(
-          `[${timestamp}] Adding new notification:`,
-          finalNotificationId
-        );
         return [notificationWithId, ...prev];
       });
 
@@ -208,14 +171,10 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
       setSnackbarOpen(true);
     };
 
-    console.log("Setting up notification listener in GlobalAppBar");
-
-    // Cast the event listener to handle CustomEvent
     const boundHandler = handleNotification as EventListener;
     window.addEventListener("sse-notification", boundHandler);
 
     return () => {
-      console.log("Cleaning up notification listener in GlobalAppBar");
       window.removeEventListener("sse-notification", boundHandler);
     };
   }, []);
@@ -235,14 +194,11 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
 
   const [markOneRead] = useMarkNotificationReadMutation();
   const [markAllRead] = useMarkAllNotificationsReadMutation();
-  // const [markBatchRead] = useMarkUserNotificationsReadBatchMutation();
 
   const handleMarkAllAsRead = () => {
-    // Optimistic update
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
     if (user?.id) {
       markAllRead({ userId: user.id }).catch(() => {
-        // Revert on failure
         setNotifications((prev) => prev.map((n) => ({ ...n, isRead: false })));
       });
     }
@@ -250,27 +206,16 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   };
 
   const handleMarkAsRead = (notificationId: string) => {
-    console.log("Marking notification as read:", {
-      notificationId,
-      hasId: !!notificationId,
-      isUndefined: notificationId === undefined,
-      isNull: notificationId === null,
-      isEmpty: notificationId === "",
-      type: typeof notificationId,
-    });
-
     if (!notificationId) {
       console.error("Cannot mark notification as read: no ID provided");
       return;
     }
 
-    // Optimistic update
     setNotifications((prev) =>
       prev.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n))
     );
     markOneRead({ id: notificationId }).catch((error) => {
       console.error("Failed to mark notification as read:", error);
-      // Revert on failure
       setNotifications((prev) =>
         prev.map((n) => (n.id === notificationId ? { ...n, isRead: false } : n))
       );
@@ -348,7 +293,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
         });
       }
     } else {
-      // For authenticated users, always show Dashboard and Profile
       buttons.push({
         label: "Dashboard",
         variant: "contained",
@@ -363,7 +307,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
         onClick: () => handleNavigation("/profile"),
       });
 
-      // Show Weekly Calendar only for non-user roles
       if (currentPath !== "/calendar" && user?.role && user.role !== "user") {
         buttons.push({
           label: "Weekly Calendar",
@@ -400,11 +343,8 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
               height: { xs: 40, sm: 50 },
               width: "auto",
               cursor: "pointer",
-              mixBlendMode: "multiply", // This removes white backgrounds
-              filter: "contrast(1.1) brightness(1.1)", // Enhances visibility
-              // Alternative blend modes if multiply doesn't work well:
-              // mixBlendMode: "screen", // For dark backgrounds
-              // mixBlendMode: "overlay", // For mixed backgrounds
+              mixBlendMode: "multiply",
+              filter: "contrast(1.1) brightness(1.1)",
             }}
             onClick={() => handleNavigation("/")}
           />
@@ -849,8 +789,6 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                   <IconButton
                     size="small"
                     onClick={() => {
-                      console.log("Notification object:", notification);
-                      console.log("Notification ID:", notification.id);
                       if (notification.id) {
                         handleMarkAsRead(notification.id);
                       } else {
