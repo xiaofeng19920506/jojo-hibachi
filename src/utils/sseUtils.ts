@@ -40,6 +40,7 @@ class SSEManager {
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectDelay = 1000;
+  private pendingReloadTimer: number | null = null;
 
   private _isConnecting = false;
   private currentUserId: string | null = null;
@@ -183,6 +184,9 @@ class SSEManager {
             reservationDetails: rawNotification.reservationDetails,
           };
 
+          // Trigger a page refresh for any SSE notification event
+          this.schedulePageRefresh();
+
           options.onNotification?.(notification);
         } catch (error) {
           console.error("Error parsing notification data:", error);
@@ -195,7 +199,10 @@ class SSEManager {
         this.handleNotification
       );
 
-      this.eventSource.onmessage = () => {};
+      this.eventSource.onmessage = () => {
+        // Trigger a page refresh on any generic SSE message
+        this.schedulePageRefresh();
+      };
 
       this.eventSource.addEventListener("connected", () => {
         this.reconnectAttempts = 0;
@@ -241,6 +248,15 @@ class SSEManager {
       this.disconnect();
       this.connect(userId, options);
     }, this.reconnectDelay * this.reconnectAttempts);
+  }
+
+  private schedulePageRefresh() {
+    // Avoid multiple rapid reloads by debouncing
+    if (this.pendingReloadTimer !== null) return;
+    this.pendingReloadTimer = window.setTimeout(() => {
+      this.pendingReloadTimer = null;
+      window.location.reload();
+    }, 300);
   }
 
   disconnect() {
