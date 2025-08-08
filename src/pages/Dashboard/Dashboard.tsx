@@ -1,5 +1,12 @@
-import { Box, CircularProgress, Alert, Typography } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Alert,
+  Typography,
+  Snackbar,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import { useEffect, useState } from "react";
 import DataTable from "../../components/DataTable/DataTable";
 import type { TableType } from "../../components/DataTable/types";
 import FilterControls from "./components/FilterControls";
@@ -10,6 +17,8 @@ import { useDashboard } from "./hooks/useDashboard";
 // Main Dashboard Component
 const Dashboard: React.FC = () => {
   const theme = useTheme();
+  const [showRefreshNotification, setShowRefreshNotification] = useState(false);
+
   const {
     // State
     searchQuery,
@@ -56,7 +65,48 @@ const Dashboard: React.FC = () => {
     getEmployeeDisplayName,
     allEmployeesData,
     sortConfig,
+    // Refetch methods
+    refetchDashboardData,
   } = useDashboard();
+
+  // Listen for SSE notifications and refresh dashboard data
+  useEffect(() => {
+    const handleSSENotification = (event: CustomEvent) => {
+      const notification = event.detail;
+      console.log("Dashboard received SSE notification:", notification);
+
+      // Refresh data based on notification type or always refresh all data
+      // You can customize this logic based on the notification content
+      if (notification) {
+        // Show refresh notification
+        setShowRefreshNotification(true);
+
+        // Refresh all dashboard data
+        refetchDashboardData();
+
+        console.log("Dashboard data refreshed due to new notification");
+
+        // Hide notification after 3 seconds
+        setTimeout(() => {
+          setShowRefreshNotification(false);
+        }, 3000);
+      }
+    };
+
+    // Add event listener for SSE notifications
+    window.addEventListener(
+      "sse-notification",
+      handleSSENotification as EventListener
+    );
+
+    // Cleanup event listener on unmount
+    return () => {
+      window.removeEventListener(
+        "sse-notification",
+        handleSSENotification as EventListener
+      );
+    };
+  }, [refetchDashboardData]);
 
   // Wait for auth/user to be initialized
   if (!isInitialized) {
@@ -238,6 +288,22 @@ const Dashboard: React.FC = () => {
         getEmployeeDisplayName={getEmployeeDisplayName}
         availableEmployees={availableEmployees}
       />
+
+      {/* Notification for dashboard refresh */}
+      <Snackbar
+        open={showRefreshNotification}
+        autoHideDuration={3000}
+        onClose={() => setShowRefreshNotification(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setShowRefreshNotification(false)}
+          severity="info"
+          sx={{ width: "100%" }}
+        >
+          Dashboard data refreshed due to new notification
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
