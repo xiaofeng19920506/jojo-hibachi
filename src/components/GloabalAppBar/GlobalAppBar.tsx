@@ -89,23 +89,40 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
 
   useEffect(() => {
     const handleNotification = (event: CustomEvent<NotificationData>) => {
-      console.log("Notification received in GlobalAppBar:", event.detail);
-      setNotifications((prev) => [event.detail, ...prev]);
+      const notificationId = event.detail.id;
+      const timestamp = new Date().toISOString();
+
+      console.log(`[${timestamp}] Notification received in GlobalAppBar:`, {
+        id: notificationId,
+        notification: event.detail,
+      });
+
+      // Check if we already have this notification
+      setNotifications((prev) => {
+        if (prev.some((n) => n.id === notificationId)) {
+          console.log(
+            `[${timestamp}] Duplicate notification detected, skipping:`,
+            notificationId
+          );
+          return prev;
+        }
+        console.log(`[${timestamp}] Adding new notification:`, notificationId);
+        return [event.detail, ...prev];
+      });
+
       setCurrentNotification(event.detail);
       setSnackbarOpen(true);
     };
 
+    console.log("Setting up notification listener in GlobalAppBar");
+
     // Cast the event listener to handle CustomEvent
-    window.addEventListener(
-      "sse-notification",
-      handleNotification as EventListener
-    );
+    const boundHandler = handleNotification as EventListener;
+    window.addEventListener("sse-notification", boundHandler);
 
     return () => {
-      window.removeEventListener(
-        "sse-notification",
-        handleNotification as EventListener
-      );
+      console.log("Cleaning up notification listener in GlobalAppBar");
+      window.removeEventListener("sse-notification", boundHandler);
     };
   }, []);
 
@@ -124,7 +141,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
 
   const handleMarkAllAsRead = () => {
     setNotifications((prev) =>
-      prev.map((notification) => ({ ...notification, read: true }))
+      prev.map((notification) => ({ ...notification, isRead: true }))
     );
     handleNotificationMenuClose();
   };
@@ -133,7 +150,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     setNotifications((prev) =>
       prev.map((notification) =>
         notification.id === notificationId
-          ? { ...notification, read: true }
+          ? { ...notification, isRead: true }
           : notification
       )
     );
@@ -165,7 +182,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
     }
   };
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const handleLogout = () => {
     forceDisconnectSSE();
@@ -662,7 +679,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                 sx={{
                   borderBottom: index < notifications.length - 1 ? 1 : 0,
                   borderColor: "divider",
-                  backgroundColor: notification.read
+                  backgroundColor: notification.isRead
                     ? "transparent"
                     : "action.hover",
                 }}

@@ -21,12 +21,6 @@ const SSEConnection: React.FC<SSEConnectionProps> = ({
     onNotification: (notification) => {
       console.log("SSEConnection: Notification received", notification);
 
-      // Call the provided callback if any
-      if (onNotification) {
-        console.log("SSEConnection: Calling onNotification callback");
-        onNotification(notification);
-      }
-
       // Dispatch a custom event for GlobalAppBar to listen to
       console.log("SSEConnection: Dispatching sse-notification event");
       const event = new CustomEvent("sse-notification", {
@@ -34,6 +28,12 @@ const SSEConnection: React.FC<SSEConnectionProps> = ({
       });
       window.dispatchEvent(event);
       console.log("SSEConnection: Event dispatched");
+
+      // Call the provided callback if any (after dispatching event)
+      if (onNotification) {
+        console.log("SSEConnection: Calling onNotification callback");
+        onNotification(notification);
+      }
     },
     onConnected: () => {
       console.log("SSEConnection: Connection established");
