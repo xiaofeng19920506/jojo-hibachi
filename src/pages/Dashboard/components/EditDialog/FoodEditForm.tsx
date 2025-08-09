@@ -71,6 +71,7 @@ const FoodEditForm: React.FC<FoodEditFormProps> = ({
           <MenuItem value="appetizer">Appetizer</MenuItem>
           <MenuItem value="protein">Protein</MenuItem>
           <MenuItem value="combo">Combo</MenuItem>
+          <MenuItem value="beverage">Beverage</MenuItem>
         </Select>
       </FormControl>
     </Box>
