@@ -125,8 +125,41 @@ const MenuPage: React.FC = () => {
     0
   );
 
-  // Show all menu items since they don't have a status field in the API response
-  const activeMenuItems = transformedMenuItems;
+  // Group menu items by category for better visual organization
+  const groupedMenuItems = transformedMenuItems.reduce((groups, item) => {
+    const category = item.category.toLowerCase();
+
+    // Special handling for protein category - split into proteins and add-ons
+    if (category === "protein") {
+      const itemName = item.name.toLowerCase();
+      if (itemName.includes("addon") || itemName.includes("add-on")) {
+        if (!groups["protein-addons"]) {
+          groups["protein-addons"] = [];
+        }
+        groups["protein-addons"].push(item);
+      } else {
+        if (!groups["protein"]) {
+          groups["protein"] = [];
+        }
+        groups["protein"].push(item);
+      }
+    } else {
+      if (!groups[category]) {
+        groups[category] = [];
+      }
+      groups[category].push(item);
+    }
+    return groups;
+  }, {} as Record<string, typeof transformedMenuItems>);
+
+  // Define category order and display names
+  const categoryOrder = [
+    { key: "appetizer", label: "Appetizers" },
+    { key: "combo", label: "Combo Meals" },
+    { key: "protein", label: "Proteins" },
+    { key: "protein-addons", label: "Add-ons" },
+    { key: "beverage", label: "Beverages" },
+  ];
 
   const handleAddToCart = () => {
     if (!selectedItem) return;
@@ -319,16 +352,6 @@ const MenuPage: React.FC = () => {
               maxHeight: "100%", // Ensure it doesn't exceed parent height
             }}
           >
-            <Paper elevation={2} sx={{ p: 3, mb: 3, flexShrink: 0 }}>
-              <Typography variant="h5" gutterBottom>
-                All Menu Items
-              </Typography>
-              <Typography variant="body2" color="text.secondary" mb={3}>
-                Browse through our entire menu to build your perfect hibachi
-                combo.
-              </Typography>
-            </Paper>
-
             {/* Scrollable Grid Container */}
             <Box
               sx={{
@@ -339,143 +362,208 @@ const MenuPage: React.FC = () => {
                 minHeight: 0,
               }}
             >
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                  gap: 3, // Changed from 1.5 to 3
-                  pb: 2, // Add bottom padding for last row
-                  m: 1, // Added margin of 1rem
-                }}
-              >
-                {activeMenuItems.map((item) => {
-                  const cartItem = cart.find(
-                    (cartItem) => cartItem.menuItem.id === item.id
-                  );
-                  const itemQuantity = cartItem?.quantity || 0;
+              {categoryOrder.map((category) => {
+                const items = groupedMenuItems[category.key] || [];
+                if (items.length === 0) return null;
 
-                  return (
-                    <Card
-                      key={item.id}
+                return (
+                  <Box key={category.key} sx={{ mb: 4 }}>
+                    {/* Category Header */}
+                    <Typography
+                      variant="h5"
                       sx={{
-                        border: "1px solid grey.300",
-                        height: "180px", // Increased height to accommodate buttons
-                        display: "flex",
-                        flexDirection: "column",
-                        justifyContent: "space-between",
-                        boxShadow: 3,
-                        "&:hover": {
-                          boxShadow: 6,
-                          transform: "translateY(-2px)",
-                          border: "1px solid primary.main",
-                        },
+                        mb: 2,
+                        px: 1,
+                        fontWeight: "bold",
+                        color: "primary.main",
+                        borderBottom: "2px solid",
+                        borderColor: "primary.main",
+                        pb: 1,
                       }}
                     >
-                      <CardContent
-                        sx={{
-                          flexGrow: 1,
-                          display: "flex",
-                          flexDirection: "column",
-                          justifyContent: "center",
-                          textAlign: "center",
-                          p: 2,
-                          cursor: "pointer",
-                        }}
-                        onClick={() => handleItemSelect(item)}
-                      >
-                        <Typography variant="h6" component="h3" gutterBottom>
-                          {item.name}
-                        </Typography>
-                        <Typography
-                          variant="body2"
-                          color="text.secondary"
-                          mb={1}
-                        >
-                          {item.description}
-                        </Typography>
-                        <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
-                          ${item.price}
-                        </Typography>
-                      </CardContent>
+                      {category.label}
+                    </Typography>
 
-                      {/* Quick Add/Remove Buttons */}
-                      <Box
-                        sx={{
-                          p: 1,
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          gap: 1,
-                          borderTop: "1px solid",
-                          borderColor: "divider",
-                        }}
-                      >
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (itemQuantity > 0) {
-                              handleUpdateQuantity(item.id, itemQuantity - 1);
-                            }
-                          }}
-                          disabled={itemQuantity === 0}
-                          sx={{
-                            backgroundColor:
-                              itemQuantity > 0 ? "error.light" : "grey.200",
-                            color: itemQuantity > 0 ? "white" : "grey.500",
-                            "&:hover": {
-                              backgroundColor:
-                                itemQuantity > 0 ? "error.main" : "grey.300",
-                            },
-                          }}
-                        >
-                          <RemoveIcon fontSize="small" />
-                        </IconButton>
+                    {/* Items Grid */}
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                        gap: 3,
+                        pb: 2,
+                        m: 1,
+                      }}
+                    >
+                      {items.map((item) => {
+                        const cartItem = cart.find(
+                          (cartItem) => cartItem.menuItem.id === item.id
+                        );
+                        const itemQuantity = cartItem?.quantity || 0;
 
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            minWidth: 30,
-                            textAlign: "center",
-                            fontWeight: "bold",
-                          }}
-                        >
-                          {itemQuantity}
-                        </Typography>
+                        return (
+                          <Card
+                            key={item.id}
+                            sx={{
+                              border: "1px solid grey.300",
+                              height: "180px",
+                              display: "flex",
+                              flexDirection: "column",
+                              justifyContent: "space-between",
+                              boxShadow: 3,
+                              "&:hover": {
+                                boxShadow: 6,
+                                transform: "translateY(-2px)",
+                                border: "1px solid primary.main",
+                              },
+                            }}
+                          >
+                            <CardContent
+                              sx={{
+                                flexGrow: 1,
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "center",
+                                textAlign: "center",
+                                p: 2,
+                                cursor: "pointer",
+                              }}
+                              onClick={() => handleItemSelect(item)}
+                            >
+                              <Typography
+                                variant="h6"
+                                component="h3"
+                                gutterBottom
+                              >
+                                {item.name}
+                              </Typography>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "space-between",
+                                  alignItems: "center",
+                                  gap: 1,
+                                }}
+                              >
+                                <Box sx={{ flex: 1, textAlign: "left" }}>
+                                  <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    sx={{
+                                      fontWeight: "bold",
+                                      display: "block",
+                                    }}
+                                  >
+                                    Description:
+                                  </Typography>
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                  >
+                                    {item.description}
+                                  </Typography>
+                                </Box>
+                                <Typography
+                                  variant="h6"
+                                  color="primary"
+                                  sx={{ fontWeight: "bold" }}
+                                >
+                                  ${item.price}
+                                </Typography>
+                              </Box>
+                            </CardContent>
 
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (itemQuantity === 0) {
-                              // Add new item to cart
-                              setCart([
-                                ...cart,
-                                {
-                                  menuItem: item,
-                                  quantity: 1,
-                                },
-                              ]);
-                            } else {
-                              // Increment existing item
-                              handleUpdateQuantity(item.id, itemQuantity + 1);
-                            }
-                          }}
-                          sx={{
-                            backgroundColor: "success.light",
-                            color: "white",
-                            "&:hover": {
-                              backgroundColor: "success.main",
-                            },
-                          }}
-                        >
-                          <AddIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    </Card>
-                  );
-                })}
-              </Box>
+                            {/* Quick Add/Remove Buttons */}
+                            <Box
+                              sx={{
+                                p: 1,
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                gap: 1,
+                                borderTop: "1px solid",
+                                borderColor: "divider",
+                              }}
+                            >
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (itemQuantity > 0) {
+                                    handleUpdateQuantity(
+                                      item.id,
+                                      itemQuantity - 1
+                                    );
+                                  }
+                                }}
+                                disabled={itemQuantity === 0}
+                                sx={{
+                                  backgroundColor:
+                                    itemQuantity > 0
+                                      ? "error.light"
+                                      : "grey.200",
+                                  color:
+                                    itemQuantity > 0 ? "white" : "grey.500",
+                                  "&:hover": {
+                                    backgroundColor:
+                                      itemQuantity > 0
+                                        ? "error.main"
+                                        : "grey.300",
+                                  },
+                                }}
+                              >
+                                <RemoveIcon fontSize="small" />
+                              </IconButton>
+
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  minWidth: 30,
+                                  textAlign: "center",
+                                  fontWeight: "bold",
+                                }}
+                              >
+                                {itemQuantity}
+                              </Typography>
+
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (itemQuantity === 0) {
+                                    // Add new item to cart
+                                    setCart([
+                                      ...cart,
+                                      {
+                                        menuItem: item,
+                                        quantity: 1,
+                                      },
+                                    ]);
+                                  } else {
+                                    // Increment existing item
+                                    handleUpdateQuantity(
+                                      item.id,
+                                      itemQuantity + 1
+                                    );
+                                  }
+                                }}
+                                sx={{
+                                  backgroundColor: "success.light",
+                                  color: "white",
+                                  "&:hover": {
+                                    backgroundColor: "success.main",
+                                  },
+                                }}
+                              >
+                                <AddIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          </Card>
+                        );
+                      })}
+                    </Box>
+                  </Box>
+                );
+              })}
             </Box>
           </Box>
 
@@ -497,20 +585,73 @@ const MenuPage: React.FC = () => {
               {cart.length === 0 ? (
                 <Box
                   sx={{
-                    textAlign: "center",
-                    py: 4,
-                    flex: 1,
                     display: "flex",
                     flexDirection: "column",
-                    justifyContent: "center",
+                    height: "100%",
                   }}
                 >
-                  <Typography variant="body1" color="text.secondary">
-                    Your cart is empty
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Start building your hibachi combo or add appetizers
-                  </Typography>
+                  <Box
+                    sx={{
+                      textAlign: "center",
+                      py: 4,
+                      flex: 1,
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Typography variant="body1" color="text.secondary">
+                      Your cart is empty
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Start building your hibachi combo or add appetizers
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ mt: "auto" }}>
+                    <Divider sx={{ my: 2 }} />
+
+                    <Box sx={{ mb: 3 }}>
+                      <Box display="flex" justifyContent="space-between" mb={1}>
+                        <Typography variant="body1">Subtotal:</Typography>
+                        <Typography variant="body1">
+                          ${totalPrice.toFixed(2)}
+                        </Typography>
+                      </Box>
+                      <Divider sx={{ my: 1 }} />
+                      <Box display="flex" justifyContent="space-between">
+                        <Typography variant="h6" fontWeight="bold">
+                          Total:
+                        </Typography>
+                        <Typography
+                          variant="h6"
+                          fontWeight="bold"
+                          color="primary"
+                        >
+                          ${totalPrice.toFixed(2)}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    <Button
+                      variant="contained"
+                      size="large"
+                      fullWidth
+                      onClick={handleProceedToCheckout}
+                      startIcon={
+                        isSubmitting ? (
+                          <CircularProgress size={20} />
+                        ) : (
+                          <CheckIcon />
+                        )
+                      }
+                      disabled={cart.length === 0 || isSubmitting}
+                    >
+                      {isSubmitting
+                        ? "Saving Order..."
+                        : "Save Order & Go to Dashboard"}
+                    </Button>
+                  </Box>
                 </Box>
               ) : (
                 <Box
