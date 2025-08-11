@@ -37,10 +37,12 @@ export const getAvailableActions = (
       }
       return ["Edit", "Cancel", "Selection Menu"];
     case "pending-reservations":
-      if (userRole === "employee") {
-        return ["Update Status"];
+      if (userRole === "admin") {
+        return ["Assign Employee", "Update Status", "Selection Menu"];
+      } else if (userRole === "employee") {
+        return ["Update Status", "Selection Menu"];
       }
-      return [];
+      return ["Selection Menu"];
     case "food":
       return userRole === "admin" ? ["Update", "Delete"] : [];
     default:

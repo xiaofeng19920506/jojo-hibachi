@@ -137,6 +137,9 @@ export function useDashboardActions({
             setSelectedStatus(reservation.status || "pending");
             setDialogOpen(true);
             break;
+          case "selection menu":
+            window.location.href = `/reservation/${reservation.id}/menu`;
+            break;
           default:
             // Action not implemented for pending reservations
             break;

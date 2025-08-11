@@ -70,7 +70,7 @@ const MenuPage: React.FC = () => {
       description: item.description,
       price: item.price,
       category: item.category,
-      status: item.status || "active",
+      status: "active", // All items from API are considered active
       image: item.image,
       allergens: item.allergens || [],
       preparationTime: item.preparationTime,
@@ -125,8 +125,8 @@ const MenuPage: React.FC = () => {
     0
   );
 
-  // Filter menu items by category - only show active items
-  const activeMenuItems = menuItems.filter((item) => item.isActive);
+  // Show all menu items since they don't have a status field in the API response
+  const activeMenuItems = transformedMenuItems;
 
   const handleAddToCart = () => {
     if (!selectedItem) return;
@@ -348,50 +348,133 @@ const MenuPage: React.FC = () => {
                   m: 1, // Added margin of 1rem
                 }}
               >
-                {activeMenuItems.map((item) => (
-                  <Card
-                    key={item.id}
-                    sx={{
-                      cursor: "pointer",
-                      border:
-                        selectedItem?.id === item.id
-                          ? "2px solid primary.main"
-                          : "1px solid grey.300", // Added subtle border for better visibility
-                      height: "150px", // Reduced from 200px
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      boxShadow: 3, // Increased shadow for better visibility
-                      "&:hover": {
-                        boxShadow: 6, // Increased hover shadow
-                        transform: "translateY(-2px)",
-                        border: "1px solid primary.main", // Enhanced hover border
-                      },
-                    }}
-                    onClick={() => handleItemSelect(item)}
-                  >
-                    <CardContent
+                {activeMenuItems.map((item) => {
+                  const cartItem = cart.find(
+                    (cartItem) => cartItem.menuItem.id === item.id
+                  );
+                  const itemQuantity = cartItem?.quantity || 0;
+
+                  return (
+                    <Card
+                      key={item.id}
                       sx={{
-                        flexGrow: 1,
+                        border: "1px solid grey.300",
+                        height: "180px", // Increased height to accommodate buttons
                         display: "flex",
                         flexDirection: "column",
-                        justifyContent: "center",
-                        textAlign: "center",
-                        p: 2, // Reduced padding from 3
+                        justifyContent: "space-between",
+                        boxShadow: 3,
+                        "&:hover": {
+                          boxShadow: 6,
+                          transform: "translateY(-2px)",
+                          border: "1px solid primary.main",
+                        },
                       }}
                     >
-                      <Typography variant="h6" component="h3" gutterBottom>
-                        {item.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" mb={1}>
-                        {item.description}
-                      </Typography>
-                      <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
-                        ${item.price}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                ))}
+                      <CardContent
+                        sx={{
+                          flexGrow: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "center",
+                          textAlign: "center",
+                          p: 2,
+                          cursor: "pointer",
+                        }}
+                        onClick={() => handleItemSelect(item)}
+                      >
+                        <Typography variant="h6" component="h3" gutterBottom>
+                          {item.name}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          mb={1}
+                        >
+                          {item.description}
+                        </Typography>
+                        <Typography variant="h6" color="primary" sx={{ mt: 1 }}>
+                          ${item.price}
+                        </Typography>
+                      </CardContent>
+
+                      {/* Quick Add/Remove Buttons */}
+                      <Box
+                        sx={{
+                          p: 1,
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          gap: 1,
+                          borderTop: "1px solid",
+                          borderColor: "divider",
+                        }}
+                      >
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (itemQuantity > 0) {
+                              handleUpdateQuantity(item.id, itemQuantity - 1);
+                            }
+                          }}
+                          disabled={itemQuantity === 0}
+                          sx={{
+                            backgroundColor:
+                              itemQuantity > 0 ? "error.light" : "grey.200",
+                            color: itemQuantity > 0 ? "white" : "grey.500",
+                            "&:hover": {
+                              backgroundColor:
+                                itemQuantity > 0 ? "error.main" : "grey.300",
+                            },
+                          }}
+                        >
+                          <RemoveIcon fontSize="small" />
+                        </IconButton>
+
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            minWidth: 30,
+                            textAlign: "center",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {itemQuantity}
+                        </Typography>
+
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (itemQuantity === 0) {
+                              // Add new item to cart
+                              setCart([
+                                ...cart,
+                                {
+                                  menuItem: item,
+                                  quantity: 1,
+                                },
+                              ]);
+                            } else {
+                              // Increment existing item
+                              handleUpdateQuantity(item.id, itemQuantity + 1);
+                            }
+                          }}
+                          sx={{
+                            backgroundColor: "success.light",
+                            color: "white",
+                            "&:hover": {
+                              backgroundColor: "success.main",
+                            },
+                          }}
+                        >
+                          <AddIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    </Card>
+                  );
+                })}
               </Box>
             </Box>
           </Box>
