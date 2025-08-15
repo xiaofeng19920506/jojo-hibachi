@@ -11,7 +11,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { useAppDispatch } from "../../utils/hooks";
 import { login } from "../../features/userSlice";
-import { useLoginMutation } from "../../services/api";
+import { useLoginMutation, api } from "../../services/api";
 
 const SignIn: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -50,6 +50,8 @@ const SignIn: React.FC = () => {
       localStorage.setItem("authToken", token);
       localStorage.setItem("user", JSON.stringify(normalizedUser));
       dispatch(login(normalizedUser));
+      // Invalidate API cache to ensure new token is used for subsequent requests
+      dispatch(api.util.resetApiState());
       navigate("/");
     } catch (err: any) {
       setError(err.data?.message || err.message || "Login failed");
