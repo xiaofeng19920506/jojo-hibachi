@@ -6,7 +6,19 @@ import {
   Button as MuiButton,
   Typography,
   Paper,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
+import {
+  CheckCircle as CheckCircleIcon,
+  Cancel as CancelIcon,
+} from "@mui/icons-material";
 import { useTheme } from "@mui/material/styles";
 import { useAppDispatch } from "../../utils/hooks";
 import { login } from "../../features/userSlice";
@@ -17,9 +29,85 @@ const SignUp: React.FC = () => {
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
+  const [showPasswordValidation, setShowPasswordValidation] = useState(false);
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const theme = useTheme();
+
+  // Consistent input styling for both light and dark modes
+  const inputStyles = {
+    mb: 2,
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor:
+          theme.palette.mode === "dark"
+            ? "rgba(255, 255, 255, 0.23)"
+            : "rgba(0, 0, 0, 0.23)",
+      },
+      "&:hover fieldset": {
+        borderColor:
+          theme.palette.mode === "dark"
+            ? "rgba(255, 255, 255, 0.4)"
+            : "rgba(0, 0, 0, 0.4)",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: theme.palette.primary.main,
+      },
+    },
+    "& .MuiInputLabel-root": {
+      color:
+        theme.palette.mode === "dark"
+          ? "rgba(255, 255, 255, 0.7)"
+          : "rgba(0, 0, 0, 0.6)",
+      "&.Mui-focused": {
+        color: theme.palette.primary.main,
+      },
+    },
+    "& .MuiInputBase-input": {
+      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+    },
+    "& .MuiFormHelperText-root": {
+      color:
+        theme.palette.mode === "dark"
+          ? "rgba(255, 255, 255, 0.7)"
+          : "rgba(0, 0, 0, 0.6)",
+    },
+  };
+
+  // Consistent select styling
+  const selectStyles = {
+    mb: 2,
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor:
+          theme.palette.mode === "dark"
+            ? "rgba(255, 255, 255, 0.23)"
+            : "rgba(0, 0, 0, 0.23)",
+      },
+      "&:hover fieldset": {
+        borderColor:
+          theme.palette.mode === "dark"
+            ? "rgba(255, 255, 255, 0.4)"
+            : "rgba(0, 0, 0, 0.4)",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: theme.palette.primary.main,
+      },
+    },
+    "& .MuiInputLabel-root": {
+      color:
+        theme.palette.mode === "dark"
+          ? "rgba(255, 255, 255, 0.7)"
+          : "rgba(0, 0, 0, 0.6)",
+      "&.Mui-focused": {
+        color: theme.palette.primary.main,
+      },
+    },
+    "& .MuiSelect-select": {
+      color: theme.palette.mode === "dark" ? "#fff" : "#000",
+    },
+  };
 
   const [registerMutation, { isLoading }] = useRegisterMutation();
   const [firstName, setFirstName] = useState("");
@@ -31,14 +119,190 @@ const SignUp: React.FC = () => {
   const [zipCode, setZipCode] = useState("");
   const [role] = useState("user"); // role is always 'user', no setter needed
 
+  // Password validation functions
+  const validatePassword = (password: string) => {
+    const validations = {
+      length: password.length >= 6 && password.length <= 20,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /\d/.test(password),
+    };
+    return validations;
+  };
+
+  const passwordValidations = validatePassword(password);
+  const isPasswordValid = Object.values(passwordValidations).every(Boolean);
+  const doPasswordsMatch = password === confirmPassword && password.length > 0;
+
+  // Name validation functions
+  const validateName = (name: string) => {
+    const validations = {
+      length: name.length >= 2 && name.length <= 20,
+      noSpecialChars: /^[a-zA-Z\s]+$/.test(name),
+      noNumbers: !/\d/.test(name),
+    };
+    return validations;
+  };
+
+  const firstNameValidations = validateName(firstName);
+  const lastNameValidations = validateName(lastName);
+  const isFirstNameValid = Object.values(firstNameValidations).every(Boolean);
+  const isLastNameValid = Object.values(lastNameValidations).every(Boolean);
+
+  // Address and city validation functions
+  const validateAddress = (address: string) => {
+    const validations = {
+      notOnlyNumbers: !/^\d+$/.test(address.trim()),
+      hasLetters: /[a-zA-Z]/.test(address),
+      hasNumbers: /\d/.test(address),
+    };
+    return validations;
+  };
+
+  const validateCity = (city: string) => {
+    const validations = {
+      length: city.length >= 2 && city.length <= 50,
+      lettersOnly: /^[a-zA-Z\s]+$/.test(city),
+      noNumbers: !/\d/.test(city),
+    };
+    return validations;
+  };
+
+  const addressValidations = validateAddress(address);
+  const cityValidations = validateCity(city);
+  const isAddressValid = Object.values(addressValidations).every(Boolean);
+  const isCityValid = Object.values(cityValidations).every(Boolean);
+
+  // Phone validation functions
+  const validatePhone = (phone: string) => {
+    // Remove all non-digit characters for validation
+    const digitsOnly = phone.replace(/\D/g, "");
+
+    const validations = {
+      length: digitsOnly.length === 10,
+      hasDigits: /\d/.test(phone),
+      noLetters: !/[a-zA-Z]/.test(phone),
+    };
+    return validations;
+  };
+
+  const phoneValidations = validatePhone(phone);
+  const isPhoneValid = Object.values(phoneValidations).every(Boolean);
+
+  // Zip code validation functions
+  const validateZipCode = (zipCode: string) => {
+    const validations = {
+      length: zipCode.length === 5,
+      digitsOnly: /^\d{5}$/.test(zipCode),
+    };
+    return validations;
+  };
+
+  const zipCodeValidations = validateZipCode(zipCode);
+  const isZipCodeValid = Object.values(zipCodeValidations).every(Boolean);
+
+  // US States data
+  const usStates = [
+    { code: "AL", name: "Alabama" },
+    { code: "AK", name: "Alaska" },
+    { code: "AZ", name: "Arizona" },
+    { code: "AR", name: "Arkansas" },
+    { code: "CA", name: "California" },
+    { code: "CO", name: "Colorado" },
+    { code: "CT", name: "Connecticut" },
+    { code: "DE", name: "Delaware" },
+    { code: "FL", name: "Florida" },
+    { code: "GA", name: "Georgia" },
+    { code: "HI", name: "Hawaii" },
+    { code: "ID", name: "Idaho" },
+    { code: "IL", name: "Illinois" },
+    { code: "IN", name: "Indiana" },
+    { code: "IA", name: "Iowa" },
+    { code: "KS", name: "Kansas" },
+    { code: "KY", name: "Kentucky" },
+    { code: "LA", name: "Louisiana" },
+    { code: "ME", name: "Maine" },
+    { code: "MD", name: "Maryland" },
+    { code: "MA", name: "Massachusetts" },
+    { code: "MI", name: "Michigan" },
+    { code: "MN", name: "Minnesota" },
+    { code: "MS", name: "Mississippi" },
+    { code: "MO", name: "Missouri" },
+    { code: "MT", name: "Montana" },
+    { code: "NE", name: "Nebraska" },
+    { code: "NV", name: "Nevada" },
+    { code: "NH", name: "New Hampshire" },
+    { code: "NJ", name: "New Jersey" },
+    { code: "NM", name: "New Mexico" },
+    { code: "NY", name: "New York" },
+    { code: "NC", name: "North Carolina" },
+    { code: "ND", name: "North Dakota" },
+    { code: "OH", name: "Ohio" },
+    { code: "OK", name: "Oklahoma" },
+    { code: "OR", name: "Oregon" },
+    { code: "PA", name: "Pennsylvania" },
+    { code: "RI", name: "Rhode Island" },
+    { code: "SC", name: "South Carolina" },
+    { code: "SD", name: "South Dakota" },
+    { code: "TN", name: "Tennessee" },
+    { code: "TX", name: "Texas" },
+    { code: "UT", name: "Utah" },
+    { code: "VT", name: "Vermont" },
+    { code: "VA", name: "Virginia" },
+    { code: "WA", name: "Washington" },
+    { code: "WV", name: "West Virginia" },
+    { code: "WI", name: "Wisconsin" },
+    { code: "WY", name: "Wyoming" },
+  ];
+
+  // Helper function to check if a field has been touched
+  const isFieldTouched = (fieldName: string) => touchedFields.has(fieldName);
+
+  // Helper function to mark a field as touched
+  const markFieldAsTouched = (fieldName: string) => {
+    setTouchedFields((prev) => new Set(prev).add(fieldName));
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!email || !password || !confirmPassword) {
       setError("All fields are required.");
       return;
     }
+    if (!isPasswordValid) {
+      setError("Password does not meet the requirements.");
+      return;
+    }
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
+      return;
+    }
+    if (!isFirstNameValid) {
+      setError("First name does not meet the requirements.");
+      return;
+    }
+    if (!isLastNameValid) {
+      setError("Last name does not meet the requirements.");
+      return;
+    }
+    if (!isAddressValid) {
+      setError("Address must contain both letters and numbers.");
+      return;
+    }
+    if (!isCityValid) {
+      setError("City must contain only letters.");
+      return;
+    }
+    if (!isPhoneValid) {
+      setError("Phone number must be exactly 10 digits.");
+      return;
+    }
+    if (!isZipCodeValid) {
+      setError("Zip code must be exactly 5 digits.");
+      return;
+    }
+    if (!stateField) {
+      setError("Please select a state.");
       return;
     }
     setError(null);
@@ -119,7 +383,7 @@ const SignUp: React.FC = () => {
           value={email}
           required
           onChange={(e) => setEmail(e.target.value)}
-          sx={{ mb: 2 }}
+          sx={inputStyles}
           fullWidth
         />
         <TextField
@@ -128,16 +392,102 @@ const SignUp: React.FC = () => {
           value={password}
           required
           onChange={(e) => setPassword(e.target.value)}
-          sx={{ mb: 2 }}
+          onFocus={() => setShowPasswordValidation(true)}
+          onBlur={() => {
+            setShowPasswordValidation(false);
+            markFieldAsTouched("password");
+          }}
+          error={isFieldTouched("password") && !isPasswordValid}
+          helperText={
+            isFieldTouched("password") && !isPasswordValid
+              ? "Password does not meet requirements"
+              : ""
+          }
+          sx={inputStyles}
           fullWidth
         />
+
+        {/* Password Validation List */}
+        {showPasswordValidation && (
+          <Box sx={{ mb: 2 }}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ mb: 1, display: "block" }}
+            >
+              Password Requirements:
+            </Typography>
+            <List dense sx={{ py: 0 }}>
+              <ListItem sx={{ py: 0, px: 0 }}>
+                <ListItemIcon sx={{ minWidth: 24 }}>
+                  {passwordValidations.length ? (
+                    <CheckCircleIcon color="success" fontSize="small" />
+                  ) : (
+                    <CancelIcon color="error" fontSize="small" />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary="6-20 characters"
+                  primaryTypographyProps={{ variant: "caption" }}
+                />
+              </ListItem>
+              <ListItem sx={{ py: 0, px: 0 }}>
+                <ListItemIcon sx={{ minWidth: 24 }}>
+                  {passwordValidations.uppercase ? (
+                    <CheckCircleIcon color="success" fontSize="small" />
+                  ) : (
+                    <CancelIcon color="error" fontSize="small" />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary="At least one uppercase letter (A-Z)"
+                  primaryTypographyProps={{ variant: "caption" }}
+                />
+              </ListItem>
+              <ListItem sx={{ py: 0, px: 0 }}>
+                <ListItemIcon sx={{ minWidth: 24 }}>
+                  {passwordValidations.lowercase ? (
+                    <CheckCircleIcon color="success" fontSize="small" />
+                  ) : (
+                    <CancelIcon color="error" fontSize="small" />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary="At least one lowercase letter (a-z)"
+                  primaryTypographyProps={{ variant: "caption" }}
+                />
+              </ListItem>
+              <ListItem sx={{ py: 0, px: 0 }}>
+                <ListItemIcon sx={{ minWidth: 24 }}>
+                  {passwordValidations.number ? (
+                    <CheckCircleIcon color="success" fontSize="small" />
+                  ) : (
+                    <CancelIcon color="error" fontSize="small" />
+                  )}
+                </ListItemIcon>
+                <ListItemText
+                  primary="At least one number (0-9)"
+                  primaryTypographyProps={{ variant: "caption" }}
+                />
+              </ListItem>
+            </List>
+          </Box>
+        )}
+
         <TextField
           label="Confirm Password"
           type="password"
           value={confirmPassword}
           required
           onChange={(e) => setConfirmPassword(e.target.value)}
-          sx={{ mb: 2 }}
+          onBlur={() => markFieldAsTouched("confirmPassword")}
+          error={isFieldTouched("confirmPassword") && !doPasswordsMatch}
+          helperText={
+            isFieldTouched("confirmPassword") && !doPasswordsMatch
+              ? "Passwords do not match"
+              : ""
+          }
+          sx={inputStyles}
           fullWidth
         />
         <TextField
@@ -145,7 +495,14 @@ const SignUp: React.FC = () => {
           value={firstName}
           required
           onChange={(e) => setFirstName(e.target.value)}
-          sx={{ mb: 2 }}
+          onBlur={() => markFieldAsTouched("firstName")}
+          error={isFieldTouched("firstName") && !isFirstNameValid}
+          helperText={
+            isFieldTouched("firstName") && !isFirstNameValid
+              ? "First name must be 2-20 characters, letters only"
+              : ""
+          }
+          sx={inputStyles}
           fullWidth
         />
         <TextField
@@ -153,7 +510,14 @@ const SignUp: React.FC = () => {
           value={lastName}
           required
           onChange={(e) => setLastName(e.target.value)}
-          sx={{ mb: 2 }}
+          onBlur={() => markFieldAsTouched("lastName")}
+          error={isFieldTouched("lastName") && !isLastNameValid}
+          helperText={
+            isFieldTouched("lastName") && !isLastNameValid
+              ? "Last name must be 2-20 characters, letters only"
+              : ""
+          }
+          sx={inputStyles}
           fullWidth
         />
         <TextField
@@ -161,7 +525,14 @@ const SignUp: React.FC = () => {
           value={phone}
           required
           onChange={(e) => setPhone(e.target.value)}
-          sx={{ mb: 2 }}
+          onBlur={() => markFieldAsTouched("phone")}
+          error={isFieldTouched("phone") && !isPhoneValid}
+          helperText={
+            isFieldTouched("phone") && !isPhoneValid
+              ? "Phone number must be exactly 10 digits"
+              : ""
+          }
+          sx={inputStyles}
           fullWidth
         />
         <TextField
@@ -169,7 +540,14 @@ const SignUp: React.FC = () => {
           value={address}
           required
           onChange={(e) => setAddress(e.target.value)}
-          sx={{ mb: 2 }}
+          onBlur={() => markFieldAsTouched("address")}
+          error={isFieldTouched("address") && !isAddressValid}
+          helperText={
+            isFieldTouched("address") && !isAddressValid
+              ? "Address must contain both letters and numbers"
+              : ""
+          }
+          sx={inputStyles}
           fullWidth
         />
         <TextField
@@ -177,29 +555,63 @@ const SignUp: React.FC = () => {
           value={city}
           required
           onChange={(e) => setCity(e.target.value)}
-          sx={{ mb: 2 }}
+          onBlur={() => markFieldAsTouched("city")}
+          error={isFieldTouched("city") && !isCityValid}
+          helperText={
+            isFieldTouched("city") && !isCityValid
+              ? "City must contain only letters"
+              : ""
+          }
+          sx={inputStyles}
           fullWidth
         />
-        <TextField
-          label="State"
-          value={stateField}
-          required
-          onChange={(e) => setStateField(e.target.value)}
-          sx={{ mb: 2 }}
-          fullWidth
-        />
+        <FormControl fullWidth sx={selectStyles}>
+          <InputLabel id="state-select-label">State</InputLabel>
+          <Select
+            labelId="state-select-label"
+            value={stateField}
+            label="State"
+            onChange={(e) => setStateField(e.target.value)}
+            onBlur={() => markFieldAsTouched("state")}
+            error={isFieldTouched("state") && !stateField}
+          >
+            {usStates.map((state) => (
+              <MenuItem key={state.code} value={state.code}>
+                {state.code} - {state.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <TextField
           label="Zip Code"
           value={zipCode}
           required
           onChange={(e) => setZipCode(e.target.value)}
-          sx={{ mb: 2 }}
+          onBlur={() => markFieldAsTouched("zipCode")}
+          error={isFieldTouched("zipCode") && !isZipCodeValid}
+          helperText={
+            isFieldTouched("zipCode") && !isZipCodeValid
+              ? "Zip code must be exactly 5 digits"
+              : ""
+          }
+          sx={inputStyles}
           fullWidth
         />
         <MuiButton
           type="submit"
           variant="contained"
-          disabled={isLoading}
+          disabled={
+            isLoading ||
+            !isPasswordValid ||
+            !doPasswordsMatch ||
+            !isFirstNameValid ||
+            !isLastNameValid ||
+            !isAddressValid ||
+            !isCityValid ||
+            !isPhoneValid ||
+            !isZipCodeValid ||
+            !stateField
+          }
           sx={{ mb: 2 }}
           fullWidth
         >

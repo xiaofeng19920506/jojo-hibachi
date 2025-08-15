@@ -1,18 +1,19 @@
 {
-  "short_name": "Hibachi",
-  "name": "Fancy Hibachi",
+  "short_name": "JoJo Hibachi",
+  "name": "JoJo Hibachi - Premium Japanese Dining",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#e3f2fd",
   "theme_color": "#e3f2fd",
+  "description": "Experience authentic Japanese hibachi dining with fresh ingredients and skilled chefs",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "favicon.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icon-512.png",
+      "src": "favicon.png",
       "sizes": "512x512",
       "type": "image/png"
     }

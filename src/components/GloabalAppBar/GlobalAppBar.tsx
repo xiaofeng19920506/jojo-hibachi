@@ -14,6 +14,11 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
@@ -87,6 +92,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [notificationMenuAnchor, setNotificationMenuAnchor] =
     useState<null | HTMLElement>(null);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
 
   const { isAuthenticated, user } = useAppSelector((state) => state.user);
   const { data: missedNotificationsData } = useGetUserNotificationsQuery(
@@ -247,13 +253,22 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
-  const handleLogout = () => {
+  const handleLogoutClick = () => {
+    setLogoutDialogOpen(true);
+  };
+
+  const handleLogoutConfirm = () => {
+    setLogoutDialogOpen(false);
     forceDisconnectSSE();
     localStorage.removeItem("authToken");
     localStorage.removeItem("user");
     dispatch(logout());
     dispatch(api.util.resetApiState());
     navigate("/signin");
+  };
+
+  const handleLogoutCancel = () => {
+    setLogoutDialogOpen(false);
   };
 
   const handleNavigation = (path: string) => {
@@ -413,7 +428,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                 <Button
                   variant="outlined"
                   color="error"
-                  onClick={handleLogout}
+                  onClick={handleLogoutClick}
                   sx={{
                     textTransform: "none",
                     width: { xs: "100%", sm: "auto" },
@@ -528,7 +543,7 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
                   )}
                   {showLogout && isAuthenticated && !isOnPasswordResetFlow && (
                     <ListItem disablePadding>
-                      <ListItemButton onClick={handleLogout}>
+                      <ListItemButton onClick={handleLogoutClick}>
                         <ListItemText
                           primary="Logout"
                           sx={{ color: theme.palette.error.main }}
@@ -804,6 +819,34 @@ const GlobalAppBar: React.FC<GlobalAppBarProps> = ({
           </List>
         )}
       </Menu>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog
+        open={logoutDialogOpen}
+        onClose={handleLogoutCancel}
+        aria-labelledby="logout-dialog-title"
+        aria-describedby="logout-dialog-description"
+      >
+        <DialogTitle id="logout-dialog-title">Confirm Logout</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="logout-dialog-description">
+            Are you sure you want to logout? You will need to sign in again to
+            access your account.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleLogoutCancel} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={handleLogoutConfirm}
+            color="error"
+            variant="contained"
+          >
+            Logout
+          </Button>
+        </DialogActions>
+      </Dialog>
     </AppBar>
   );
 };

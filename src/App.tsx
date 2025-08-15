@@ -7,6 +7,7 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import GlobalAppBar from "./components/GloabalAppBar/GlobalAppBar";
 import SSEConnection from "./components/SSEConnection/SSEConnection";
 import NotificationHandler from "./components/NotificationHandler/NotificationHandler";
+import { usePageTitle } from "./utils/hooks";
 
 const SignIn = lazy(() => import("./pages/Auth/SignIn"));
 const SignUp = lazy(() => import("./pages/Auth/SignUp"));
@@ -76,6 +77,32 @@ const App: React.FC<AppProps> = ({ themeMode, setThemeMode }) => {
   };
 
   const { title, subtitle } = getAppBarProps();
+
+  // Set page title based on current route
+  const getPageTitle = () => {
+    if (location.pathname === "/signin") return "Sign In";
+    if (location.pathname === "/signup") return "Sign Up";
+    if (location.pathname === "/booknow") return "Book Now";
+    if (location.pathname === "/profile") return "Profile";
+    if (location.pathname === "/calendar") return "Weekly Calendar";
+    if (location.pathname.includes("/menu")) return "Menu Selection";
+    if (location.pathname.includes("/checkout")) return "Checkout";
+    if (
+      location.pathname.startsWith("/reservation/") &&
+      !location.pathname.includes("/menu") &&
+      !location.pathname.includes("/checkout")
+    ) {
+      return "Reservation Details";
+    }
+    if (location.pathname === "/forgot-password") return "Forgot Password";
+    if (location.pathname === "/reset-password") return "Reset Password";
+    if (location.pathname === "/reset-password-result") return "Password Reset";
+    if (location.pathname === "/dashboard") return "Dashboard";
+    if (location.pathname === "/") return "Home";
+    return "Dashboard";
+  };
+
+  usePageTitle(getPageTitle());
 
   return (
     <AuthInitializer>
